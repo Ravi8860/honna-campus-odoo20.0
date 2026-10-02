@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Registration Page matching Figma Screen (Node 0-1) with Main Website Header -->
+    <template id="registration_page" name="Stakeholder Portals Registration">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Create Your Account - Honna Campus</t>
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div id="wrap" class="oe_structure oe_empty honna-account-creation-page">
+                <!-- Reused Main Website Header Component -->
+                <t t-call="honna_campus_website.honna_header">
+                    <t t-set="page_name" t-value="'register'"/>
+                </t>
+
+                <div class="honna-reg-wrapper py-5">
+                    <div class="container">
+                        <!-- Title & Subtitle matching Figma -->
+                        <div class="honna-reg-header text-center mb-4">
+                            <h1 class="honna-reg-title">Create Your Account</h1>
+                            <p class="honna-reg-subtitle">Tell us a little about yourself to get started on the Honna platform.</p>
+                        </div>
+
+                        <div class="honna-reg-form-container mx-auto">
+                            <!-- Global Error Alert -->
+                            <t t-if="errors and errors.get('global')">
+                                <div class="alert alert-danger d-flex align-items-center mb-3 rounded-3 shadow-sm py-2 px-3" role="alert">
+                                    <i class="oi oi-warning me-2 fs-5"></i>
+                                    <div class="fw-semibold small"><t t-out="errors.get('global')"/></div>
+                                </div>
+                            </t>
+
+                            <!-- Success Message Alert -->
+                            <t t-if="success_message">
+                                <div class="alert alert-success d-flex align-items-center mb-3 rounded-3 shadow-sm py-2 px-3" role="alert">
+                                    <i class="oi oi-check-circle me-2 fs-5"></i>
+                                    <div class="fw-semibold small"><t t-out="success_message"/></div>
+                                </div>
+                            </t>
+
+                            <!-- Form wrapper -->
+                            <form action="/stakeholder-portals/submit" method="post" class="needs-validation" id="honna_registration_form">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                
+                                <!-- Role Selector Section ("I am an") matching Figma -->
+                                <div class="honna-role-selector-wrapper mb-3">
+                                    <label class="honna-field-label">I am an</label>
+                                    <input type="hidden" name="portal_type" id="hidden_portal_type" t-att-value="values.get('portal_type') or 'honna_staff'"/>
+                                    
+                                    <div class="honna-custom-dropdown" id="honna_role_dropdown">
+                                        <button type="button" class="honna-role-select-btn" id="honna_role_btn" aria-haspopup="listbox" aria-expanded="false">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="honna-role-icon-box">
+                                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+                                                        <circle cx="10" cy="10" r="2.5"></circle>
+                                                        <path d="M6 17c0-1.8 1.8-3 4-3s4 1.2 4 3"></path>
+                                                        <line x1="16" y1="9" x2="18" y2="9"></line>
+                                                        <line x1="16" y1="13" x2="18" y2="13"></line>
+                                                    </svg>
+                                                </div>
+                                                <span class="honna-role-label-text" id="honna_selected_role_label">
+                                                    <t t-if="values.get('portal_type') == 'honna_staff'">Honna Staff</t>
+                                                    <t t-elif="values.get('portal_type') == 'association'">Association</t>
+                                                    <t t-elif="values.get('portal_type') == 'school'">School</t>
+                                                    <t t-elif="values.get('portal_type') == 'college'">College</t>
+                                                    <t t-elif="values.get('portal_type') == 'academy'">Academy</t>
+                                                    <t t-elif="values.get('portal_type') in ('partner', 'ecosystem_partner')">Partner</t>
+                                                    <t t-elif="values.get('portal_type') == 'others'">Others</t>
+                                                    <t t-elif="values.get('portal_type') in ('organisation', 'school_college')">School</t>
+                                                    <t t-elif="values.get('portal_type') == 'educator'">Teacher</t>
+                                                    <t t-else="">Honna Staff</t>
+                                                </span>
+                                            </div>
+                                            <div class="honna-chevron-wrap">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                                </svg>
+                                            </div>
+                                        </button>
+
+                                        <!-- Dropdown Menu for Roles -->
+                                        <ul class="honna-role-options-menu d-none" id="honna_role_menu" role="listbox">
+                                            <li t-attf-class="honna-role-option #{(values.get('portal_type') or 'honna_staff') == 'honna_staff' and 'active' or ''}" data-value="honna_staff" role="option">
+                                                <span>Honna Staff</span>
+                                            </li>
+                                            <li t-attf-class="honna-role-option #{values.get('portal_type') == 'association' and 'active' or ''}" data-value="association" role="option">
+                                                <span>Association</span>
+                                            </li>
+                                            <li t-attf-class="honna-role-option #{values.get('portal_type') in ('school', 'school_college', 'organisation') and 'active' or ''}" data-value="school" role="option">
+                                                <span>School</span>
+                                            </li>
+                                            <li t-attf-class="honna-role-option #{values.get('portal_type') == 'college' and 'active' or ''}" data-value="college" role="option">
+                                                <span>College</span>
+                                            </li>
+                                            <li t-attf-class="honna-role-option #{values.get('portal_type') == 'academy' and 'active' or ''}" data-value="academy" role="option">
+                                                <span>Academy</span>
+                                            </li>
+                                            <li t-attf-class="honna-role-option #{values.get('portal_type') in ('partner', 'ecosystem_partner') and 'active' or ''}" data-value="partner" role="option">
+                                                <span>Partner</span>
+                                            </li>
+                                            <li t-attf-class="honna-role-option #{values.get('portal_type') == 'others' and 'active' or ''}" data-value="others" role="option">
+                                                <span>Others</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <t t-if="errors and errors.get('portal_type')">
+                                        <div class="text-danger small mt-1"><t t-out="errors.get('portal_type')"/></div>
+                                    </t>
+                                </div>
+
+                                <!-- Main Form Card matching Figma -->
+                                <div class="honna-form-card">
+                                    <!-- Row 1: Salutation, Full Name, Last Name -->
+                                    <div class="honna-row-3col mb-3">
+                                        <div class="honna-form-group">
+                                            <label class="honna-input-label" for="reg_salutation">Salutation <span class="honna-required">*</span></label>
+                                            <select name="salutation" id="reg_salutation" class="form-select honna-custom-select" required="required">
+                                                <option value="" disabled="disabled" t-att-selected="not values.get('salutation') and 'selected'">Salutation</option>
+                                                <option value="Mr." t-att-selected="values.get('salutation') == 'Mr.' and 'selected'">Mr.</option>
+                                                <option value="Ms." t-att-selected="values.get('salutation') == 'Ms.' and 'selected'">Ms.</option>
+                                                <option value="Mrs." t-att-selected="values.get('salutation') == 'Mrs.' and 'selected'">Mrs.</option>
+                                                <option value="Dr." t-att-selected="values.get('salutation') == 'Dr.' and 'selected'">Dr.</option>
+                                                <option value="Prof." t-att-selected="values.get('salutation') == 'Prof.' and 'selected'">Prof.</option>
+                                            </select>
+                                            <t t-if="errors and errors.get('salutation')">
+                                                <div class="text-danger small mt-1"><t t-out="errors.get('salutation')"/></div>
+                                            </t>
+                                        </div>
+                                        <div class="honna-form-group">
+                                            <label class="honna-input-label" for="reg_first_name">Full Name <span class="honna-required">*</span></label>
+                                            <input type="text" name="first_name" id="reg_first_name" class="form-control honna-input-field" placeholder="Enter your first name" t-att-value="values.get('first_name') or values.get('name') or ''" required="required"/>
+                                            <t t-if="errors and errors.get('first_name')">
+                                                <div class="text-danger small mt-1"><t t-out="errors.get('first_name')"/></div>
+                                            </t>
+                                        </div>
+                                        <div class="honna-form-group">
+                                            <label class="honna-input-label" for="reg_last_name">Last Name</label>
+                                            <input type="text" name="last_name" id="reg_last_name" class="form-control honna-input-field" placeholder="Enter your last name" t-att-value="values.get('last_name') or ''"/>
+                                        </div>
+                                    </div>
+
+                                    <!-- Row 2: Email Address, Phone Number -->
+                                    <div class="honna-row-2col mb-3">
+                                        <div class="honna-form-group">
+                                            <label class="honna-input-label" for="reg_email">Email Address <span class="honna-required">*</span></label>
+                                            <div class="honna-input-icon-group">
+                                                <span class="honna-field-icon">
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                                                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                                                    </svg>
+                                                </span>
+                                                <input type="email" name="email" id="reg_email" class="form-control honna-input-field honna-input-with-left-icon" placeholder="Enter your email" t-att-value="values.get('email') or ''" required="required"/>
+                                            </div>
+                                            <t t-if="errors and errors.get('email')">
+                                                <div class="text-danger small mt-1"><t t-out="errors.get('email')"/></div>
+                                            </t>
+                                        </div>
+                                        <div class="honna-form-group">
+                                            <label class="honna-input-label" for="reg_phone">Phone Number <span class="honna-required">*</span></label>
+                                            <div class="honna-phone-input-wrapper">
+                                                <div class="honna-phone-prefix">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                                    </svg>
+                                                    <span class="honna-country-code">+91</span>
+                                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="ms-1">
+                                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                                    </svg>
+                                                </div>
+                                                <input type="hidden" name="country_code" value="+91"/>
+                                                <input type="tel" name="phone" id="reg_phone" class="form-control honna-phone-input" placeholder="98863 98863" t-att-value="values.get('phone') or ''" required="required"/>
+                                            </div>
+                                            <t t-if="errors and errors.get('phone')">
+                                                <div class="text-danger small mt-1"><t t-out="errors.get('phone')"/></div>
+                                            </t>
+                                        </div>
+                                    </div>
+
+                                    <!-- Terms & Conditions Checkbox matching Figma -->
+                                    <div class="form-check honna-terms-checkbox-wrap my-4">
+                                        <input class="form-check-input honna-custom-checkbox" type="checkbox" id="terms_agree" name="terms_agree" value="1" required="required" t-att-checked="values.get('terms_agree') and 'checked'"/>
+                                        <label class="form-check-label honna-terms-label" for="terms_agree">
+                                            I agree to Honna Education's <a href="/terms" class="honna-inline-link" target="_blank">Terms &amp; Conditions</a> and <a href="/privacy" class="honna-inline-link" target="_blank">Privacy Policy</a>, and consent to being contacted about my account.
+                                        </label>
+                                    </div>
+                                    <t t-if="errors and errors.get('terms_agree')">
+                                        <div class="text-danger small mb-3"><t t-out="errors.get('terms_agree')"/></div>
+                                    </t>
+
+                                    <!-- Submit Button matching Figma (Left aligned pill button) -->
+                                    <div class="mb-3 text-start">
+                                        <button type="submit" class="btn btn-honna-approval-submit" id="btn_submit_approval">
+                                            Submit for Approval
+                                        </button>
+                                    </div>
+
+                                    <!-- Footer Sign-in Link matching Figma -->
+                                    <div class="honna-signin-footer mt-3">
+                                        <span class="text-muted">Already have an account? </span>
+                                        <a href="/web/login" class="honna-signin-link fw-semibold">Sign in</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reused Main Website Footer & Login Modal Components -->
+                <t t-call="honna_campus_website.honna_footer"/>
+                <t t-call="honna_campus_website.honna_login_modal"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_user_registration_link" inherit_id="portal.user_sign_in" name="User Sign In Header Registration Link">
+        <xpath expr="//li" position="after">
+            <li t-attf-class="#{_item_class} o_no_autohide_item">
+                <a href="/registration" t-attf-class="#{_link_class}">Registration</a>
+            </li>
+        </xpath>
+    </template>
+</odoo>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="facility_physics" model="stakeholder.facility">
+            <field name="name">Physics Lab</field>
+            <field name="code">physics_lab</field>
+        </record>
+        <record id="facility_chemistry" model="stakeholder.facility">
+            <field name="name">Chemistry Lab</field>
+            <field name="code">chemistry_lab</field>
+        </record>
+        <record id="facility_biology" model="stakeholder.facility">
+            <field name="name">Biology Lab</field>
+            <field name="code">biology_lab</field>
+        </record>
+        <record id="facility_composite" model="stakeholder.facility">
+            <field name="name">Composite Science Lab</field>
+            <field name="code">composite_science_lab</field>
+        </record>
+        <record id="facility_computer" model="stakeholder.facility">
+            <field name="name">Core Computer Lab</field>
+            <field name="code">computer_lab</field>
+        </record>
+        <record id="facility_language" model="stakeholder.facility">
+            <field name="name">Language Lab</field>
+            <field name="code">language_lab</field>
+        </record>
+        <record id="facility_robotics" model="stakeholder.facility">
+            <field name="name">Robotics</field>
+            <field name="code">robotics</field>
+        </record>
+        <record id="facility_steam" model="stakeholder.facility">
+            <field name="name">STEAM</field>
+            <field name="code">steam</field>
+        </record>
+        <record id="facility_home_science" model="stakeholder.facility">
+            <field name="name">Home Science Lab</field>
+            <field name="code">home_science_lab</field>
+        </record>
+        <record id="facility_vocational" model="stakeholder.facility">
+            <field name="name">Vocational Lab</field>
+            <field name="code">vocational_lab</field>
+        </record>
+        <record id="facility_sports" model="stakeholder.facility">
+            <field name="name">Sports</field>
+            <field name="code">sports</field>
+        </record>
+        <record id="facility_transport" model="stakeholder.facility">
+            <field name="name">Transport</field>
+            <field name="code">transport</field>
+        </record>
+        <record id="facility_hostel" model="stakeholder.facility">
+            <field name="name">Hostel</field>
+            <field name="code">hostel</field>
+        </record>
+    </data>
+</odoo>

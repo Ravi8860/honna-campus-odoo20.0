@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Figma Login Page Template matching node 40002097-240 -->
+    <template id="login_page_template" name="Honna Campus Login Page">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Login - Honna Campus</t>
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div id="wrap" class="oe_structure oe_empty honna-login-page-container">
+                <!-- Custom Top Navigation matching Figma -->
+                <t t-call="honna_campus_website.honna_header">
+                    <t t-set="page_name" t-value="'login'"/>
+                </t>
+
+                <!-- Split Screen Container matching Figma (1385x923) -->
+                <div class="honna-login-split-wrapper">
+                    <div class="container-fluid p-0">
+                        <div class="row g-0 honna-login-split-row">
+                            
+                            <!-- LEFT COLUMN: Dark Theme Educational Ecosystem Showcase -->
+                            <div class="col-lg-6 honna-login-left-col">
+                                <div class="honna-login-left-overlay">
+                                    <div class="honna-login-left-content">
+                                        <!-- Headline -->
+                                        <h1 class="honna-login-headline">
+                                            Your Gateway to the<br/>
+                                            <span class="honna-highlight-amber">Educational</span> Ecosystem
+                                        </h1>
+
+                                        <!-- Mission description -->
+                                        <p class="honna-login-mission">
+                                            To build a unified, technology-driven platform that connects schools, universities, educators, service partners, and learners into one cohesive ecosystem
+                                        </p>
+
+                                        <!-- 4 Feature Bullets with Circular Checkmarks -->
+                                        <ul class="honna-feature-checklist list-unstyled">
+                                            <li class="honna-feature-item">
+                                                <span class="honna-check-icon">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <circle cx="12" cy="12" r="10"></circle>
+                                                        <polyline points="8 12 11 15 16 9"></polyline>
+                                                    </svg>
+                                                </span>
+                                                <span class="honna-feature-text">Educational Networking Platform</span>
+                                            </li>
+                                            <li class="honna-feature-item">
+                                                <span class="honna-check-icon">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <circle cx="12" cy="12" r="10"></circle>
+                                                        <polyline points="8 12 11 15 16 9"></polyline>
+                                                    </svg>
+                                                </span>
+                                                <span class="honna-feature-text">Academic &amp; Skill Enrichment Program</span>
+                                            </li>
+                                            <li class="honna-feature-item">
+                                                <span class="honna-check-icon">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <circle cx="12" cy="12" r="10"></circle>
+                                                        <polyline points="8 12 11 15 16 9"></polyline>
+                                                    </svg>
+                                                </span>
+                                                <span class="honna-feature-text">Institutional &amp; Accreditation Advisory</span>
+                                            </li>
+                                            <li class="honna-feature-item">
+                                                <span class="honna-check-icon">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <circle cx="12" cy="12" r="10"></circle>
+                                                        <polyline points="8 12 11 15 16 9"></polyline>
+                                                    </svg>
+                                                </span>
+                                                <span class="honna-feature-text">Digitalising Campus Operations</span>
+                                            </li>
+                                        </ul>
+
+                                        <!-- 3 Stat Counters at Bottom -->
+                                        <div class="honna-login-stats-row">
+                                            <div class="honna-stat-box">
+                                                <div class="honna-stat-number">50,000+</div>
+                                                <div class="honna-stat-label">Students</div>
+                                            </div>
+                                            <div class="honna-stat-box">
+                                                <div class="honna-stat-number">100+</div>
+                                                <div class="honna-stat-label">Clients</div>
+                                            </div>
+                                            <div class="honna-stat-box">
+                                                <div class="honna-stat-number">95%</div>
+                                                <div class="honna-stat-label">Satisfaction Rate</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- RIGHT COLUMN: Clean White Login Form Card -->
+                            <div class="col-lg-6 honna-login-right-col">
+                                <div class="honna-login-card-inner">
+                                    
+                                    <!-- Honna Campus Logo -->
+                                    <div class="honna-login-logo-wrap text-center mb-3">
+                                        <img src="/honna_campus_website/static/src/img/logo_honna_campus_dark.svg" alt="Honna Campus" class="honna-login-logo-img"/>
+                                    </div>
+
+                                    <!-- Headings -->
+                                    <div class="text-center mb-4">
+                                        <h2 class="honna-welcome-title">Welcome back</h2>
+                                        <p class="honna-welcome-subtitle">Sign in to connect with our unified partner ecosystem.</p>
+                                    </div>
+
+                                    <!-- Error / Message Alerts -->
+                                    <t t-if="error">
+                                        <div class="alert alert-danger d-flex align-items-center mb-3 py-2 px-3 rounded-3 small" role="alert">
+                                            <i class="oi oi-warning me-2 fs-6"></i>
+                                            <div><t t-out="error"/></div>
+                                        </div>
+                                    </t>
+                                    <t t-if="message">
+                                        <div class="alert alert-info d-flex align-items-center mb-3 py-2 px-3 rounded-3 small" role="alert">
+                                            <i class="oi oi-info me-2 fs-6"></i>
+                                            <div><t t-out="message"/></div>
+                                        </div>
+                                    </t>
+
+                                    <!-- Login Form -->
+                                    <form class="oe_login_form honna-auth-form" role="form" action="/web/login" method="post" onsubmit="this.action = '/web/login' + location.hash">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <input type="hidden" name="type" value="password"/>
+                                        <t t-if="redirect">
+                                            <input type="hidden" name="redirect" t-att-value="redirect"/>
+                                        </t>
+
+                                        <!-- Email Address or Phone Number -->
+                                        <div class="mb-3">
+                                            <label class="honna-input-label" for="login_input">Email Address or Phone Number</label>
+                                            <div class="honna-input-group position-relative">
+                                                <span class="honna-input-icon">
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                                    </svg>
+                                                </span>
+                                                <input type="text" 
+                                                       name="login" 
+                                                       id="login_input"
+                                                       t-att-value="login" 
+                                                       class="form-control honna-login-field" 
+                                                       placeholder="Enter your Email Address or Phone Number" 
+                                                       required="required"
+                                                       autocapitalize="off"
+                                                       autocomplete="username"/>
+                                            </div>
+                                        </div>
+
+                                        <!-- Password -->
+                                        <div class="mb-3">
+                                            <label class="honna-input-label" for="password_input">Password</label>
+                                            <div class="honna-input-group position-relative">
+                                                <span class="honna-input-icon">
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                                    </svg>
+                                                </span>
+                                                <input type="password" 
+                                                       name="password" 
+                                                       id="password_input" 
+                                                       class="form-control honna-login-field" 
+                                                       placeholder="Password" 
+                                                       required="required"
+                                                       autocomplete="current-password"/>
+                                                <button type="button" class="honna-toggle-password-btn" id="honna_toggle_password" aria-label="Show password" tabindex="-1">
+                                                    <svg class="icon-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                    </svg>
+                                                    <svg class="icon-eye-off d-none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Remember Me & Forgot Password -->
+                                        <div class="d-flex justify-content-between align-items-center mb-4 honna-form-meta">
+                                            <div class="form-check d-flex align-items-center m-0">
+                                                <input class="form-check-input honna-checkbox" type="checkbox" id="remember_me" name="remember"/>
+                                                <label class="form-check-label ms-2 small text-secondary" for="remember_me">
+                                                    Remember me
+                                                </label>
+                                            </div>
+                                            <a href="/web/reset_password" class="honna-forgot-password-link small">Forgot Password?</a>
+                                        </div>
+
+                                        <!-- Login Submit Button (Vibrant Orange Pill) -->
+                                        <div class="mb-4 oe_login_buttons">
+                                            <button type="submit" class="btn btn-honna-login-submit w-100">
+                                                Login
+                                            </button>
+                                        </div>
+
+                                        <!-- Signup Prompt -->
+                                        <div class="text-center honna-signup-box">
+                                            <span class="text-secondary small">Don't have an account? </span>
+                                            <a href="/registration" class="honna-signup-link small fw-semibold">Signup</a>
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </t>
+    </template>
+</odoo>

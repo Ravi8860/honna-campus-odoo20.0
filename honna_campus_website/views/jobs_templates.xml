@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="careers_page_template" name="Honna Careers">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Careers - Honna Education</t>
+            
+            <div id="wrap" class="oe_structure oe_empty">
+                <t t-call="honna_campus_website.honna_header"/>
+
+                <section class="py-5 text-white" style="background: linear-gradient(135deg, #071326 0%, #1874c7 100%);">
+                    <div class="container py-4 text-center">
+                        <span class="badge text-bg-warning px-3 py-2 rounded-pill mb-3 text-uppercase">Join Our Mission</span>
+                        <h1 class="display-4 fw-bold">Shape the Future of Technology Education</h1>
+                        <p class="lead opacity-90 max-w-2xl mx-auto" style="max-width: 680px;">
+                            We are looking for passionate STEM educators, robotics engineers, curriculum architects, and community leaders.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="py-5 bg-light">
+                    <div class="container py-4">
+                        <div class="row g-4 justify-content-center">
+                            <!-- Job 1 -->
+                            <div class="col-lg-8">
+                                <div class="card p-4 border-0 shadow-sm rounded-4 mb-3">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                        <h4 class="fw-bold mb-0 text-dark">STEM &amp; Robotics Lead Educator</h4>
+                                        <span class="badge bg-primary-subtle text-primary">Full Time - Bengaluru</span>
+                                    </div>
+                                    <p class="text-muted small mb-3">
+                                        Drive hands-on workshops in partner schools, mentor students in AI/IoT projects, and deliver masterclasses.
+                                    </p>
+                                    <div>
+                                        <a href="/contactus" class="btn btn-sm btn-outline-primary rounded-pill px-3">Apply Now</a>
+                                    </div>
+                                </div>
+
+                                <div class="card p-4 border-0 shadow-sm rounded-4 mb-3">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                        <h4 class="fw-bold mb-0 text-dark">Curriculum Designer (K-12 CS &amp; AI)</h4>
+                                        <span class="badge bg-primary-subtle text-primary">Full Time / Remote</span>
+                                    </div>
+                                    <p class="text-muted small mb-3">
+                                        Author experiential workbooks, project challenges, and NEP 2020 aligned computational thinking modules.
+                                    </p>
+                                    <div>
+                                        <a href="/contactus" class="btn btn-sm btn-outline-primary rounded-pill px-3">Apply Now</a>
+                                    </div>
+                                </div>
+
+                                <div class="card p-4 border-0 shadow-sm rounded-4">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                        <h4 class="fw-bold mb-0 text-dark">Institutional Partnership Manager</h4>
+                                        <span class="badge bg-primary-subtle text-primary">Full Time - Pan India</span>
+                                    </div>
+                                    <p class="text-muted small mb-3">
+                                        Connect with school principals, management trusts, and educational boards to expand Honna Campus labs.
+                                    </p>
+                                    <div>
+                                        <a href="/contactus" class="btn btn-sm btn-outline-primary rounded-pill px-3">Apply Now</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <t t-call="honna_campus_website.honna_footer"/>
+                <t t-call="honna_campus_website.honna_login_modal"/>
+            </div>
+        </t>
+    </template>
+</odoo>

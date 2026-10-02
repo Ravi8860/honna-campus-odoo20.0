@@ -1,0 +1,439 @@
+/* ==========================================================================
+   Honna Stakeholder Registration & Portals Styles
+   Matches Figma Design (Node 0-1) Same-to-Same
+   ========================================================================== */
+
+/* Overall Page Layout */
+.honna-account-creation-page {
+    background-color: #f4f7fb !important;
+    min-height: calc(100vh - 120px);
+}
+
+.honna-reg-wrapper {
+    background-color: #f4f7fb;
+}
+
+.honna-reg-header {
+    margin-bottom: 2rem;
+}
+
+.honna-reg-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    letter-spacing: -0.025em;
+    margin-bottom: 0.35rem;
+    font-family: inherit;
+}
+
+.honna-reg-subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin-bottom: 0;
+}
+
+/* Centered Form Container (Expanded width matching user specification) */
+.honna-reg-form-container {
+    max-width: 980px;
+    width: 100%;
+}
+
+/* Role Selector ("I am an") */
+.honna-field-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #475569;
+    margin-bottom: 0.45rem;
+}
+
+.honna-custom-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.honna-role-select-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 18px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.honna-role-select-btn:hover {
+    border-color: #cbd5e1;
+}
+
+.honna-role-select-btn:focus,
+.honna-custom-dropdown.is-open .honna-role-select-btn {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    outline: none;
+}
+
+.honna-role-icon-box {
+    width: 36px;
+    height: 36px;
+    background-color: #1d4ed8;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.honna-role-label-text {
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.honna-chevron-wrap {
+    color: #64748b;
+    transition: transform 0.25s ease;
+    display: flex;
+    align-items: center;
+}
+
+.honna-custom-dropdown.is-open .honna-chevron-wrap {
+    transform: rotate(180deg);
+}
+
+.honna-role-options-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    z-index: 1050;
+    padding: 6px 0;
+    margin: 0;
+    list-style: none;
+}
+
+.honna-role-option {
+    padding: 11px 20px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: #334155;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.honna-role-option:hover {
+    background-color: #f8fafc;
+    color: #1e293b;
+}
+
+.honna-role-option.active {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 600;
+}
+
+/* White Form Card */
+.honna-form-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 10px 30px -10px rgba(0, 0, 0, 0.04);
+    padding: 40px 44px 36px 44px;
+    margin-top: 1rem;
+}
+
+@media (max-width: 576px) {
+    .honna-form-card {
+        padding: 24px 20px;
+    }
+}
+
+/* Grid Layouts for Exact Column Proportions */
+.honna-row-3col {
+    display: grid;
+    grid-template-columns: 1fr 1.45fr 1.45fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .honna-row-3col {
+        grid-template-columns: 1fr;
+    }
+}
+
+.honna-row-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .honna-row-2col {
+        grid-template-columns: 1fr;
+    }
+}
+
+.honna-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Form Input Elements */
+.honna-input-label {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #1e293b;
+    margin-bottom: 0.45rem;
+    display: block;
+}
+
+.honna-required {
+    color: #ef4444;
+    font-weight: 600;
+    margin-left: 2px;
+}
+
+.honna-input-field {
+    height: 48px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0 14px;
+    font-size: 0.92rem;
+    color: #1e293b;
+    background-color: #ffffff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+}
+
+.honna-custom-select {
+    height: 48px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0 36px 0 14px;
+    font-size: 0.92rem;
+    color: #1e293b;
+    background-color: #ffffff;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    width: 100%;
+}
+
+.honna-input-field:focus,
+.honna-custom-select:focus {
+    border-color: #fa5a1e;
+    box-shadow: 0 0 0 3px rgba(250, 90, 30, 0.12);
+    outline: none;
+}
+
+.honna-input-field::placeholder {
+    color: #94a3b8;
+}
+
+/* Email Input with Mail Icon */
+.honna-input-icon-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.honna-field-icon {
+    position: absolute;
+    left: 14px;
+    pointer-events: none;
+    display: inline-flex;
+    align-items: center;
+    z-index: 2;
+}
+
+.honna-input-with-left-icon {
+    padding-left: 42px !important;
+}
+
+/* Phone Input with +91 Country Selector */
+.honna-phone-input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    height: 48px;
+    background: #ffffff;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+}
+
+.honna-phone-input-wrapper:focus-within {
+    border-color: #fa5a1e;
+    box-shadow: 0 0 0 3px rgba(250, 90, 30, 0.12);
+}
+
+.honna-phone-prefix {
+    display: flex;
+    align-items: center;
+    padding: 0 8px 0 14px;
+    gap: 5px;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.honna-country-code {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: #334155;
+}
+
+.honna-phone-input {
+    border: none !important;
+    box-shadow: none !important;
+    height: 100% !important;
+    padding: 0 12px !important;
+    font-size: 0.92rem !important;
+    color: #1e293b !important;
+    outline: none !important;
+    width: 100% !important;
+}
+
+.honna-phone-input::placeholder {
+    color: #94a3b8;
+}
+
+/* Terms Checkbox */
+.honna-terms-checkbox-wrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding-left: 0;
+}
+
+.honna-custom-checkbox {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px !important;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.honna-custom-checkbox:checked {
+    background-color: #fa5a1e !important;
+    border-color: #fa5a1e !important;
+}
+
+.honna-terms-label {
+    font-size: 0.86rem;
+    color: #64748b;
+    line-height: 1.55;
+    cursor: pointer;
+    margin: 0;
+}
+
+.honna-inline-link {
+    color: #475569;
+    text-decoration: underline;
+    font-weight: 500;
+    transition: color 0.15s;
+}
+
+.honna-inline-link:hover {
+    color: #fa5a1e;
+}
+
+/* Submit for Approval Button (Left-aligned Pill Button) */
+.btn-honna-approval-submit {
+    background-color: #fa5a1e !important;
+    color: #ffffff !important;
+    font-size: 0.98rem !important;
+    font-weight: 600 !important;
+    padding: 12px 32px !important;
+    border-radius: 28px !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s !important;
+    box-shadow: 0 2px 6px rgba(250, 90, 30, 0.25) !important;
+}
+
+.btn-honna-approval-submit:hover {
+    background-color: #e04d15 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(250, 90, 30, 0.35) !important;
+}
+
+.btn-honna-approval-submit:active {
+    transform: translateY(0);
+}
+
+/* Sign-in Footer */
+.honna-signin-footer {
+    font-size: 0.88rem;
+    color: #64748b;
+    text-align: left;
+}
+
+.honna-signin-link {
+    color: #2563eb;
+    text-decoration: none;
+    margin-left: 4px;
+    transition: color 0.15s;
+}
+
+.honna-signin-link:hover {
+    text-decoration: underline;
+    color: #1d4ed8;
+}
+
+/* Legacy & Dashboard Support */
+.portal-card-check .form-check-input {
+    position: static !important;
+    margin-left: 0 !important;
+    margin-right: 0.75rem !important;
+    flex-shrink: 0 !important;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+/* Portal Login Navbar Button matching screenshot */
+.btn-honna-portal-login {
+    background-color: #fa5a1e !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.92rem !important;
+    padding: 8px 20px !important;
+    border: none !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    transition: background-color 0.2s ease, transform 0.15s ease !important;
+}
+
+.btn-honna-portal-login:hover {
+    background-color: #e04d15 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}

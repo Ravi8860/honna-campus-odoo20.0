@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="about_page_template" name="Honna Campus - Next-Generation ICT Curricula">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Honna Campus - Next-Generation ICT &amp; Computer Curricula</t>
+            <t t-set="page_name" t-value="'about'"/>
+            
+            <div id="wrap" class="oe_structure oe_empty campus-dark-bg">
+                <t t-call="honna_campus_website.honna_header"/>
+
+                <!-- ========================================================
+                     1. HONNA CAMPUS HERO SECTION
+                     ======================================================== -->
+                <section class="campus-hero-section">
+                    <div class="container">
+                        <div class="row align-items-center g-5">
+                            <!-- Left: Hero Headline & Description -->
+                            <div class="col-lg-6 hero-left-content">
+                                <div class="d-flex align-items-center gap-3 gap-md-4 mb-4">
+                                    <div class="badge-spark-innovation">
+                                        Learning<br/>That<br/>Sparks<br/>Innovation
+                                    </div>
+                                    <h1 class="campus-hero-title mb-0">
+                                        Next-Generation<br/>
+                                        <span class="highlight-orange">ICT &amp; Computer</span><br/>
+                                        Curricula
+                                    </h1>
+                                </div>
+
+                                <p class="campus-hero-desc mb-0">
+                                    Empowering schools across India with hands-on <strong>STEM, AI, Robotics, and IoT</strong> learning—fully aligned with NEP 2020 guidelines.
+                                </p>
+                            </div>
+
+                            <!-- Right: Cutout Hero Boy with Robotics Car Rover -->
+                            <div class="col-lg-6 text-center text-lg-end">
+                                <img src="/honna_campus_website/static/src/img/about_image_top_banner.png" alt="Student with Robotics Rover" class="hero-boy-img img-fluid"/>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================
+                     2. "OUR STORY / WHERE IT ALL BEGAN"
+                     ======================================================== -->
+                <section class="campus-story-section">
+                    <div class="container">
+                        <div class="row g-5 align-items-center">
+                            <!-- Left: Story Narrative -->
+                            <div class="col-lg-6">
+                                <span class="story-tag">Our Story</span>
+                                <h2 class="story-title">Where It All Began</h2>
+                                
+                                <p class="story-text">
+                                    Honna began with a simple realization: traditional ICT courses were no longer equipping students for a 21st-century workforce.
+                                </p>
+                                <p class="story-text">
+                                    We built Honna to completely rethink how computer science is taught. By blending practical, hands-on training in AI, Robotics, IoT, and Coding, we transform passive learners into active creators.
+                                </p>
+                                <p class="story-text mb-0">
+                                    Today, Honna serves as a trusted partner for schools, educators, and students across India—fostering structure, curiosity, and future-ready tech skills.
+                                </p>
+                            </div>
+
+                            <!-- Right: 2x2 Statistics Grid -->
+                            <div class="col-lg-6">
+                                <div class="row g-3 g-md-4">
+                                    <div class="col-sm-6">
+                                        <div class="campus-stat-card">
+                                            <div class="campus-stat-val">2022</div>
+                                            <p class="campus-stat-sub">Honna Inception</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="campus-stat-card">
+                                            <div class="campus-stat-val">50,000+</div>
+                                            <p class="campus-stat-sub">Students Empowered</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="campus-stat-card">
+                                            <div class="campus-stat-val">200+</div>
+                                            <p class="campus-stat-sub">Educators Trained</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="campus-stat-card">
+                                            <div class="campus-stat-val">95%</div>
+                                            <p class="campus-stat-sub">Institutional Retention Rate</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================
+                     3. "A HOLISTIC TECH EDUCATION" (9 Interactive Cards)
+                     ======================================================== -->
+                <section class="holistic-grid-section">
+                    <div class="container">
+                        <div class="text-center mb-5">
+                            <h2 class="holistic-title mb-3">A Holistic Tech Education</h2>
+                            <p class="holistic-sub mx-auto">
+                                Delivering a end-to-end curriculum across ICT, Computer Science, advanced STEM, Computational Thinking, and AI.
+                            </p>
+                        </div>
+
+                        <div class="row g-4 justify-content-center">
+                            <!-- 1. Design Thinking -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="holistic-card">
+                                    <img src="/honna_campus_website/static/src/img/about_icon_design_thinking.png" alt="Design Thinking" class="holistic-card-img"/>
+                                    <h4 class="holistic-card-title">Design Thinking</h4>
+                                </div>
+                            </div>
+
+                            <!-- 2. 3D Printing -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="holistic-card">
+                                    <img src="/honna_campus_website/static/src/img/about_icon_3d.png" alt="3D Printing" class="holistic-card-img"/>
+                                    <h4 class="holistic-card-title">3D Printing</h4>
+                                </div>
+                            </div>
+
+                            <!-- 3. Internet of Things -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="holistic-card">
+                                    <img src="/honna_campus_website/static/src/img/about_icon_iot.png" alt="Internet of Things" class="holistic-card-img"/>
+                                    <h4 class="holistic-card-title">Internet of Things</h4>
+                                </div>
+                            </div>
+
+                            <!-- 4. Robotics & Automation -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="holistic-card">
+                                    <img src="/honna_campus_website/static/src/img/about_icon_robotics_automation.png" alt="Robotics &amp; Automation" class="holistic-card-img"/>
+                                    <h4 class="holistic-card-title">Robotics &amp; Automation</h4>
+                                </div>
+                            </div>
+
+                            <!-- 5. Drone Technology -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="holistic-card">
+                                    <img src="/honna_campus_website/static/src/img/about_icon_drone.png" alt="Drone Technology" class="holistic-card-img"/>
+                                    <h4 class="holistic-card-title">Drone Technology</h4>
+                                </div>
+                            </div>
+
+                            <!-- 6. AI & Machine Learning -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="holistic-card">
+                                    <img src="/honna_campus_website/static/src/img/about_icon_ai.png" alt="AI &amp; Machine Learning" class="holistic-card-img"/>
+                                    <h4 class="holistic-card-title">AI &amp; Machine Learning</h4>
+                                </div>
+                            </div>
+
+                            <!-- 7. Idea Lab -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="holistic-card">
+                                    <img src="/honna_campus_website/static/src/img/about_icon_lab.png" alt="Idea Lab" class="holistic-card-img"/>
+                                    <h4 class="holistic-card-title">Idea Lab</h4>
+                                </div>
+                            </div>
+
+                            <!-- 8. Humanoid & Automation -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="holistic-card">
+                                    <img src="/honna_campus_website/static/src/img/about_icon_humanoid.png" alt="Humanoid &amp; Automation" class="holistic-card-img"/>
+                                    <h4 class="holistic-card-title">Humanoid &amp; Automation</h4>
+                                </div>
+                            </div>
+
+                            <!-- 9. Robotics Systems -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="holistic-card">
+                                    <img src="/honna_campus_website/static/src/img/about_icon_robotics.png" alt="Robotics Systems" class="holistic-card-img"/>
+                                    <h4 class="holistic-card-title">Robotics Systems</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================
+                     4. CALL TO ACTION SECTION
+                     ======================================================== -->
+                <section class="campus-cta-section">
+                    <div class="container text-center">
+                        <span class="cta-tag">Let's Connect</span>
+                        <h2 class="cta-title">Discover How We Transform<br/>Technology Education</h2>
+                        <p class="cta-sub">
+                            If you are looking for a technology education partner, the Honna Platform provides everything you need to deliver extraordinary teaching and learning experiences.
+                        </p>
+                        <a href="/contactus" class="btn btn-honna-explore">Explore Honna</a>
+                    </div>
+                </section>
+
+                <t t-call="honna_campus_website.honna_footer"/>
+                <t t-call="honna_campus_website.honna_login_modal"/>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="skill_steam" model="stakeholder.skill.program">
+            <field name="name">STEAM</field>
+            <field name="code">steam</field>
+            <field name="type">skill</field>
+        </record>
+        <record id="skill_music" model="stakeholder.skill.program">
+            <field name="name">Music</field>
+            <field name="code">music</field>
+            <field name="type">skill</field>
+        </record>
+        <record id="skill_art" model="stakeholder.skill.program">
+            <field name="name">Art</field>
+            <field name="code">art</field>
+            <field name="type">holistic</field>
+        </record>
+        <record id="skill_coding" model="stakeholder.skill.program">
+            <field name="name">Coding</field>
+            <field name="code">coding</field>
+            <field name="type">holistic</field>
+        </record>
+        <record id="skill_sports" model="stakeholder.skill.program">
+            <field name="name">Sports</field>
+            <field name="code">sports</field>
+            <field name="type">holistic</field>
+        </record>
+        <record id="skill_languages" model="stakeholder.skill.program">
+            <field name="name">Languages</field>
+            <field name="code">languages</field>
+            <field name="type">holistic</field>
+        </record>
+        <record id="skill_stem" model="stakeholder.skill.program">
+            <field name="name">STEM</field>
+            <field name="code">stem</field>
+            <field name="type">holistic</field>
+        </record>
+        <record id="skill_other" model="stakeholder.skill.program">
+            <field name="name">Other Skills</field>
+            <field name="code">other</field>
+            <field name="type">holistic</field>
+        </record>
+    </data>
+</odoo>

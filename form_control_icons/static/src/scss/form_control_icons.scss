@@ -1,0 +1,11 @@
+.o_form_status_indicator_buttons {
+    gap: 0.25rem;
+
+    .o_form_button_save,
+    .o_form_button_cancel {
+        min-height: 1.875rem;
+        padding-inline: 0.75rem;
+        font-weight: 500;
+        line-height: 1.25;
+    }
+}

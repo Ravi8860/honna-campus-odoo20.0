@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="menu_honna_home" model="website.menu">
+        <field name="name">Home</field>
+        <field name="url">/</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" type="int">10</field>
+    </record>
+
+    <record id="menu_honna_about" model="website.menu">
+        <field name="name">About Us</field>
+        <field name="url">/about-us</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" type="int">20</field>
+    </record>
+
+    <record id="menu_honna_shop" model="website.menu">
+        <field name="name">Shop</field>
+        <field name="url">/shop</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" type="int">30</field>
+    </record>
+
+    <record id="menu_honna_courses" model="website.menu">
+        <field name="name">Courses</field>
+        <field name="url">/courses</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" type="int">40</field>
+    </record>
+
+    <record id="menu_honna_jobs" model="website.menu">
+        <field name="name">Jobs</field>
+        <field name="url">/jobs</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" type="int">50</field>
+    </record>
+
+    <record id="menu_honna_contact" model="website.menu">
+        <field name="name">Contact Us</field>
+        <field name="url">/contactus</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" type="int">60</field>
+    </record>
+</odoo>

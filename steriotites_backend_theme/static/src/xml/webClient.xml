@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates id="templateWebClient" xml:space="preserve">
+
+    <t t-name="steriotites_backend_theme.SidebarMenuItem">
+        <t t-if="menu and menu.childrenTree and menu.childrenTree.length">
+            <li class="submenu-group" t-att-style="'padding-left:' + (level * 8) + 'px'">
+                <span class="submenu-group-title"><t t-out="menu.name"/></span>
+            </li>
+            <t t-foreach="menu.childrenTree" t-as="child" t-key="child.id">
+                <t t-call="steriotites_backend_theme.SidebarMenuItem" menu="child" level="level + 1"/>
+            </t>
+        </t>
+        <li
+            t-elif="menu"
+            class="submenu"
+            t-att-class="{ 'active': this.state.activeMenuId === menu.id }"
+            t-on-click.stop="() => this.onSidebarMenuSelection(menu, this.ui.isSmall)"
+        >
+            <span
+                class="menu-label"
+                t-att-style="'padding-left:' + (level * 8) + 'px'"
+            >
+                <t t-out="menu.name"/>
+            </span>
+        </li>
+    </t>
+
+    <t t-inherit="web.WebClient" t-inherit-mode="extension">
+        <xpath expr="." position="replace">
+            <div class="custom-wrapper">
+
+                <div
+                    class="sidebar-backdrop"
+                    t-if="this.state.sidebarOpen"
+                    t-on-click="this.toggleSidebar"
+                />
+
+                <aside
+                    class="custom-sidebar"
+                    t-att-class="{
+                        'open': this.state.sidebarOpen,
+                        'mini': this.state.sidebarMini,
+                        'sidebar-mobile': this.ui.isSmall
+                    }"
+                    t-if="!this.state.fullscreen and (!this.ui.isSmall or this.state.sidebarOpen)"
+                >
+                    <div class="logo">
+                        <i
+                            class="fa toggle-mini d-none d-md-inline me-2"
+                            t-att-class="{
+                                'fa-arrow-left': !this.state.sidebarMini,
+                                'fa-arrow-right': this.state.sidebarMini,
+                            }"
+                            t-on-click="this.toggleMiniSidebar"
+                        />
+                        <span t-if="!this.state.sidebarMini">
+                            <t t-out="this.user.activeCompany?.name"/>
+                        </span>
+                    </div>
+
+                    <ul class="custom-menu">
+                        <t t-foreach="this.menuService.getApps()" t-as="app" t-key="app.id">
+                            <li
+                                class="app-item"
+                                t-att-class="{
+                                    'active': this.state.currentAppId === app.id and !this.isSidebarTreeApp(app),
+                                    'expanded': this.isSidebarTreeApp(app) and this.isAppExpanded(app.id),
+                                    'has-submenus': this.isSidebarTreeApp(app) and this.getAppSections(app).length > 0,
+                                }"
+                                t-on-click="() => this.onAppClick(app)"
+                            >
+                                <span
+                                    class="menu-icon"
+                                    t-attf-style="background-image:url('#{this._getMenuIcon(app)}')"
+                                />
+                                <span class="menu-label" t-if="!this.state.sidebarMini">
+                                    <t t-out="app.name"/>
+                                </span>
+                                <i
+                                    t-if="!this.state.sidebarMini and this.isSidebarTreeApp(app) and this.getAppSections(app).length"
+                                    class="fa fa-chevron-down submenu-caret ms-auto"
+                                />
+                            </li>
+                            <t t-if="this.isSidebarTreeApp(app) and this.isAppExpanded(app.id) and this.getAppSections(app).length and !this.state.sidebarMini">
+                                <li class="app-submenus">
+                                    <ul class="submenu-list">
+                                        <t t-foreach="this.getAppSections(app)" t-as="section" t-key="section.id">
+                                            <t t-call="steriotites_backend_theme.SidebarMenuItem" menu="section" level="1"/>
+                                        </t>
+                                    </ul>
+                                </li>
+                            </t>
+                        </t>
+                    </ul>
+
+                </aside>
+
+                <!-- MAIN -->
+                <div class="custom-main">
+                    <header class="custom-topbar" t-if="!this.state.fullscreen">
+                        <button
+                            class="btn text-white d-md-none"
+                            t-on-click="this.toggleSidebar"
+                        >
+                            <i class="fa fa-bars"/>
+                        </button>
+
+                        <NavBar/>
+                    </header>
+
+                    <div class="custom-content">
+                        <ActionContainer/>
+                        <MainComponentsContainer/>
+                    </div>
+                </div>
+
+            </div>
+        </xpath>
+    </t>
+
+</templates>

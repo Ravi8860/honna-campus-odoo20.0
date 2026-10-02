@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 50" fill="none">
+  <!-- Icon -->
+  <rect x="2" y="10" width="9" height="24" rx="4.5" fill="#00AEEF"/>
+  <rect x="17" y="10" width="9" height="24" rx="4.5" fill="#00AEEF"/>
+  <path d="M6.5 22H21.5" stroke="#FBB03B" stroke-width="7" stroke-linecap="round"/>
+  <!-- Text -->
+  <text x="34" y="27" font-family="'Inter', 'Segoe UI', sans-serif" font-size="22" font-weight="800" fill="#00AEEF">Honna</text>
+  <text x="35" y="39" font-family="'Inter', 'Segoe UI', sans-serif" font-size="9.5" font-weight="700" letter-spacing="3" fill="#FFFFFF">CAMPUS</text>
+</svg>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Mock Circulars -->
+        <record id="circular_1" model="student.circular">
+            <field name="name">Annual Sports Day 2026</field>
+            <field name="date">2026-09-01</field>
+            <field name="content">We are excited to announce our Annual Sports Meet scheduled for September 15th, 2026. All students must wear their respective house uniforms.</field>
+            <field name="category">event</field>
+        </record>
+        <record id="circular_2" model="student.circular">
+            <field name="name">Parent-Teacher Meeting (PTM)</field>
+            <field name="date">2026-08-25</field>
+            <field name="content">The Term 1 Parent-Teacher Meeting will be held on Saturday, August 30th from 9:00 AM to 1:00 PM. Please check your ward's time slot.</field>
+            <field name="category">general</field>
+        </record>
+        <record id="circular_3" model="student.circular">
+            <field name="name">Revised Health Guidelines</field>
+            <field name="date">2026-08-10</field>
+            <field name="content">Please ensure students carry their personal sanitizers and do not attend school if showing mild symptoms of cold or fever.</field>
+            <field name="category">urgent</field>
+        </record>
+
+        <!-- Mock Resources -->
+        <record id="resource_1" model="student.resource">
+            <field name="name">Encouraging a Growth Mindset in Children</field>
+            <field name="author">Dr. Sarah Jenkins</field>
+            <field name="category">article</field>
+            <field name="article_type">psychology</field>
+            <field name="content">This article discusses how praising effort rather than intelligence can foster resilience and a lifelong love of learning in school-aged children.</field>
+            <field name="link">#</field>
+        </record>
+        <record id="resource_2" model="student.resource">
+            <field name="name">Healthy Bento Boxes &amp; School Nutrition</field>
+            <field name="author">Nutritionist Rohit Sharma</field>
+            <field name="category">webinar</field>
+            <field name="article_type">nutrition</field>
+            <field name="content">Watch this 45-minute recording from our guest expert on planning balanced, nutritious school lunches that keep children energetic all day.</field>
+            <field name="link">#</field>
+        </record>
+        <record id="resource_3" model="student.resource">
+            <field name="name">Establishing Effective Study Habits at Home</field>
+            <field name="author">Educator Elena Rostova</field>
+            <field name="category">workshop</field>
+            <field name="article_type">study_habits</field>
+            <field name="content">Key takeaways and templates from our latest workshop on structuring homework, minimizing distractions, and setting up study tables.</field>
+            <field name="link">#</field>
+        </record>
+    </data>
+</odoo>

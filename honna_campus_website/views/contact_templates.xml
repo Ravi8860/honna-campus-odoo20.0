@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="contact_page_template" name="Honna Contact Us">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Contact Us - Honna Campus &amp; Education</t>
+            
+            <div id="wrap" class="oe_structure oe_empty">
+                <t t-call="honna_campus_website.honna_header"/>
+
+                <section class="py-5 text-white" style="background: linear-gradient(135deg, #071326 0%, #1874c7 100%);">
+                    <div class="container py-4 text-center">
+                        <span class="badge text-bg-warning px-3 py-2 rounded-pill mb-3 text-uppercase">Get in Touch</span>
+                        <h1 class="display-4 fw-bold">Let's Build Extraordinary Learning Together</h1>
+                        <p class="lead opacity-90 max-w-2xl mx-auto" style="max-width: 650px;">
+                            Reach out to explore how Honna Campus can transform STEM education at your institution.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="py-5 bg-light">
+                    <div class="container py-4">
+                        <t t-if="success">
+                            <div class="alert alert-success alert-dismissible fade show rounded-4 p-4 shadow-sm mb-5" role="alert">
+                                <div class="d-flex align-items-center">
+                                    <i class="oi oi-check fs-2 text-success me-3"></i>
+                                    <div>
+                                        <h5 class="alert-heading fw-bold mb-1">Thank You! Your inquiry has been received.</h5>
+                                        <p class="mb-0 text-muted">A Honna STEM specialist will reach out to you within 24 hours.</p>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        </t>
+
+                        <div class="row g-5">
+                            <!-- Contact Details -->
+                            <div class="col-lg-5">
+                                <div class="card p-4 p-md-5 border-0 shadow-sm rounded-4 h-100 bg-white">
+                                    <h3 class="fw-bold mb-4" style="color: #0f2d59;">Contact Information</h3>
+
+                                    <div class="contact-info-item">
+                                        <div class="contact-icon-box"><i class="oi oi-location-pin"></i></div>
+                                        <div>
+                                            <strong>Honna Education</strong><br/>
+                                            <span class="text-muted">Bengaluru 560035, Karnataka, India</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="contact-info-item">
+                                        <div class="contact-icon-box"><i class="oi oi-telephone"></i></div>
+                                        <div>
+                                            <strong>Phone Number</strong><br/>
+                                            <span class="text-muted">+91 89042 77404</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="contact-info-item">
+                                        <div class="contact-icon-box"><i class="oi oi-envelope"></i></div>
+                                        <div>
+                                            <strong>Email Address</strong><br/>
+                                            <span class="text-muted">stemlab@honna.in</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4 pt-4 border-top">
+                                        <h6 class="fw-bold text-muted text-uppercase small mb-3">Partner Portals</h6>
+                                        <p class="small text-muted mb-3">Looking to register as a school, association, student, or parent?</p>
+                                        <a href="/stakeholder-portals" class="btn btn-outline-primary btn-sm rounded-pill px-3">Access Portals</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form -->
+                            <div class="col-lg-7">
+                                <div class="card p-4 p-md-5 border-0 shadow-sm rounded-4 bg-white">
+                                    <h3 class="fw-bold mb-4" style="color: #0f2d59;">Send a Message</h3>
+                                    
+                                    <form action="/honna/contact-submit" method="post">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold">Your Name <span class="text-danger">*</span></label>
+                                                <input type="text" name="name" class="form-control form-control-honna" placeholder="Enter your full name" required="required"/>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold">Phone Number</label>
+                                                <input type="text" name="phone" class="form-control form-control-honna" placeholder="+91 XXXXX XXXXX"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold">Email Address <span class="text-danger">*</span></label>
+                                            <input type="email" name="email" class="form-control form-control-honna" placeholder="name@school.edu.in" required="required"/>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label class="form-label small fw-bold">Your Message</label>
+                                            <textarea name="message" rows="5" class="form-control form-control-honna" placeholder="Tell us about your school or query..."></textarea>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-honna-submit w-100 py-3 fs-6">Submit Inquiry</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <t t-call="honna_campus_website.honna_footer"/>
+                <t t-call="honna_campus_website.honna_login_modal"/>
+            </div>
+        </t>
+    </template>
+</odoo>

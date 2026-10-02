@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Odoo 20: groups with privilege_id appear as a selection under the privilege name.
+        Groups without privilege_id appear as checkboxes in "Extra Rights".
+        We use a privilege so Association User / Full Access show under "Eco System Partners".
+    -->
+    <record model="ir.module.category" id="module_category_ecosystem_partners">
+        <field name="name">Eco System Partners</field>
+        <field name="parent_id" ref="base.module_category_administration"/>
+        <field name="sequence">45</field>
+    </record>
+
+    <record model="res.groups.privilege" id="res_groups_privilege_ecosystem_partners">
+        <field name="name">Eco System Partners</field>
+        <field name="category_id" ref="module_category_ecosystem_partners"/>
+        <field name="sequence">10</field>
+        <field name="placeholder">No</field>
+        <field name="description">Choose Association User to hide Student and Parent menus, or Full Access for all menus.</field>
+    </record>
+
+    <!-- Association Users: Association + School only (Student/Parent hidden). -->
+    <record id="group_association_user" model="res.groups">
+        <field name="name">Association User</field>
+        <field name="sequence">10</field>
+        <field name="comment">Access Association and School only. Student and Parent menus are hidden.</field>
+        <field name="privilege_id" ref="res_groups_privilege_ecosystem_partners"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- School Users: School only (Association, Student, Parent hidden). -->
+    <record id="group_school_user" model="res.groups">
+        <field name="name">School User</field>
+        <field name="sequence">15</field>
+        <field name="comment">Access School and Profile only. Association, Student, and Parent menus are hidden.</field>
+        <field name="privilege_id" ref="res_groups_privilege_ecosystem_partners"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- Full Eco System access including Student and Parent. -->
+    <record id="group_stakeholder_user" model="res.groups">
+        <field name="name">Full Access</field>
+        <field name="sequence">20</field>
+        <field name="comment">Full Eco System Partners access, including Student and Parent menus.</field>
+        <field name="privilege_id" ref="res_groups_privilege_ecosystem_partners"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="base.user_admin" model="res.users">
+        <field name="group_ids" eval="[(4, ref('stakeholder_registration.group_stakeholder_user'))]"/>
+    </record>
+
+    <!-- ==========================================
+         RECORD RULES (ir.access in Odoo 20)
+         ========================================== -->
+
+    <!-- Association Record Rules -->
+    <record id="rule_stakeholder_association_user" model="ir.access">
+        <field name="name">Association User: Own Association Only</field>
+        <field name="model_id" ref="model_stakeholder_association"/>
+        <field name="group_id" ref="group_association_user"/>
+        <field name="domain">['|', '|', ('partner_id', '=', user.partner_id.id), ('user_id', '=', user.id), ('partner_id.user_ids', 'in', [user.id])]</field>
+        <field name="operation">cru</field>
+    </record>
+
+    <record id="rule_stakeholder_association_full" model="ir.access">
+        <field name="name">Stakeholder Full Access: All Associations</field>
+        <field name="model_id" ref="model_stakeholder_association"/>
+        <field name="group_id" ref="group_stakeholder_user"/>
+        <field name="domain">[(1, '=', 1)]</field>
+        <field name="operation">crud</field>
+    </record>
+
+    <record id="rule_stakeholder_association_school_user" model="ir.access">
+        <field name="name">School User: Read Associations</field>
+        <field name="model_id" ref="model_stakeholder_association"/>
+        <field name="group_id" ref="group_school_user"/>
+        <field name="domain">[(1, '=', 1)]</field>
+        <field name="operation">r</field>
+    </record>
+
+    <!-- School / Organisation Record Rules -->
+    <record id="rule_stakeholder_organisation_association_user" model="ir.access">
+        <field name="name">Association User: Configured Association Schools Only</field>
+        <field name="model_id" ref="model_stakeholder_organisation"/>
+        <field name="group_id" ref="group_association_user"/>
+        <field name="domain">['|', '|', '|', '|', '|', '|', ('association_ids.partner_id', '=', user.partner_id.id), ('parent_organisation_id.partner_id', '=', user.partner_id.id), ('parent_organisation_id.user_id', '=', user.id), ('association_ids.user_id', '=', user.id), ('parent_organisation_id', '=', user.association_id.id), ('id', 'in', user.association_id.school_ids.ids), ('create_uid', '=', user.id)]</field>
+        <field name="operation">cru</field>
+    </record>
+
+    <record id="rule_stakeholder_organisation_school_user" model="ir.access">
+        <field name="name">School User: Own School Records</field>
+        <field name="model_id" ref="model_stakeholder_organisation"/>
+        <field name="group_id" ref="group_school_user"/>
+        <field name="domain">['|', '|', '|', '|', '|', '|', '|', ('partner_id', '=', user.partner_id.id), ('user_id', '=', user.id), ('partner_id.user_ids', 'in', [user.id]), ('create_uid', '=', user.id), ('id', '=', user.organisation_id.id), ('email', '=', user.login), ('parent_school_id', '=', user.organisation_id.id), ('parent_school_id.user_id', '=', user.id)]</field>
+        <field name="operation">cru</field>
+    </record>
+
+    <record id="rule_stakeholder_organisation_full" model="ir.access">
+        <field name="name">Stakeholder Full Access: All Organisations</field>
+        <field name="model_id" ref="model_stakeholder_organisation"/>
+        <field name="group_id" ref="group_stakeholder_user"/>
+        <field name="domain">[(1, '=', 1)]</field>
+        <field name="operation">crud</field>
+    </record>
+
+    <!-- Association Member Record Rules -->
+    <record id="rule_stakeholder_association_member_user" model="ir.access">
+        <field name="name">Association User: Own Association Members Only</field>
+        <field name="model_id" ref="model_stakeholder_association_member"/>
+        <field name="group_id" ref="group_association_user"/>
+        <field name="domain">['|', '|', ('association_id.partner_id', '=', user.partner_id.id), ('association_id.user_id', '=', user.id), ('association_id.partner_id.user_ids', 'in', [user.id])]</field>
+        <field name="operation">crud</field>
+    </record>
+
+    <record id="rule_stakeholder_association_member_full" model="ir.access">
+        <field name="name">Stakeholder Full Access: All Association Members</field>
+        <field name="model_id" ref="model_stakeholder_association_member"/>
+        <field name="group_id" ref="group_stakeholder_user"/>
+        <field name="domain">[(1, '=', 1)]</field>
+        <field name="operation">crud</field>
+    </record>
+
+    <record id="rule_stakeholder_association_member_school_user" model="ir.access">
+        <field name="name">School User: Read Association Members</field>
+        <field name="model_id" ref="model_stakeholder_association_member"/>
+        <field name="group_id" ref="group_school_user"/>
+        <field name="domain">[(1, '=', 1)]</field>
+        <field name="operation">r</field>
+    </record>
+
+    <!-- Partner / Contacts Record Rules -->
+    <record id="rule_res_partner_school_user" model="ir.access">
+        <field name="name">School User: Own Contacts Only</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="group_id" ref="group_school_user"/>
+        <field name="domain">['|', '|', '|',
+            ('id', '=', user.partner_id.id),
+            ('user_id', '=', user.id),
+            ('create_uid', '=', user.id),
+            ('id', 'in', (user.partner_id.child_ids.ids + (user.organisation_id.partner_id.ids if user.organisation_id else []) + (user.organisation_id.partner_id.child_ids.ids if user.organisation_id else [])))
+        ]</field>
+        <field name="operation">crud</field>
+    </record>
+
+    <record id="rule_res_partner_association_user" model="ir.access">
+        <field name="name">Association User: Own Contacts Only</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="group_id" ref="group_association_user"/>
+        <field name="domain">['|', '|', '|',
+            ('id', '=', user.partner_id.id),
+            ('user_id', '=', user.id),
+            ('create_uid', '=', user.id),
+            ('id', 'in', (user.partner_id.child_ids.ids + (user.association_id.partner_id.ids if user.association_id else []) + (user.association_id.partner_id.child_ids.ids if user.association_id else [])))
+        ]</field>
+        <field name="operation">crud</field>
+    </record>
+
+    <record id="rule_res_partner_full" model="ir.access">
+        <field name="name">Honna Staff: Only Honna Staff Contacts</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="group_id" ref="group_stakeholder_user"/>
+        <field name="domain">['|', '|', '|',
+            ('user_category', '=', 'honna_staff'),
+            ('id', '=', user.partner_id.id),
+            ('user_id', '=', user.id),
+            ('create_uid', '=', user.id)
+        ]</field>
+        <field name="operation">crud</field>
+    </record>
+
+    <!-- Administrator: Full Access to All Contacts -->
+    <record id="rule_res_partner_admin_full" model="ir.access">
+        <field name="name">Stakeholder Admin: All Contacts</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="group_id" ref="base.group_system"/>
+        <field name="domain">[(1, '=', 1)]</field>
+        <field name="operation">crud</field>
+    </record>
+
+    <function model="res.users" name="_init_honna_staff_groups"/>
+    <function model="res.users" name="_init_association_users"/>
+    <function model="res.partner" name="_init_partner_user_category"/>
+</odoo>

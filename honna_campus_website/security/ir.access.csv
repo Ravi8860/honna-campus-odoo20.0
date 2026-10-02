@@ -1,0 +1,13 @@
+id,name,model_id,group_id/id,operation,domain
+access_campus_program_user,honna.campus.program.user,honna.campus.program,base.group_user,crud,
+access_campus_program_public,honna.campus.program.public,honna.campus.program,base.group_public,r,
+access_campus_program_portal,honna.campus.program.portal,honna.campus.program,base.group_portal,r,
+access_campus_partner_user,honna.campus.partner.user,honna.campus.partner,base.group_user,crud,
+access_campus_partner_public,honna.campus.partner.public,honna.campus.partner,base.group_public,r,
+access_campus_partner_portal,honna.campus.partner.portal,honna.campus.partner,base.group_portal,r,
+access_campus_impact_user,honna.campus.impact.user,honna.campus.impact,base.group_user,crud,
+access_campus_impact_public,honna.campus.impact.public,honna.campus.impact,base.group_public,r,
+access_campus_impact_portal,honna.campus.impact.portal,honna.campus.impact,base.group_portal,r,
+access_campus_testimonial_user,honna.campus.testimonial.user,honna.campus.testimonial,base.group_user,crud,
+access_campus_testimonial_public,honna.campus.testimonial.public,honna.campus.testimonial,base.group_public,r,
+access_campus_testimonial_portal,honna.campus.testimonial.portal,honna.campus.testimonial,base.group_portal,r,

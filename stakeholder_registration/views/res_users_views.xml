@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree / List View: Insert User Category between Name and Login -->
+    <record id="view_users_tree_user_category" model="ir.ui.view">
+        <field name="name">res.users.tree.user.category</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='login']" position="before">
+                <field name="user_category" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Form View: Add User Category and Is Association in Eco System Partners section -->
+    <record id="view_users_form_is_association" model="ir.ui.view">
+        <field name="name">res.users.form.is.association</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='access_rights']/group[1]" position="after">
+                <group string="Eco System Partners" name="ecosystem_partners_access">
+                    <field name="user_category"/>
+                    <field name="is_honna_staff"/>
+                    <field name="is_association"/>
+                    <field name="is_school"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Search View: Add User Category filter and group by -->
+    <record id="view_users_search_user_category" model="ir.ui.view">
+        <field name="name">res.users.search.user.category</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="user_category"/>
+            </xpath>
+            <xpath expr="//search" position="inside">
+                <group name="group_by">
+                    <filter string="User Category" name="group_by_user_category" context="{'group_by': 'user_category'}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+
+
+</odoo>

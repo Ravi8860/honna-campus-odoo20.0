@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Custom Header Navigation -->
+    <template id="honna_header" name="Honna Header">
+        <header id="top" class="honna-navbar navbar navbar-expand-lg sticky-top">
+            <div class="container-fluid px-lg-4">
+                <!-- Brand Logo matching Figma -->
+                <a class="navbar-brand me-4 d-flex align-items-center" href="/">
+                    <img src="/honna_campus_website/static/src/img/logo_honna_campus.svg" alt="Honna Campus" class="img-fluid" style="height: 38px; width: auto;"/>
+                </a>
+
+                <!-- Mobile Hamburger Toggle -->
+                <button class="navbar-toggler border-secondary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#honnaNavbarNav" aria-controls="honnaNavbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Navigation Links matching Figma (Home, About us, Shop, Courses, Jobs, Contact Us) - Centered -->
+                <div class="collapse navbar-collapse" id="honnaNavbarNav">
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0 align-items-lg-center">
+                        <li class="nav-item">
+                            <a t-attf-class="nav-link honna-nav-link #{'active' if page_name == 'home' else ''}" href="/">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a t-attf-class="nav-link honna-nav-link #{'active' if page_name == 'about' else ''}" href="/about-us">About us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a t-attf-class="nav-link honna-nav-link #{'active' if page_name == 'shop' else ''}" href="/shop">Shop</a>
+                        </li>
+                        <li class="nav-item">
+                            <a t-attf-class="nav-link honna-nav-link #{'active' if page_name in ('courses', 'curriculum') else ''}" href="/courses">Courses</a>
+                        </li>
+                        <li class="nav-item">
+                            <a t-attf-class="nav-link honna-nav-link #{'active' if page_name in ('jobs', 'careers') else ''}" href="/jobs">Jobs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a t-attf-class="nav-link honna-nav-link #{'active' if page_name == 'contact' else ''}" href="/contactus">Contact Us</a>
+                        </li>
+                    </ul>
+
+                    <!-- Right Action CTA Buttons matching Figma -->
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <t t-if="request.session.uid and not request.env.user._is_public()">
+                            <!-- Authenticated User Dropdown Menu with Logout -->
+                            <div class="dropdown honna-user-dropdown">
+                                <a href="#" class="dropdown-toggle d-flex align-items-center gap-2 text-white text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="honna-avatar-circle bg-primary text-white d-inline-flex align-items-center justify-content-center rounded-circle fw-bold" style="width: 34px; height: 34px; font-size: 0.85rem;">
+                                        <t t-out="request.env.user.name[:1].upper() if request.env.user.name else 'U'"/>
+                                    </span>
+                                    <span class="d-none d-md-inline small fw-semibold text-white">
+                                        <t t-out="request.env.user.name"/>
+                                    </span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 py-2 mt-2" style="min-width: 210px;">
+                                    <li class="px-3 py-2 border-bottom">
+                                        <div class="small fw-bold text-dark"><t t-out="request.env.user.name"/></div>
+                                        <div class="text-muted small text-truncate" style="font-size: 0.75rem;"><t t-out="request.env.user.email or request.env.user.login"/></div>
+                                    </li>
+                                    <li t-if="request.env.user.has_group('base.group_user')">
+                                        <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-primary fw-semibold" href="/odoo">
+                                            <i class="oi oi-view-apps"></i> Apps / Backend
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="/stakeholder-portals">
+                                            <i class="oi oi-user"></i> Stakeholder Portals
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="/my">
+                                            <i class="oi oi-settings"></i> My Account
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider my-1"/></li>
+                                    <li>
+                                        <form method="POST" action="/web/session/logout?redirect=/" class="p-0 m-0">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <button type="submit" class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger fw-semibold bg-transparent border-0 w-100 text-start">
+                                                <i class="oi oi-sign-out"></i> Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <t t-if="page_name == 'register'">
+                                <a href="/web/login" class="btn btn-honna-portal-login">Login to Portal</a>
+                            </t>
+                            <t t-elif="page_name == 'login'">
+                                <a href="/registration" class="btn btn-honna-register-outline">Register</a>
+                            </t>
+                            <t t-else="">
+                                <a href="/web/login" class="honna-nav-login">Login</a>
+                                <a href="/registration" class="btn btn-honna-register-outline">Register</a>
+                            </t>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </header>
+    </template>
+
+    <!-- Mascot Login Modal -->
+    <template id="honna_login_modal" name="Honna Login Modal">
+        <t t-if="not request.session.uid or request.env.user._is_public()">
+            <div id="honna_login_modal" class="honna-modal-backdrop">
+                <div class="honna-modal-card">
+                    <button type="button" class="modal-close-btn" id="honna_modal_close" aria-label="Close">&amp;times;</button>
+                    
+                    <!-- Mascot illustration at bottom right -->
+                    <img src="/honna_campus_website/static/src/img/robot_mascot.png" alt="Honna Robot Mascot" class="modal-mascot-img"/>
+
+                    <div class="text-center mb-4">
+                        <img src="/honna_campus_website/static/src/img/logo_honna_education.svg" alt="Honna" style="height: 48px; width: auto;"/>
+                    </div>
+
+                    <form action="/web/login" method="post" class="honna-modal-login-form">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="redirect" value="/"/>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="oi oi-user text-muted"></i></span>
+                                <input type="text" name="login" class="form-control form-control-honna border-start-0" placeholder="Enter your email" required="required"/>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="oi oi-lock text-muted"></i></span>
+                                <input type="password" name="password" class="form-control form-control-honna border-start-0" placeholder="Password" required="required"/>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-4 small">
+                            <a href="/web/reset_password" class="text-decoration-none text-muted">Forgot Password?</a>
+                            <a href="/registration" class="text-decoration-none text-primary fw-semibold">New user? Register</a>
+                        </div>
+
+                        <div class="text-center oe_login_buttons">
+                            <button type="submit" class="btn btn-honna-contact w-100 py-2 fs-6">Login</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Custom Footer matching Figma -->
+    <template id="honna_footer" name="Honna Footer">
+        <footer class="honna-footer">
+            <div class="container py-2">
+                <div class="row g-4 justify-content-between">
+                    <!-- Col 1: Logo & Mission -->
+                    <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                        <img src="/honna_campus_website/static/src/img/logo_honna_campus.svg" alt="Honna Campus" style="height: 42px; width: auto;" class="mb-3 d-block"/>
+                        <p class="honna-footer-mission text-white-50 pe-xl-4 mb-0" style="font-size: 0.95rem; line-height: 1.65; max-width: 380px;">
+                            To build a unified, technology-driven platform that connects schools, universities, educators, service partners, and learners into one cohesive ecosystem
+                        </p>
+                    </div>
+
+                    <!-- Col 2: Honna Links -->
+                    <div class="col-lg-2 col-md-6 col-6 mb-4 mb-lg-0">
+                        <h5 class="footer-heading text-white fw-bold mb-3" style="font-size: 1.15rem;">Honna</h5>
+                        <ul class="footer-links list-unstyled p-0 m-0">
+                            <li class="mb-2"><a href="/about-us" class="text-white-50 text-decoration-none">About Us</a></li>
+                            <li class="mb-2"><a href="/shop" class="text-white-50 text-decoration-none">Shop</a></li>
+                            <li class="mb-2"><a href="/courses" class="text-white-50 text-decoration-none">Courses</a></li>
+                            <li class="mb-2"><a href="/jobs" class="text-white-50 text-decoration-none">Jobs</a></li>
+                            <li class="mb-2"><a href="/contactus" class="text-white-50 text-decoration-none">Contact Us</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Col 3: Contact Details -->
+                    <div class="col-lg-3 col-md-6 col-6 mb-4 mb-lg-0">
+                        <h5 class="footer-heading text-white fw-bold mb-3" style="font-size: 1.15rem;">Contact</h5>
+                        <div class="honna-footer-contact" style="font-size: 0.95rem; line-height: 1.6;">
+                            <div class="text-white fw-bold">Honna Education</div>
+                            <div class="text-white-50 mb-3">Bengaluru 560035, Karnataka, India</div>
+                            
+                            <div class="text-white fw-bold">Email:</div>
+                            <div class="mb-3"><a href="mailto:stemlab@honna.in" class="text-white-50 text-decoration-none">stemlab@honna.in</a></div>
+                            
+                            <div class="text-white fw-bold">Phone:</div>
+                            <div><a href="tel:+918904277404" class="text-white-50 text-decoration-none">+91 89042 77404</a></div>
+                        </div>
+                    </div>
+
+                    <!-- Col 4: Follow Us (2x2 Social Grid) -->
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <h5 class="footer-heading text-white fw-bold mb-3" style="font-size: 1.15rem;">Follow us</h5>
+                        <div class="honna-social-grid">
+                            <a href="#" class="honna-social-circle" aria-label="Instagram">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                            </a>
+                            <a href="#" class="honna-social-circle" aria-label="Facebook">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                            </a>
+                            <a href="#" class="honna-social-circle" aria-label="YouTube">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                            </a>
+                            <a href="#" class="honna-social-circle" aria-label="LinkedIn">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Copyright Bar -->
+                <div class="footer-bottom-bar text-center text-white-50 mt-5 pt-4 border-top" style="border-color: rgba(255, 255, 255, 0.08) !important; font-size: 0.88rem;">
+                    Copyright 2026 – Honna Enterprises LLP. All rights reserved
+                </div>
+            </div>
+        </footer>
+    </template>
+</odoo>

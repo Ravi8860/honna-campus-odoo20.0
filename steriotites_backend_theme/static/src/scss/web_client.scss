@@ -1,0 +1,356 @@
+:root {
+    --NavBar-entry-backgroundColor: #502e82 !important;
+}
+
+
+
+.custom-wrapper {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Sidebar */
+.custom-sidebar {
+    // width: 240px;
+    width: 180px;
+    height: 100vh;
+    background: #111827;
+    /* dark slate */
+    color: #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    z-index: 1050;
+
+}
+
+/* Mini sidebar */
+.custom-sidebar.mini {
+    width: 64px;
+}
+
+.sidebar-mobile {
+    min-width: 60%;
+}
+
+.custom-sidebar.mini .menu-label {
+    display: none;
+}
+
+// .sidebar-backdrop {
+//     display: none;
+//     position: fixed;
+//     inset: 0;
+//     background: rgba(0, 0, 0, 0.4);
+//     z-index: 1040;
+// }
+
+/* MOBILE */
+@media (max-width: 767px) {
+    .custom-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        transform: translateX(-100%);
+    }
+
+    .custom-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1040;
+    }
+
+    .custom-content {
+        flex: 1;
+        overflow: auto;
+        background: #f6f7fa;
+        // padding-top: 10px;
+        padding-bottom: 10px;
+
+        .o_action_manager {
+            height: 100% !important;
+        }
+    }
+
+
+    .o_spreadsheet_dashboard_action .o_mobile_dashboard {
+        height: 80vh !important;
+        width: 100% !important;
+    }
+}
+
+.menu-separator {
+    font-size: 10px;
+    text-transform: uppercase;
+    opacity: 0.6;
+    padding: 8px 12px;
+}
+
+.custom-menu li.submenu {
+    padding: 4px 4px 4px 12px;
+    font-size: 12px;
+    opacity: 0.9;
+    margin: 1px 0;
+}
+
+.custom-menu li.app-submenus {
+    display: block;
+    padding: 0;
+    margin: 0 0 6px 0;
+    cursor: default;
+    background: transparent !important;
+}
+
+.custom-menu li.app-submenus:hover {
+    background: transparent !important;
+}
+
+.submenu-list {
+    list-style: none;
+    padding: 0 0 4px 12px;
+    margin: 0;
+    border-left: 1px solid #374151;
+    margin-left: 14px;
+}
+
+.submenu-list .submenu-group {
+    display: block;
+    padding: 6px 4px 2px;
+    margin: 0;
+    cursor: default;
+    background: transparent !important;
+}
+
+.submenu-list .submenu-group:hover {
+    background: transparent !important;
+}
+
+.submenu-list .submenu-group-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    opacity: 0.55;
+}
+
+.submenu-list li.submenu {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    margin: 2px 0;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 12px;
+    opacity: 0.95;
+}
+
+.submenu-list li.submenu:hover {
+    background: #1f2937;
+}
+
+.submenu-list li.submenu.active {
+    background: #1d4ed8;
+    color: white;
+}
+
+.submenu.has-children .submenu-caret {
+    font-size: 10px;
+    transition: transform 0.2s ease;
+}
+
+.submenu.expanded .submenu-caret {
+    transform: rotate(180deg);
+}
+
+
+.custom-sidebar .logo {
+    height: 56px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 1px solid #1f2937;
+}
+
+.custom-menu {
+    list-style: none;
+    padding: 8px;
+    margin: 0;
+    height: calc(100vh - 56px);
+
+    overflow-y: auto;
+
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.custom-menu::-webkit-scrollbar {
+    display: none;
+}
+
+.custom-menu li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 4px;
+    border-radius: 4px;
+    margin: 3px 0px 3px 0px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.custom-menu li:hover {
+    background: #1f2937;
+}
+
+.custom-menu li.active {
+    background: #2563eb;
+    color: white;
+}
+
+/* Parent apps with submenus: no blue highlight — only children get active color */
+.custom-menu li.app-item.has-submenus.active,
+.custom-menu li.app-item.has-submenus.expanded {
+    background: transparent;
+    color: inherit;
+}
+
+.custom-menu li.app-item.has-submenus:hover {
+    background: #1f2937;
+}
+
+.custom-menu li.app-item .submenu-caret {
+    font-size: 10px;
+    opacity: 0.6;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.custom-menu li.app-item.expanded .submenu-caret {
+    transform: rotate(180deg);
+}
+
+.menu-icon {
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.menu-label {
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+
+/* Main container */
+.custom-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* Top bar */
+.custom-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #502e82 !important;
+
+    header {
+        width: 100% !important;
+    }
+
+    .o_main_navbar {
+        background: #502e82 !important;
+    }
+}
+
+/* Odoo content area */
+.custom-content {
+    flex: 1;
+    overflow: auto;
+    background: #f6f7fa;
+    // padding-top: 10px;
+    padding-bottom: 10px;
+    min-width: 0;
+
+    .o_action_manager {
+        height: 100% !important;
+    }
+}
+
+
+.o_spreadsheet_dashboard_action .o_renderer {
+    height: 80vh !important;
+    width: 100% !important;
+}
+
+
+
+.o_seo_preview {
+    border: 1px solid #ddd;
+    padding: 12px;
+    border-radius: 6px;
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+
+
+    img {
+        max-width: 100%;
+        border-radius: 6px;
+        margin-top: 10px;
+        max-height: 100px;
+        min-width: 100px;
+    }
+}
+
+.o_seo_google .seo-title {
+    color: #1a0dab;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+// .o_seo_google .seo-field-label {}
+
+.o_seo_google .seo-url {
+    color: #006621;
+    font-size: 13px;
+}
+
+.o_seo_google .seo-desc {
+    color: #545454;
+    font-size: 14px;
+}
+
+.seo-og-img {
+    max-width: 100%;
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+/* Hide unwanted user menu items & IM presence dot */
+.o-web-UserMenu-imStatus,
+[data-menu="support"],
+[data-menu="account"],
+[data-menu="install_pwa"],
+.o-mail-ImStatusDropdown,
+.dropdown-item:has(> .o-mail-ImStatusDropdown),
+.dropdown-menu .o-dropdown:has(.o-mail-ImStatusDropdown),
+.dropdown-menu .o-dropdown--has-parent:has(.oi-chevron-right) {
+    display: none !important;
+}

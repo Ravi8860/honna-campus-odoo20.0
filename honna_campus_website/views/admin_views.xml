@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Programs Views -->
+    <record id="view_campus_program_list" model="ir.ui.view">
+        <field name="name">honna.campus.program.list</field>
+        <field name="model">honna.campus.program</field>
+        <field name="arch" type="xml">
+            <list string="Campus Programs">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="category"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_campus_program_form" model="ir.ui.view">
+        <field name="name">honna.campus.program.form</field>
+        <field name="model">honna.campus.program</field>
+        <field name="arch" type="xml">
+            <form string="Campus Program">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Robotics &amp; Automation"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="category"/>
+                            <field name="icon"/>
+                        </group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" placeholder="Program overview and learning objectives..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_campus_programs" model="ir.actions.act_window">
+        <field name="name">Programs &amp; Curricula</field>
+        <field name="res_model">honna.campus.program</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Partner Schools Views -->
+    <record id="view_campus_partner_list" model="ir.ui.view">
+        <field name="name">honna.campus.partner.list</field>
+        <field name="model">honna.campus.partner</field>
+        <field name="arch" type="xml">
+            <list string="Partner Schools">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="location"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_campus_partner_form" model="ir.ui.view">
+        <field name="name">honna.campus.partner.form</field>
+        <field name="model">honna.campus.partner</field>
+        <field name="arch" type="xml">
+            <form string="Partner School">
+                <sheet>
+                    <field name="logo" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Delhi Public School"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="location"/>
+                            <field name="website_url"/>
+                            <field name="logo_filename"/>
+                        </group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_campus_partners" model="ir.actions.act_window">
+        <field name="name">Partner Schools</field>
+        <field name="res_model">honna.campus.partner</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Impact & Metrics Views -->
+    <record id="view_campus_impact_list" model="ir.ui.view">
+        <field name="name">honna.campus.impact.list</field>
+        <field name="model">honna.campus.impact</field>
+        <field name="arch" type="xml">
+            <list string="Impact Metrics">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="metric_type"/>
+                <field name="value"/>
+                <field name="year"/>
+                <field name="percentage"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_campus_impacts" model="ir.actions.act_window">
+        <field name="name">Impact &amp; Growth Data</field>
+        <field name="res_model">honna.campus.impact</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Testimonials Views -->
+    <record id="view_campus_testimonial_list" model="ir.ui.view">
+        <field name="name">honna.campus.testimonial.list</field>
+        <field name="model">honna.campus.testimonial</field>
+        <field name="arch" type="xml">
+            <list string="Testimonials">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="target_group"/>
+                <field name="role"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_campus_testimonials" model="ir.actions.act_window">
+        <field name="name">Stakeholder Testimonials</field>
+        <field name="res_model">honna.campus.testimonial</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menus in Website app -->
+    <menuitem id="menu_honna_campus_root"
+              name="Honna Campus"
+              parent="website.menu_website_configuration"
+              sequence="50"/>
+
+    <menuitem id="menu_honna_programs"
+              name="Programs &amp; Curricula"
+              parent="menu_honna_campus_root"
+              action="action_campus_programs"
+              sequence="10"/>
+
+    <menuitem id="menu_honna_partners"
+              name="Partner Schools"
+              parent="menu_honna_campus_root"
+              action="action_campus_partners"
+              sequence="20"/>
+
+    <menuitem id="menu_honna_impact"
+              name="Impact &amp; Growth"
+              parent="menu_honna_campus_root"
+              action="action_campus_impacts"
+              sequence="30"/>
+
+    <menuitem id="menu_honna_testimonials"
+              name="Testimonials"
+              parent="menu_honna_campus_root"
+              action="action_campus_testimonials"
+              sequence="40"/>
+</odoo>

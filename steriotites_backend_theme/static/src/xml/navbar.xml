@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates id="templateNavBar" xml:space="preserve">
+
+    <t t-inherit="web.NavBar" t-inherit-mode="extension">
+        <xpath expr="." position="replace">
+            <header class="o_navbar" t-ref="this.root">
+                <nav
+                    class="o_main_navbar d-print-none ps-2"
+                    data-command-category="disabled"
+                >
+                    <!-- App Brand -->
+                    <DropdownItem
+                        t-if="!this.ui.isSmall and this.currentApp"
+                        t-out="this.currentApp.name"
+                        class="'o_menu_brand d-flex'"
+                        onSelected="() => this.onNavBarDropdownItemSelection(this.currentApp)"
+                        attrs="{ href: this.getMenuItemHref(this.currentApp), 'data-menu-xmlid': this.currentApp.xmlid, 'data-section': this.currentApp.id }"
+                    />
+
+                    <div class="o_navbar_breadcrumbs d-contents"/>
+
+                    <t t-if="!this.ui.isSmall">
+                        <!-- Header menus for all apps except Eco System Partners (those use the sidebar). -->
+                        <t t-if="this.currentAppSections.length and this.currentApp?.xmlid !== 'stakeholder_registration.menu_stakeholder_registration_root'"
+                           t-call="web.NavBar.SectionsMenu"
+                           sections="this.currentAppSections"/>
+                    </t>
+
+                    <!-- Systray -->
+                    <div class="o_menu_systray d-flex flex-shrink-0 ms-auto bg-inherit" role="menu">
+                        <t t-foreach="this.systrayItems" t-as="item" t-key="item.key">
+                            <!-- This ensures the correct order of the systray items -->
+                            <div t-att-data-index="item.index"/>
+                            <ErrorHandler onError="error => this.handleItemError(error, item)">
+                                <t t-component="item.Component" t-props="item.props"/>
+                            </ErrorHandler>
+                        </t>
+                    </div>
+                </nav>
+            </header>
+        </xpath>
+    </t>
+
+</templates>

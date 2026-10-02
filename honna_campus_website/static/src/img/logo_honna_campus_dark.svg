@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 52" fill="none">
+  <!-- Icon -->
+  <rect x="2" y="11" width="9" height="24" rx="4.5" fill="#00AEEF"/>
+  <rect x="17" y="11" width="9" height="24" rx="4.5" fill="#00AEEF"/>
+  <path d="M6.5 23H21.5" stroke="#FBB03B" stroke-width="7" stroke-linecap="round"/>
+  <!-- Text -->
+  <text x="34" y="28" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" fill="#00AEEF">Honna</text>
+  <text x="100" y="18" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8" font-weight="700" fill="#00AEEF">TM</text>
+  <text x="35" y="41" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" font-weight="700" letter-spacing="3.5" fill="#0F172A">CAMPUS</text>
+</svg>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="shop_page_template" name="Honna Shop - Educational Hardware &amp; Kits">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Shop - Honna Educational Kits &amp; Hardware</t>
+            
+            <div id="wrap" class="oe_structure oe_empty">
+                <t t-call="honna_campus_website.honna_header"/>
+
+                <section class="py-5 text-white" style="background: linear-gradient(135deg, #071326 0%, #0f2d59 100%);">
+                    <div class="container py-4 text-center">
+                        <span class="badge text-bg-warning px-3 py-2 rounded-pill mb-3 text-uppercase">Hardware &amp; Platforms</span>
+                        <h1 class="display-4 fw-bold">Educational Kits &amp; Software Solutions</h1>
+                        <p class="lead text-white-50 max-w-2xl mx-auto" style="max-width: 680px;">
+                            High-grade STEM kits, open robotics platforms, and school software tools engineered for Indian educational institutions.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="py-5 bg-light">
+                    <div class="container py-4">
+                        <div class="row g-4">
+                            <!-- Product 1: Honna STEM Kit -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                                    <div class="bg-white p-4 text-center border-bottom">
+                                        <img src="/honna_campus_website/static/src/img/toy_rover.png" alt="Honna STEM Kit" style="height: 140px; object-fit: contain;"/>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge bg-primary-subtle text-primary">K-12 Kit</span>
+                                            <span class="fw-bold text-success">School Edition</span>
+                                        </div>
+                                        <h4 class="card-title fw-bold">Honna STEM Kit</h4>
+                                        <p class="card-text text-muted small">
+                                            Comprehensive electro-mechanical construction kit featuring microcontrollers, sensors, motors, and guided modules.
+                                        </p>
+                                    </div>
+                                    <div class="card-footer bg-transparent border-0 pb-4 text-center">
+                                        <a href="/contactus" class="btn btn-honna-portal w-100">Request Quote</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Product 2: Open-Source Lab KIT -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                                    <div class="bg-white p-4 text-center border-bottom">
+                                        <img src="/honna_campus_website/static/src/img/toy_crane.png" alt="Open-Source Lab KIT" style="height: 140px; object-fit: contain;"/>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge bg-info-subtle text-info">Advanced Lab</span>
+                                            <span class="fw-bold text-success">Turnkey Lab</span>
+                                        </div>
+                                        <h4 class="card-title fw-bold">Open-Source Lab KIT</h4>
+                                        <p class="card-text text-muted small">
+                                            Complete lab inventory for setting up tinkering, robotics, 3D printing, and IoT maker hubs within schools.
+                                        </p>
+                                    </div>
+                                    <div class="card-footer bg-transparent border-0 pb-4 text-center">
+                                        <a href="/contactus" class="btn btn-honna-portal w-100">Request Quote</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Product 3: Educopilot Platform -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                                    <div class="bg-white p-4 text-center border-bottom">
+                                        <img src="/honna_campus_website/static/src/img/robot_mascot.png" alt="Educopilot Platform" style="height: 140px; object-fit: contain;"/>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge bg-warning-subtle text-warning">AI Assistant</span>
+                                            <span class="fw-bold text-primary">SaaS Solution</span>
+                                        </div>
+                                        <h4 class="card-title fw-bold">Educopilot Platform</h4>
+                                        <p class="card-text text-muted small">
+                                            AI-powered curriculum planning, auto-grading, student progress analytics, and lesson generator for faculty.
+                                        </p>
+                                    </div>
+                                    <div class="card-footer bg-transparent border-0 pb-4 text-center">
+                                        <a href="/contactus" class="btn btn-honna-portal w-100">Request Demo</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <t t-call="honna_campus_website.honna_footer"/>
+                <t t-call="honna_campus_website.honna_login_modal"/>
+            </div>
+        </t>
+    </template>
+</odoo>

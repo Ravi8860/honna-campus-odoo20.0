@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="crm_lead_view_form_association_portal" model="ir.ui.view">
+        <field name="name">crm.lead.form.association.portal</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet//field[@name='type'][1]" position="after">
+                <field name="portal_type" invisible="1"/>
+            </xpath>
+            <xpath expr="//sheet//group//field[@name='tag_ids']" position="after">
+                <field name="user_category" widget="badge"/>
+                <field name="salutation" invisible="not salutation"/>
+                <field name="first_name" invisible="not first_name"/>
+                <field name="last_name" invisible="not last_name"/>
+                <field name="registration_id_ref" invisible="not registration_id_ref"/>
+            </xpath>
+            <page name="extra" position="after">
+                <page name="registration_details" string="Registration Details"
+                      invisible="not user_category and not salutation and not first_name and not registration_id_ref">
+                    <group>
+                        <group string="Stakeholder Registration Details">
+                            <field name="user_category"/>
+                            <field name="salutation"/>
+                            <field name="first_name"/>
+                            <field name="last_name"/>
+                        </group>
+                        <group string="Linked Registration Records">
+                            <field name="registration_id_ref"/>
+                            <field name="assoc_registration_id" invisible="user_category != 'association'"/>
+                            <field name="org_registration_id" invisible="user_category not in ('organisation', 'school_college', 'school', 'college', 'academy', 'partner', 'honna_staff', 'others')"/>
+                        </group>
+                    </group>
+                </page>
+
+                <page name="association_portal"
+                      string="Association Portal Registration"
+                      invisible="portal_type != 'association'">
+                    <group>
+                        <group string="Identity &amp; Branding">
+                            <field name="assoc_organisation_name"/>
+                            <field name="assoc_organisation_code"/>
+                            <field name="assoc_tax_gst"/>
+                            <field name="assoc_trust_details"/>
+                        </group>
+                        <group string="Location &amp; Branches">
+                            <field name="assoc_address"/>
+                            <field name="assoc_geolocation"/>
+                            <field name="assoc_branch_code"/>
+                            <field name="assoc_registration_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Primary Contact">
+                            <field name="assoc_contact_name"/>
+                            <field name="assoc_contact_role"/>
+                            <field name="assoc_contact_time"/>
+                        </group>
+                        <group string="Secondary Contact">
+                            <field name="assoc_secondary_phone"/>
+                            <field name="assoc_secondary_email"/>
+                        </group>
+                    </group>
+                </page>
+            </page>
+        </field>
+    </record>
+</odoo>

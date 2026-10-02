@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Delete the Stakeholder Portals menu item from main navigation -->
+        <delete model="website.menu" search="[('url', '=', '/stakeholder-portals')]"/>
+    </data>
+</odoo>

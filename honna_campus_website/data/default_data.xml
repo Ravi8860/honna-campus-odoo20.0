@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Impact Counters -->
+    <record id="impact_students" model="honna.campus.impact">
+        <field name="name">Students Reached</field>
+        <field name="metric_type">counter</field>
+        <field name="value">28000+</field>
+        <field name="label">Students Reached</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="impact_teachers" model="honna.campus.impact">
+        <field name="name">Teachers Trained</field>
+        <field name="metric_type">counter</field>
+        <field name="value">100+</field>
+        <field name="label">Teachers Trained</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="impact_schools" model="honna.campus.impact">
+        <field name="name">Schools Partnered</field>
+        <field name="metric_type">counter</field>
+        <field name="value">50+</field>
+        <field name="label">Schools Partnered</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <record id="impact_retention" model="honna.campus.impact">
+        <field name="name">Institutional Retention</field>
+        <field name="metric_type">counter</field>
+        <field name="value">95%</field>
+        <field name="label">Institutional Retention Rate</field>
+        <field name="sequence">40</field>
+    </record>
+
+    <!-- Growth Timeline -->
+    <record id="growth_2022" model="honna.campus.impact">
+        <field name="name">Growth 2022</field>
+        <field name="metric_type">growth</field>
+        <field name="value">2%</field>
+        <field name="label">Foundation &amp; Early Adoption</field>
+        <field name="year">2022</field>
+        <field name="percentage">2</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="growth_2023" model="honna.campus.impact">
+        <field name="name">Growth 2023</field>
+        <field name="metric_type">growth</field>
+        <field name="value">8%</field>
+        <field name="label">Regional Expansion</field>
+        <field name="year">2023</field>
+        <field name="percentage">8</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="growth_2024" model="honna.campus.impact">
+        <field name="name">Growth 2024</field>
+        <field name="metric_type">growth</field>
+        <field name="value">32%</field>
+        <field name="label">Statewide Integration</field>
+        <field name="year">2024</field>
+        <field name="percentage">32</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <record id="growth_2025" model="honna.campus.impact">
+        <field name="name">Growth 2025</field>
+        <field name="metric_type">growth</field>
+        <field name="value">58%</field>
+        <field name="label">National Leadership</field>
+        <field name="year">2025</field>
+        <field name="percentage">58</field>
+        <field name="sequence">40</field>
+    </record>
+
+    <!-- Holistic Tech Education (The 9 Figma Cards) -->
+    <record id="prog_design_thinking" model="honna.campus.program">
+        <field name="name">Design Thinking</field>
+        <field name="code">DT</field>
+        <field name="category">holistic</field>
+        <field name="description">Fostering creative problem-solving and structured design processes for young minds.</field>
+        <field name="icon">bi-lightbulb</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="prog_3d_printing" model="honna.campus.program">
+        <field name="name">3D Printing</field>
+        <field name="code">3DP</field>
+        <field name="category">holistic</field>
+        <field name="description">Transforming conceptual digital designs into physical models through additive manufacturing.</field>
+        <field name="icon">bi-box</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="prog_iot" model="honna.campus.program">
+        <field name="name">Internet of Things</field>
+        <field name="code">IOT</field>
+        <field name="category">holistic</field>
+        <field name="description">Connecting smart sensors, cloud telemetry, and microcontrollers to solve everyday challenges.</field>
+        <field name="icon">bi-wifi</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <record id="prog_robotics_auto" model="honna.campus.program">
+        <field name="name">Robotics &amp; Automation</field>
+        <field name="code">RA</field>
+        <field name="category">holistic</field>
+        <field name="description">Hands-on electro-mechanical robotics kits and automated control logic systems.</field>
+        <field name="icon">bi-gear-wide-connected</field>
+        <field name="sequence">40</field>
+    </record>
+
+    <record id="prog_drone" model="honna.campus.program">
+        <field name="name">Drone Technology</field>
+        <field name="code">DRONE</field>
+        <field name="category">holistic</field>
+        <field name="description">Aerodynamics, flight simulation, autonomous navigation, and aerial robotics fundamentals.</field>
+        <field name="icon">bi-cursor</field>
+        <field name="sequence">50</field>
+    </record>
+
+    <record id="prog_ai_ml" model="honna.campus.program">
+        <field name="name">AI &amp; Machine Learning</field>
+        <field name="code">AIML</field>
+        <field name="category">holistic</field>
+        <field name="description">Demystifying neural networks, computer vision, and cognitive computing for K-12 students.</field>
+        <field name="icon">bi-cpu</field>
+        <field name="sequence">60</field>
+    </record>
+
+    <record id="prog_idea_lab" model="honna.campus.program">
+        <field name="name">Idea Lab</field>
+        <field name="code">IDEA</field>
+        <field name="category">holistic</field>
+        <field name="description">An open prototyping and maker sanctuary where students experiment with novel concepts.</field>
+        <field name="icon">bi-stars</field>
+        <field name="sequence">70</field>
+    </record>
+
+    <record id="prog_humanoid" model="honna.campus.program">
+        <field name="name">Humanoid &amp; Automation</field>
+        <field name="code">HUMAN</field>
+        <field name="category">holistic</field>
+        <field name="description">Bipedal mechanics, gesture recognition, bio-inspired algorithms, and human-robot interaction.</field>
+        <field name="icon">bi-person-badge</field>
+        <field name="sequence">80</field>
+    </record>
+
+    <record id="prog_robotics_sys" model="honna.campus.program">
+        <field name="name">Robotics Systems</field>
+        <field name="code">RSYS</field>
+        <field name="category">holistic</field>
+        <field name="description">Multi-joint articulated robotic arms, kinematics, conveyor integration, and factory simulation.</field>
+        <field name="icon">bi-tools</field>
+        <field name="sequence">90</field>
+    </record>
+
+    <!-- Testimonials -->
+    <record id="test_school" model="honna.campus.testimonial">
+        <field name="name">Principal &amp; School Management</field>
+        <field name="role">Schools that want to build future-ready classrooms</field>
+        <field name="target_group">school</field>
+        <field name="quote">Schools report higher engagement and stronger problem-solving skills.</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="test_educator" model="honna.campus.testimonial">
+        <field name="name">STEM &amp; Computer Science Faculty</field>
+        <field name="role">Educators who value innovation and engagement</field>
+        <field name="target_group">educator</field>
+        <field name="quote">Educators love the relevance and practicality of the curriculum.</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="test_parent" model="honna.campus.testimonial">
+        <field name="name">Parent Association</field>
+        <field name="role">Helping children build confidence, creativity, skills</field>
+        <field name="target_group">parent</field>
+        <field name="quote">Parents see their children become more confident and curious.</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <!-- Partner Schools -->
+    <record id="partner_dps" model="honna.campus.partner">
+        <field name="name">Delhi Public School</field>
+        <field name="logo_filename">school_dps.png</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="partner_totw" model="honna.campus.partner">
+        <field name="name">Take On The World</field>
+        <field name="logo_filename">school_take_on_world.png</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="partner_hgs" model="honna.campus.partner">
+        <field name="name">Hyderabad Green School</field>
+        <field name="logo_filename">school_hyderabad_green.png</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <record id="partner_st_marys" model="honna.campus.partner">
+        <field name="name">St. Mary's High English School</field>
+        <field name="logo_filename">school_st_marys.png</field>
+        <field name="sequence">40</field>
+    </record>
+
+    <record id="partner_edify" model="honna.campus.partner">
+        <field name="name">Edify World School Kurnool</field>
+        <field name="logo_filename">school_edify.png</field>
+        <field name="sequence">50</field>
+    </record>
+
+    <record id="partner_kodagu" model="honna.campus.partner">
+        <field name="name">Kodagu Vidyalaya</field>
+        <field name="logo_filename">school_kodagu.png</field>
+        <field name="sequence">60</field>
+    </record>
+
+    <record id="partner_kals" model="honna.campus.partner">
+        <field name="name">KALS School</field>
+        <field name="logo_filename">school_kals.png</field>
+        <field name="sequence">70</field>
+    </record>
+
+    <record id="partner_nps" model="honna.campus.partner">
+        <field name="name">National Public School Kalaburagi</field>
+        <field name="logo_filename">school_nps.png</field>
+        <field name="sequence">80</field>
+    </record>
+
+    <record id="partner_st_pious" model="honna.campus.partner">
+        <field name="name">St. Pious X School</field>
+        <field name="logo_filename">school_st_pious.png</field>
+        <field name="sequence">90</field>
+    </record>
+
+    <record id="partner_st_marys_t" model="honna.campus.partner">
+        <field name="name">St. Mary's English School</field>
+        <field name="logo_filename">school_st_marys_t.png</field>
+        <field name="sequence">100</field>
+    </record>
+</odoo>

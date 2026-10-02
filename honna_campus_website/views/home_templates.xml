@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="homepage_template" name="Honna Campus Homepage">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Honna Campus - Your Gateway to the Educational Ecosystem</t>
+            
+            <div id="wrap" class="oe_structure oe_empty honna-campus-page-wrapper">
+                <t t-call="honna_campus_website.honna_header"/>
+
+                <!-- ========================================================
+                     1. HERO SECTION (Matching Figma node 1:1016)
+                     ======================================================== -->
+                <section class="honna-campus-hero-section position-relative overflow-hidden">
+                    <div class="honna-hero-bg-overlay"></div>
+                    <div class="container position-relative py-5">
+                        <div class="row align-items-center py-lg-4">
+                            <!-- Left: Headline & Content -->
+                            <div class="col-lg-6 text-start">
+                                <div class="honna-hero-welcome-tag mb-3">
+                                    Welcome to Honna Campus
+                                </div>
+                                <div class="honna-hero-networking-box mb-4">
+                                    The Trusted, End-to-End Educational Networking platform
+                                </div>
+                                <h1 class="honna-campus-hero-title text-white fw-bold mb-4">
+                                    Empowering the Next<br/>
+                                    Generation of Education
+                                </h1>
+                                <p class="honna-campus-hero-lead mb-4">
+                                    Honna Campus designed to seamlessly connect every stakeholder across the learning lifecycle— from K-12 foundational schooling to higher education. By bringing together academic institutions, school associations, parents, industry experts, and service providers. A trusted ecosystem to discover right partners for any educational need.
+                                </p>
+                                <div class="honna-hero-actions">
+                                    <a href="/registration" class="btn btn-honna-hero-join">
+                                        Join the Network
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Right: High-Res Team Hands Banner Image from Figma -->
+                            <div class="col-lg-6 text-center text-lg-end position-relative">
+                                <div class="honna-hero-hands-wrapper">
+                                    <img src="/honna_campus_website/static/src/img/image_banner.png" 
+                                         alt="Empowering the Next Generation of Education" 
+                                         class="img-fluid honna-hero-hands-img"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================
+                     2. "WHY HONNA CAMPUS?" (6 Feature Cards Matching Figma)
+                     ======================================================== -->
+                <section class="honna-offerings-section py-5">
+                    <div class="container py-4">
+                        <!-- Section Header -->
+                        <div class="text-center mb-5">
+                            <h2 class="honna-section-title text-white fw-bold mb-0">
+                                Why Honna Campus?
+                            </h2>
+                        </div>
+
+                        <!-- 6 Offerings Cards in 3x2 Grid -->
+                        <div class="row g-4">
+                            <!-- Card 1: Unified Educational Network -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="honna-ecosystem-card h-100">
+                                    <div class="honna-card-icon-wrap mb-3">
+                                        <img src="/honna_campus_website/static/src/img/icon_unified.png" alt="Unified Educational Network" class="honna-card-icon"/>
+                                    </div>
+                                    <h3 class="honna-card-title text-white">Unified Educational Network</h3>
+                                    <p class="honna-card-desc">
+                                        A trusted, single-point network connecting schools, higher-end institutions, educators, parents, service providers, and management associations.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: Streamlined Admission Pathways -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="honna-ecosystem-card h-100">
+                                    <div class="honna-card-icon-wrap mb-3">
+                                        <img src="/honna_campus_website/static/src/img/icon_streamline.png" alt="Streamlined Admission Pathways" class="honna-card-icon"/>
+                                    </div>
+                                    <h3 class="honna-card-title text-white">Streamlined Admission Pathways</h3>
+                                    <p class="honna-card-desc">
+                                        Connect parents and prospective students directly with schools, PU colleges, and universities for transparent discovery, application tracking, and enrolment facilitation.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Card 3: Industry-Aligned Learning Pathways -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="honna-ecosystem-card h-100">
+                                    <div class="honna-card-icon-wrap mb-3">
+                                        <img src="/honna_campus_website/static/src/img/icon_Industry.png" alt="Industry-Aligned Learning Pathways" class="honna-card-icon"/>
+                                    </div>
+                                    <h3 class="honna-card-title text-white">Industry-Aligned Learning Pathways</h3>
+                                    <p class="honna-card-desc">
+                                        Discover and collaborate with vetted industry expert partners to deliver specialised STEM &amp; AI labs, internships, vocational training, and career-bridge programs.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Card 4: Academic & Skill Enrichment -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="honna-ecosystem-card h-100">
+                                    <div class="honna-card-icon-wrap mb-3">
+                                        <img src="/honna_campus_website/static/src/img/icon_Academic.png" alt="Academic &amp; Skill Enrichment" class="honna-card-icon"/>
+                                    </div>
+                                    <h3 class="honna-card-title text-white">Academic &amp; Skill Enrichment</h3>
+                                    <p class="honna-card-desc">
+                                        Find specialised providers for hands-on skill workshops, summer bootcamps, and co-curricular learning programs.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Card 5: Institutional & Accreditation Advisory -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="honna-ecosystem-card h-100">
+                                    <div class="honna-card-icon-wrap mb-3">
+                                        <img src="/honna_campus_website/static/src/img/icon_institutional.png" alt="Institutional &amp; Accreditation Advisory" class="honna-card-icon"/>
+                                    </div>
+                                    <h3 class="honna-card-title text-white">Institutional &amp; Accreditation Advisory</h3>
+                                    <p class="honna-card-desc">
+                                        Connect with verified education consultants for board affiliations, regulatory compliance, quality benchmarking, and national accreditation standards (such as NAAC or NBA).
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Card 6: Smart Campus Operations -->
+                            <div class="col-lg-4 col-md-6">
+                                <div class="honna-ecosystem-card h-100">
+                                    <div class="honna-card-icon-wrap mb-3">
+                                        <img src="/honna_campus_website/static/src/img/icon_campus.png" alt="Smart Campus Operations" class="honna-card-icon"/>
+                                    </div>
+                                    <h3 class="honna-card-title text-white">Smart Campus Operations</h3>
+                                    <p class="honna-card-desc">
+                                        Find and evaluate pre-verified operational partners and ERP solution providers to digitise administrative workflows, academic tracking, and campus management.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========================================================
+                     3. BOTTOM CTA BANNER (Full Size Matching Figma)
+                     ======================================================== -->
+                <section class="honna-bottom-cta-section w-100 p-0 m-0 overflow-hidden position-relative">
+                    <div class="honna-cta-banner-wrapper position-relative text-center w-100 overflow-hidden">
+                        <img src="/honna_campus_website/static/src/img/group_bottom_banner.jpg?v=4" 
+                             alt="Your Gateway to the Educational Ecosystem" 
+                             class="w-100 honna-bottom-banner-img d-block"/>
+                        <!-- Interactive overlay hotspots for Login and Register -->
+                        <a href="/web/login" class="honna-banner-hotspot-login" title="Log In" aria-label="Log In"></a>
+                        <a href="/registration" class="honna-banner-hotspot-register" title="Register / Join Network" aria-label="Register / Join Network"></a>
+                    </div>
+                </section>
+
+                <t t-call="honna_campus_website.honna_footer"/>
+                <t t-call="honna_campus_website.honna_login_modal"/>
+            </div>
+        </t>
+    </template>
+</odoo>

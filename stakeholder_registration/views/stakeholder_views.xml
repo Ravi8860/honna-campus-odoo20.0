@@ -1,0 +1,1255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ==========================================
+         ASSOCIATION REGISTRATION VIEWS
+         ========================================== -->
+    <record id="view_stakeholder_association_tree" model="ir.ui.view">
+        <field name="name">stakeholder.association.tree</field>
+        <field name="model">stakeholder.association</field>
+        <field name="arch" type="xml">
+            <list string="Association Registrations" export_xlsx="1">
+                <field name="name" string="Association Name"/>
+                <field name="email" string="Association Email"/>
+                <field name="phone" string="Association Phone"/>
+                <field name="contact_name_phone" string="Primary Contact"/>
+                <field name="contact_name" string="Primary Contact Name" optional="hide"/>
+                <field name="contact_phone" string="Primary Contact Mobile" optional="hide"/>
+                <field name="website"/>
+                <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-muted="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_association_form" model="ir.ui.view">
+        <field name="name">stakeholder.association.form</field>
+        <field name="model">stakeholder.association</field>
+        <field name="arch" type="xml">
+            <form string="Association Registration">
+                <header>
+                    <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="not id or state == 'approved'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_reject" string="Reject" type="object" class="btn-secondary" invisible="not id or state == 'rejected'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_draft" string="Reset to Draft" type="object" class="btn-secondary" invisible="not id or state == 'draft'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,rejected"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_left" style="width: 90px; float:left; padding-right: 15px;">
+                        <field name="logo" widget="image" class="oe_avatar" options="{'size': [90, 90]}"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Organisation Name"/>
+                        <h1>
+                            <field name="name" placeholder="Organisation Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Primary Address">
+                            <label for="street" string="Address"/>
+                            <div class="o_address_format">
+                                <field name="street" placeholder="Address line 1..." class="o_address_street"/>
+                                <field name="street2" placeholder="Address line 2..." class="o_address_street"/>
+                                <field name="city" placeholder="City" class="o_address_city"/>
+                                <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('country_id.code', '=', 'IN')]" context="{'country_id': country_id, 'default_country_id': country_id}"/>
+                                <field name="zip" placeholder="PIN Code" class="o_address_zip"/>
+                                <field name="country_id" placeholder="Country" class="o_address_country" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('code', '=', 'IN')]"/>
+                            </div>
+                            <field name="geolocation"/>
+                        </group>
+                        <group string="Organisation Details">
+                            <field name="trust_details" string="Note" placeholder="Notes..."/>
+                            <field name="partner_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Association Details">
+                            <field name="phone" string="Association Phone"/>
+                            <field name="email" string="Association Email"/>
+                            <field name="school_ids" widget="many2many_tags" groups="stakeholder_registration.group_stakeholder_user"/>
+                            <field name="website"/>
+                            <field name="year_established"/>
+                            <field name="vat" string="Tax ID / GSTIN"/>
+                        </group>
+                        <group string="Primary Contact">
+                            <field name="primary_contact_first_name"/>
+                            <field name="primary_contact_last_name"/>
+                            <field name="contact_role" string="Job Title / Role" placeholder="E.g., Principal, Director, Trustee, Administrator"/>
+                            <field name="contact_email" string="Email"/>
+                            <field name="contact_phone" string="Mobile"/>
+                            <field name="contact_method"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Management / Executive Members">
+                            <field name="member_ids">
+                                <list editable="bottom">
+                                    <field name="first_name"/>
+                                    <field name="last_name"/>
+                                    <field name="role"/>
+                                    <field name="email"/>
+                                    <field name="phone"/>
+                                    <field name="contact_method"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_association_search" model="ir.ui.view">
+        <field name="name">stakeholder.association.search</field>
+        <field name="model">stakeholder.association</field>
+        <field name="arch" type="xml">
+            <search string="Search Association Registrations">
+                <field name="name" string="Association Name"/>
+                <field name="email" string="Association Email"/>
+                <field name="phone" string="Association Phone"/>
+                <field name="contact_name" string="Primary Contact"/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Approved" name="approved" domain="[('state', '=', 'approved')]"/>
+                <filter string="Rejected" name="rejected" domain="[('state', '=', 'rejected')]"/>
+                <separator/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter string="Status" name="group_by_state" domain="[]" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_association" model="ir.actions.act_window">
+        <field name="name">Associations</field>
+        <field name="res_model">stakeholder.association</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_stakeholder_association_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage Association Registrations.
+            </p>
+        </field>
+    </record>
+
+
+    <!-- ==========================================
+         ORGANISATION SEARCH VIEW (COMMON)
+         ========================================== -->
+    <record id="view_stakeholder_organisation_search" model="ir.ui.view">
+        <field name="name">stakeholder.organisation.search</field>
+        <field name="model">stakeholder.organisation</field>
+        <field name="arch" type="xml">
+            <search string="Search Registrations">
+                <field name="name" string="Name"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="contact_name" string="Primary Contact"/>
+                <field name="city" string="Place"/>
+                <field name="zip" string="Pincode"/>
+
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Approved" name="approved" domain="[('state', '=', 'approved')]"/>
+                <filter string="Rejected" name="rejected" domain="[('state', '=', 'rejected')]"/>
+                <separator/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
+
+                <group>
+                    <filter string="Status" name="group_by_state" domain="[]" context="{'group_by': 'state'}"/>
+                    <filter string="Category" name="group_by_category" domain="[]" context="{'group_by': 'category'}"/>
+                    <filter string="Place" name="group_by_place" domain="[]" context="{'group_by': 'city'}"/>
+                    <filter string="Pincode" name="group_by_pincode" domain="[]" context="{'group_by': 'zip'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ==========================================
+         HONNA STAFF VIEWS & ACTION
+         ========================================== -->
+    <record id="view_stakeholder_honna_staff_tree" model="ir.ui.view">
+        <field name="name">stakeholder.honna.staff.tree</field>
+        <field name="model">stakeholder.organisation</field>
+        <field name="arch" type="xml">
+            <list string="Honna Staff Registrations" export_xlsx="1">
+                <field name="name" string="Staff / Organisation Name"/>
+                <field name="email" string="Staff Email"/>
+                <field name="phone" string="Staff Phone"/>
+                <field name="contact_name_phone" string="Primary Contact"/>
+                <field name="contact_name" string="Primary Contact Name" optional="hide"/>
+                <field name="contact_phone" string="Primary Contact Mobile" optional="hide"/>
+                <field name="website"/>
+                <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-muted="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_honna_staff_form" model="ir.ui.view">
+        <field name="name">stakeholder.honna.staff.form</field>
+        <field name="model">stakeholder.organisation</field>
+        <field name="arch" type="xml">
+            <form string="Honna Staff Registration">
+                <header>
+                    <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="not id or state == 'approved'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_reject" string="Reject" type="object" class="btn-secondary" invisible="not id or state == 'rejected'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_draft" string="Reset to Draft" type="object" class="btn-secondary" invisible="not id or state == 'draft'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,rejected"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <field name="category" invisible="1"/>
+                    <div class="oe_left" style="width: 90px; float:left; padding-right: 15px;">
+                        <field name="logo" widget="image" class="oe_avatar" options="{'size': [90, 90]}"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Organisation Name"/>
+                        <h1>
+                            <field name="name" placeholder="Organisation Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Primary Address">
+                            <label for="street" string="Address"/>
+                            <div class="o_address_format">
+                                <field name="street" placeholder="Address line 1..." class="o_address_street"/>
+                                <field name="street2" placeholder="Address line 2..." class="o_address_street"/>
+                                <field name="city" placeholder="City" class="o_address_city"/>
+                                <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('country_id.code', '=', 'IN')]" context="{'country_id': country_id, 'default_country_id': country_id}"/>
+                                <field name="zip" placeholder="PIN Code" class="o_address_zip"/>
+                                <field name="country_id" placeholder="Country" class="o_address_country" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('code', '=', 'IN')]"/>
+                            </div>
+                            <field name="geolocation"/>
+                        </group>
+                        <group string="Organisation Details">
+                            <field name="trust_details" string="Note" placeholder="Notes..."/>
+                            <field name="partner_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Honna Staff Details">
+                            <field name="phone" string="Staff Phone"/>
+                            <field name="email" string="Staff Email"/>
+                            <field name="parent_organisation_id" string="Parent Association"/>
+                            <field name="website"/>
+                            <field name="year_established"/>
+                            <field name="vat" string="Tax ID / GSTIN"/>
+                        </group>
+                        <group string="Primary Contact">
+                            <field name="primary_contact_first_name"/>
+                            <field name="primary_contact_last_name"/>
+                            <field name="contact_role" string="Job Title / Role" placeholder="E.g., Principal, Director, Trustee, Administrator"/>
+                            <field name="contact_email" string="Email"/>
+                            <field name="contact_phone" string="Mobile"/>
+                            <field name="contact_method"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_honna_staff" model="ir.actions.act_window">
+        <field name="name">Honna Staff</field>
+        <field name="res_model">stakeholder.organisation</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('category', '=', 'honna_staff')]</field>
+        <field name="context">{'default_category': 'honna_staff'}</field>
+        <field name="search_view_id" ref="view_stakeholder_organisation_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage Honna Staff Registrations.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_honna_staff_tree_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_stakeholder_honna_staff_tree"/>
+        <field name="act_window_id" ref="action_stakeholder_honna_staff"/>
+    </record>
+
+    <record id="action_stakeholder_honna_staff_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_stakeholder_honna_staff_form"/>
+        <field name="act_window_id" ref="action_stakeholder_honna_staff"/>
+    </record>
+
+    <!-- ==========================================
+         SCHOOL VIEWS & ACTION
+         ========================================== -->
+    <record id="view_stakeholder_organisation_tree" model="ir.ui.view">
+        <field name="name">stakeholder.organisation.tree</field>
+        <field name="model">stakeholder.organisation</field>
+        <field name="arch" type="xml">
+            <list string="School Registrations" export_xlsx="1">
+                <field name="name" string="School Name"/>
+                <field name="email" string="School Email"/>
+                <field name="phone" string="School Phone"/>
+                <field name="contact_name_phone" string="Primary Contact"/>
+                <field name="contact_name" string="Primary Contact Name" optional="hide"/>
+                <field name="contact_phone" string="Primary Contact Mobile" optional="hide"/>
+                <field name="website"/>
+                <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-muted="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_organisation_form" model="ir.ui.view">
+        <field name="name">stakeholder.organisation.form</field>
+        <field name="model">stakeholder.organisation</field>
+        <field name="arch" type="xml">
+            <form string="School Registration">
+                <header>
+                    <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="not id or state == 'approved'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_reject" string="Reject" type="object" class="btn-secondary" invisible="not id or state == 'rejected'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_draft" string="Reset to Draft" type="object" class="btn-secondary" invisible="not id or state == 'draft'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,rejected"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <field name="category" invisible="1"/>
+                    <div class="oe_left" style="width: 90px; float:left; padding-right: 15px;">
+                        <field name="logo" widget="image" class="oe_avatar" options="{'size': [90, 90]}"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Organisation Name"/>
+                        <h1>
+                            <field name="name" placeholder="Organisation Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Primary Address">
+                            <label for="street" string="Address"/>
+                            <div class="o_address_format">
+                                <field name="street" placeholder="Address line 1..." class="o_address_street"/>
+                                <field name="street2" placeholder="Address line 2..." class="o_address_street"/>
+                                <field name="city" placeholder="City" class="o_address_city"/>
+                                <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('country_id.code', '=', 'IN')]" context="{'country_id': country_id, 'default_country_id': country_id}"/>
+                                <field name="zip" placeholder="PIN Code" class="o_address_zip"/>
+                                <field name="country_id" placeholder="Country" class="o_address_country" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('code', '=', 'IN')]"/>
+                            </div>
+                            <field name="geolocation"/>
+                        </group>
+                        <group string="Organisation Details">
+                            <field name="trust_details" string="Note" placeholder="Notes..."/>
+                            <field name="partner_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="School Details">
+                            <field name="phone" string="School Phone"/>
+                            <field name="email" string="School Email"/>
+                            <field name="parent_organisation_id" string="Parent Association"/>
+                            <field name="website"/>
+                            <field name="year_established"/>
+                            <field name="vat" string="Tax ID / GSTIN"/>
+                        </group>
+                        <group string="Primary Contact">
+                            <field name="primary_contact_first_name"/>
+                            <field name="primary_contact_last_name"/>
+                            <field name="contact_role" string="Job Title / Role" placeholder="E.g., Principal, Director, Trustee, Administrator"/>
+                            <field name="contact_email" string="Email"/>
+                            <field name="contact_phone" string="Mobile"/>
+                            <field name="contact_method"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_organisation" model="ir.actions.act_window">
+        <field name="name">School</field>
+        <field name="res_model">stakeholder.organisation</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('category', '=', 'school')]</field>
+        <field name="context">{'default_category': 'school'}</field>
+        <field name="search_view_id" ref="view_stakeholder_organisation_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage School Registrations.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_organisation_tree_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_stakeholder_organisation_tree"/>
+        <field name="act_window_id" ref="action_stakeholder_organisation"/>
+    </record>
+
+    <record id="action_stakeholder_organisation_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_stakeholder_organisation_form"/>
+        <field name="act_window_id" ref="action_stakeholder_organisation"/>
+    </record>
+
+    <!-- ==========================================
+         COLLEGE VIEWS & ACTION
+         ========================================== -->
+    <record id="view_stakeholder_college_tree" model="ir.ui.view">
+        <field name="name">stakeholder.college.tree</field>
+        <field name="model">stakeholder.organisation</field>
+        <field name="arch" type="xml">
+            <list string="College Registrations" export_xlsx="1">
+                <field name="name" string="College Name"/>
+                <field name="email" string="College Email"/>
+                <field name="phone" string="College Phone"/>
+                <field name="contact_name_phone" string="Primary Contact"/>
+                <field name="contact_name" string="Primary Contact Name" optional="hide"/>
+                <field name="contact_phone" string="Primary Contact Mobile" optional="hide"/>
+                <field name="website"/>
+                <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-muted="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_college_form" model="ir.ui.view">
+        <field name="name">stakeholder.college.form</field>
+        <field name="model">stakeholder.organisation</field>
+        <field name="arch" type="xml">
+            <form string="College Registration">
+                <header>
+                    <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="not id or state == 'approved'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_reject" string="Reject" type="object" class="btn-secondary" invisible="not id or state == 'rejected'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_draft" string="Reset to Draft" type="object" class="btn-secondary" invisible="not id or state == 'draft'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,rejected"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <field name="category" invisible="1"/>
+                    <div class="oe_left" style="width: 90px; float:left; padding-right: 15px;">
+                        <field name="logo" widget="image" class="oe_avatar" options="{'size': [90, 90]}"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Organisation Name"/>
+                        <h1>
+                            <field name="name" placeholder="Organisation Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Primary Address">
+                            <label for="street" string="Address"/>
+                            <div class="o_address_format">
+                                <field name="street" placeholder="Address line 1..." class="o_address_street"/>
+                                <field name="street2" placeholder="Address line 2..." class="o_address_street"/>
+                                <field name="city" placeholder="City" class="o_address_city"/>
+                                <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('country_id.code', '=', 'IN')]" context="{'country_id': country_id, 'default_country_id': country_id}"/>
+                                <field name="zip" placeholder="PIN Code" class="o_address_zip"/>
+                                <field name="country_id" placeholder="Country" class="o_address_country" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('code', '=', 'IN')]"/>
+                            </div>
+                            <field name="geolocation"/>
+                        </group>
+                        <group string="Organisation Details">
+                            <field name="trust_details" string="Note" placeholder="Notes..."/>
+                            <field name="partner_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="College Details">
+                            <field name="phone" string="College Phone"/>
+                            <field name="email" string="College Email"/>
+                            <field name="parent_organisation_id" string="Parent Association"/>
+                            <field name="website"/>
+                            <field name="year_established"/>
+                            <field name="vat" string="Tax ID / GSTIN"/>
+                        </group>
+                        <group string="Primary Contact">
+                            <field name="primary_contact_first_name"/>
+                            <field name="primary_contact_last_name"/>
+                            <field name="contact_role" string="Job Title / Role" placeholder="E.g., Principal, Director, Trustee, Administrator"/>
+                            <field name="contact_email" string="Email"/>
+                            <field name="contact_phone" string="Mobile"/>
+                            <field name="contact_method"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_college" model="ir.actions.act_window">
+        <field name="name">College</field>
+        <field name="res_model">stakeholder.organisation</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('category', '=', 'college')]</field>
+        <field name="context">{'default_category': 'college'}</field>
+        <field name="search_view_id" ref="view_stakeholder_organisation_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage College Registrations.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_college_tree_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_stakeholder_college_tree"/>
+        <field name="act_window_id" ref="action_stakeholder_college"/>
+    </record>
+
+    <record id="action_stakeholder_college_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_stakeholder_college_form"/>
+        <field name="act_window_id" ref="action_stakeholder_college"/>
+    </record>
+
+    <!-- ==========================================
+         ACADEMY VIEWS & ACTION
+         ========================================== -->
+    <record id="view_stakeholder_academy_tree" model="ir.ui.view">
+        <field name="name">stakeholder.academy.tree</field>
+        <field name="model">stakeholder.organisation</field>
+        <field name="arch" type="xml">
+            <list string="Academy Registrations" export_xlsx="1">
+                <field name="name" string="Academy Name"/>
+                <field name="email" string="Academy Email"/>
+                <field name="phone" string="Academy Phone"/>
+                <field name="contact_name_phone" string="Primary Contact"/>
+                <field name="contact_name" string="Primary Contact Name" optional="hide"/>
+                <field name="contact_phone" string="Primary Contact Mobile" optional="hide"/>
+                <field name="website"/>
+                <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-muted="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_academy_form" model="ir.ui.view">
+        <field name="name">stakeholder.academy.form</field>
+        <field name="model">stakeholder.organisation</field>
+        <field name="arch" type="xml">
+            <form string="Academy Registration">
+                <header>
+                    <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="not id or state == 'approved'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_reject" string="Reject" type="object" class="btn-secondary" invisible="not id or state == 'rejected'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_draft" string="Reset to Draft" type="object" class="btn-secondary" invisible="not id or state == 'draft'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,rejected"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <field name="category" invisible="1"/>
+                    <div class="oe_left" style="width: 90px; float:left; padding-right: 15px;">
+                        <field name="logo" widget="image" class="oe_avatar" options="{'size': [90, 90]}"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Organisation Name"/>
+                        <h1>
+                            <field name="name" placeholder="Organisation Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Primary Address">
+                            <label for="street" string="Address"/>
+                            <div class="o_address_format">
+                                <field name="street" placeholder="Address line 1..." class="o_address_street"/>
+                                <field name="street2" placeholder="Address line 2..." class="o_address_street"/>
+                                <field name="city" placeholder="City" class="o_address_city"/>
+                                <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('country_id.code', '=', 'IN')]" context="{'country_id': country_id, 'default_country_id': country_id}"/>
+                                <field name="zip" placeholder="PIN Code" class="o_address_zip"/>
+                                <field name="country_id" placeholder="Country" class="o_address_country" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('code', '=', 'IN')]"/>
+                            </div>
+                            <field name="geolocation"/>
+                        </group>
+                        <group string="Organisation Details">
+                            <field name="trust_details" string="Note" placeholder="Notes..."/>
+                            <field name="partner_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Academy Details">
+                            <field name="phone" string="Academy Phone"/>
+                            <field name="email" string="Academy Email"/>
+                            <field name="parent_organisation_id" string="Parent Association"/>
+                            <field name="website"/>
+                            <field name="year_established"/>
+                            <field name="vat" string="Tax ID / GSTIN"/>
+                        </group>
+                        <group string="Primary Contact">
+                            <field name="primary_contact_first_name"/>
+                            <field name="primary_contact_last_name"/>
+                            <field name="contact_role" string="Job Title / Role" placeholder="E.g., Principal, Director, Trustee, Administrator"/>
+                            <field name="contact_email" string="Email"/>
+                            <field name="contact_phone" string="Mobile"/>
+                            <field name="contact_method"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_academy" model="ir.actions.act_window">
+        <field name="name">Academy</field>
+        <field name="res_model">stakeholder.organisation</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('category', '=', 'academy')]</field>
+        <field name="context">{'default_category': 'academy'}</field>
+        <field name="search_view_id" ref="view_stakeholder_organisation_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage Academy Registrations.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_academy_tree_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_stakeholder_academy_tree"/>
+        <field name="act_window_id" ref="action_stakeholder_academy"/>
+    </record>
+
+    <record id="action_stakeholder_academy_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_stakeholder_academy_form"/>
+        <field name="act_window_id" ref="action_stakeholder_academy"/>
+    </record>
+
+    <!-- ==========================================
+         PARTNER VIEWS & ACTION
+         ========================================== -->
+    <record id="view_stakeholder_partner_tree" model="ir.ui.view">
+        <field name="name">stakeholder.partner.tree</field>
+        <field name="model">stakeholder.organisation</field>
+        <field name="arch" type="xml">
+            <list string="Partner Registrations" export_xlsx="1">
+                <field name="name" string="Partner Name"/>
+                <field name="email" string="Partner Email"/>
+                <field name="phone" string="Partner Phone"/>
+                <field name="contact_name_phone" string="Primary Contact"/>
+                <field name="contact_name" string="Primary Contact Name" optional="hide"/>
+                <field name="contact_phone" string="Primary Contact Mobile" optional="hide"/>
+                <field name="website"/>
+                <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-muted="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_partner_form" model="ir.ui.view">
+        <field name="name">stakeholder.partner.form</field>
+        <field name="model">stakeholder.organisation</field>
+        <field name="arch" type="xml">
+            <form string="Partner Registration">
+                <header>
+                    <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="not id or state == 'approved'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_reject" string="Reject" type="object" class="btn-secondary" invisible="not id or state == 'rejected'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_draft" string="Reset to Draft" type="object" class="btn-secondary" invisible="not id or state == 'draft'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,rejected"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <field name="category" invisible="1"/>
+                    <div class="oe_left" style="width: 90px; float:left; padding-right: 15px;">
+                        <field name="logo" widget="image" class="oe_avatar" options="{'size': [90, 90]}"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Organisation Name"/>
+                        <h1>
+                            <field name="name" placeholder="Organisation Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Primary Address">
+                            <label for="street" string="Address"/>
+                            <div class="o_address_format">
+                                <field name="street" placeholder="Address line 1..." class="o_address_street"/>
+                                <field name="street2" placeholder="Address line 2..." class="o_address_street"/>
+                                <field name="city" placeholder="City" class="o_address_city"/>
+                                <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('country_id.code', '=', 'IN')]" context="{'country_id': country_id, 'default_country_id': country_id}"/>
+                                <field name="zip" placeholder="PIN Code" class="o_address_zip"/>
+                                <field name="country_id" placeholder="Country" class="o_address_country" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('code', '=', 'IN')]"/>
+                            </div>
+                            <field name="geolocation"/>
+                        </group>
+                        <group string="Organisation Details">
+                            <field name="trust_details" string="Note" placeholder="Notes..."/>
+                            <field name="partner_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Partner Details">
+                            <field name="phone" string="Partner Phone"/>
+                            <field name="email" string="Partner Email"/>
+                            <field name="parent_organisation_id" string="Parent Association"/>
+                            <field name="website"/>
+                            <field name="year_established"/>
+                            <field name="vat" string="Tax ID / GSTIN"/>
+                        </group>
+                        <group string="Primary Contact">
+                            <field name="primary_contact_first_name"/>
+                            <field name="primary_contact_last_name"/>
+                            <field name="contact_role" string="Job Title / Role" placeholder="E.g., Principal, Director, Trustee, Administrator"/>
+                            <field name="contact_email" string="Email"/>
+                            <field name="contact_phone" string="Mobile"/>
+                            <field name="contact_method"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_partner" model="ir.actions.act_window">
+        <field name="name">Partner</field>
+        <field name="res_model">stakeholder.organisation</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('category', '=', 'partner')]</field>
+        <field name="context">{'default_category': 'partner'}</field>
+        <field name="search_view_id" ref="view_stakeholder_organisation_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage Partner Registrations.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_partner_tree_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_stakeholder_partner_tree"/>
+        <field name="act_window_id" ref="action_stakeholder_partner"/>
+    </record>
+
+    <record id="action_stakeholder_partner_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_stakeholder_partner_form"/>
+        <field name="act_window_id" ref="action_stakeholder_partner"/>
+    </record>
+
+    <!-- ==========================================
+         OTHERS VIEWS & ACTION
+         ========================================== -->
+    <record id="view_stakeholder_others_tree" model="ir.ui.view">
+        <field name="name">stakeholder.others.tree</field>
+        <field name="model">stakeholder.organisation</field>
+        <field name="arch" type="xml">
+            <list string="Others Registrations" export_xlsx="1">
+                <field name="name" string="Organisation Name"/>
+                <field name="email" string="Email"/>
+                <field name="phone" string="Phone"/>
+                <field name="contact_name_phone" string="Primary Contact"/>
+                <field name="contact_name" string="Primary Contact Name" optional="hide"/>
+                <field name="contact_phone" string="Primary Contact Mobile" optional="hide"/>
+                <field name="website"/>
+                <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-muted="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_others_form" model="ir.ui.view">
+        <field name="name">stakeholder.others.form</field>
+        <field name="model">stakeholder.organisation</field>
+        <field name="arch" type="xml">
+            <form string="Others Registration">
+                <header>
+                    <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="not id or state == 'approved'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_reject" string="Reject" type="object" class="btn-secondary" invisible="not id or state == 'rejected'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_draft" string="Reset to Draft" type="object" class="btn-secondary" invisible="not id or state == 'draft'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,rejected"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <field name="category" invisible="1"/>
+                    <div class="oe_left" style="width: 90px; float:left; padding-right: 15px;">
+                        <field name="logo" widget="image" class="oe_avatar" options="{'size': [90, 90]}"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Organisation Name"/>
+                        <h1>
+                            <field name="name" placeholder="Organisation Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Primary Address">
+                            <label for="street" string="Address"/>
+                            <div class="o_address_format">
+                                <field name="street" placeholder="Address line 1..." class="o_address_street"/>
+                                <field name="street2" placeholder="Address line 2..." class="o_address_street"/>
+                                <field name="city" placeholder="City" class="o_address_city"/>
+                                <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('country_id.code', '=', 'IN')]" context="{'country_id': country_id, 'default_country_id': country_id}"/>
+                                <field name="zip" placeholder="PIN Code" class="o_address_zip"/>
+                                <field name="country_id" placeholder="Country" class="o_address_country" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('code', '=', 'IN')]"/>
+                            </div>
+                            <field name="geolocation"/>
+                        </group>
+                        <group string="Organisation Details">
+                            <field name="trust_details" string="Note" placeholder="Notes..."/>
+                            <field name="partner_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Organisation Details">
+                            <field name="phone" string="Phone"/>
+                            <field name="email" string="Email"/>
+                            <field name="parent_organisation_id" string="Parent Association"/>
+                            <field name="website"/>
+                            <field name="year_established"/>
+                            <field name="vat" string="Tax ID / GSTIN"/>
+                        </group>
+                        <group string="Primary Contact">
+                            <field name="primary_contact_first_name"/>
+                            <field name="primary_contact_last_name"/>
+                            <field name="contact_role" string="Job Title / Role" placeholder="E.g., Principal, Director, Trustee, Administrator"/>
+                            <field name="contact_email" string="Email"/>
+                            <field name="contact_phone" string="Mobile"/>
+                            <field name="contact_method"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_others" model="ir.actions.act_window">
+        <field name="name">Others</field>
+        <field name="res_model">stakeholder.organisation</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('category', '=', 'others')]</field>
+        <field name="context">{'default_category': 'others'}</field>
+        <field name="search_view_id" ref="view_stakeholder_organisation_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage Others Registrations.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_others_tree_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_stakeholder_others_tree"/>
+        <field name="act_window_id" ref="action_stakeholder_others"/>
+    </record>
+
+    <record id="action_stakeholder_others_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_stakeholder_others_form"/>
+        <field name="act_window_id" ref="action_stakeholder_others"/>
+    </record>
+
+
+    <!-- ==========================================
+         STUDENT REGISTRATION VIEWS
+         ========================================== -->
+    <record id="view_stakeholder_student_tree" model="ir.ui.view">
+        <field name="name">stakeholder.student.tree</field>
+        <field name="model">stakeholder.student</field>
+        <field name="arch" type="xml">
+            <list string="Student Registrations">
+                <field name="name"/>
+                <field name="dob"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="school_id"/>
+                <field name="grade"/>
+                <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-muted="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_student_form" model="ir.ui.view">
+        <field name="name">stakeholder.student.form</field>
+        <field name="model">stakeholder.student</field>
+        <field name="arch" type="xml">
+            <form string="Student Registration">
+                <header>
+                    <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="not id or state == 'approved'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_reject" string="Reject" type="object" class="btn-secondary" invisible="not id or state == 'rejected'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_draft" string="Reset to Draft" type="object" class="btn-secondary" invisible="not id or state == 'draft'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,rejected"/>
+                </header>
+                <sheet>
+                    <div class="oe_left" style="width: 90px; float:left; padding-right: 15px;">
+                        <field name="photo" widget="image" class="oe_avatar" options="{'size': [90, 90]}"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="Student Full Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Personal Details">
+                            <field name="dob"/>
+                            <field name="gender"/>
+                            <field name="blood_group"/>
+                            <field name="email"/>
+                            <field name="phone"/>
+                            <field name="address"/>
+                        </group>
+                        <group string="Academic Allocation">
+                            <field name="roll"/>
+                            <field name="school_id"/>
+                            <field name="branch"/>
+                            <field name="board"/>
+                            <field name="grade"/>
+                            <field name="section"/>
+                            <field name="academic_year"/>
+                            <field name="house_group"/>
+                        </group>
+                    </group>
+                    <group string="Parent &amp; Relations">
+                        <group>
+                            <field name="parent_id"/>
+                            <field name="guardian_email"/>
+                        </group>
+                        <group>
+                            <field name="emergency_contact"/>
+                            <field name="partner_id"/>
+                            <field name="student_profile_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Health Profile">
+                            <group>
+                                <field name="allergies"/>
+                                <field name="medical_history"/>
+                                <field name="vaccination"/>
+                            </group>
+                            <group>
+                                <field name="height"/>
+                                <field name="weight"/>
+                            </group>
+                        </page>
+                        <page string="Skills &amp; Interests">
+                            <group string="Interests &amp; Preferences">
+                                <field name="subject_preferences"/>
+                                <field name="sports_preferences"/>
+                                <field name="coaching_requirements"/>
+                            </group>
+                            <group string="Skill Program Enrollments">
+                                <field name="enrolled_skills" widget="many2many_tags"/>
+                                <field name="interested_skills" widget="many2many_tags"/>
+                            </group>
+                        </page>
+                        <page string="Achievements Draft (JSON)">
+                            <field name="achievements_json"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_student_search" model="ir.ui.view">
+        <field name="name">stakeholder.student.search</field>
+        <field name="model">stakeholder.student</field>
+        <field name="arch" type="xml">
+            <search string="Search Student Registrations">
+                <field name="name"/>
+                <field name="email"/>
+                <field name="roll"/>
+                <field name="school_id"/>
+                <filter string="Approved" name="approved" domain="[('state', '=', 'approved')]"/>
+                <filter string="Rejected" name="rejected" domain="[('state', '=', 'rejected')]"/>
+                <group>
+                    <filter string="Status" name="group_by_state" domain="[]" context="{'group_by': 'state'}"/>
+                    <filter string="School" name="group_by_school" domain="[]" context="{'group_by': 'school_id'}"/>
+                    <filter string="Grade" name="group_by_grade" domain="[]" context="{'group_by': 'grade'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_student" model="ir.actions.act_window">
+        <field name="name">Students</field>
+        <field name="res_model">stakeholder.student</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_stakeholder_student_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage Student Registrations.
+            </p>
+        </field>
+    </record>
+
+
+    <!-- ==========================================
+         PARENT REGISTRATION VIEWS
+         ========================================== -->
+    <record id="view_stakeholder_parent_tree" model="ir.ui.view">
+        <field name="name">stakeholder.parent.tree</field>
+        <field name="model">stakeholder.parent</field>
+        <field name="arch" type="xml">
+            <list string="Parent Registrations">
+                <field name="name"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-muted="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_parent_form" model="ir.ui.view">
+        <field name="name">stakeholder.parent.form</field>
+        <field name="model">stakeholder.parent</field>
+        <field name="arch" type="xml">
+            <form string="Parent Registration">
+                <header>
+                    <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="not id or state == 'approved'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_reject" string="Reject" type="object" class="btn-secondary" invisible="not id or state == 'rejected'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <button name="action_draft" string="Reset to Draft" type="object" class="btn-secondary" invisible="not id or state == 'draft'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,rejected"/>
+                </header>
+                <sheet>
+                    <div class="oe_left" style="width: 90px; float:left; padding-right: 15px;">
+                        <field name="photo" widget="image" class="oe_avatar" options="{'size': [90, 90]}"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="Parent Full Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Personal Information">
+                            <field name="email"/>
+                            <field name="phone"/>
+                            <field name="partner_id"/>
+                        </group>
+                        <group string="Mentorship &amp; Admission">
+                            <field name="pref_subject"/>
+                            <field name="pref_skills"/>
+                            <field name="coaching_req"/>
+                            <field name="enquiry"/>
+                            <field name="apply"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Mapped Students / Profiles">
+                            <field name="student_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_parent_search" model="ir.ui.view">
+        <field name="name">stakeholder.parent.search</field>
+        <field name="model">stakeholder.parent</field>
+        <field name="arch" type="xml">
+            <search string="Search Parent Registrations">
+                <field name="name"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <filter string="Approved" name="approved" domain="[('state', '=', 'approved')]"/>
+                <filter string="Rejected" name="rejected" domain="[('state', '=', 'rejected')]"/>
+                <group>
+                    <filter string="Status" name="group_by_state" domain="[]" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_parent" model="ir.actions.act_window">
+        <field name="name">Parents</field>
+        <field name="res_model">stakeholder.parent</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_stakeholder_parent_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage Parent Registrations.
+            </p>
+        </field>
+    </record>
+
+
+    <record id="action_stakeholder_association_profile" model="ir.actions.server">
+        <field name="name">Profile</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="group_ids" eval="[(4, ref('group_association_user')), (4, ref('group_school_user')), (4, ref('group_stakeholder_user'))]"/>
+        <field name="state">code</field>
+        <field name="code">
+if env.user.has_group('stakeholder_registration.group_school_user') or env.user.user_category in ('school_college', 'school', 'college', 'academy'):
+    action = env['stakeholder.organisation'].action_open_profile()
+else:
+    action = env['stakeholder.association'].action_open_profile()
+        </field>
+    </record>
+
+    <record id="action_stakeholder_association_profile_window" model="ir.actions.act_window">
+        <field name="name">Profile</field>
+        <field name="res_model">stakeholder.association</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_stakeholder_association_search"/>
+        <field name="context">{'create': False, 'delete': False}</field>
+    </record>
+
+    <!-- ==========================================
+         MENUS AND ACTIONS
+         ========================================== -->
+    <menuitem id="menu_stakeholder_registration_root"
+              name="Eco System Partners"
+              web_icon="stakeholder_registration,static/description/icon.png"
+              groups="stakeholder_registration.group_school_user,stakeholder_registration.group_stakeholder_user"
+              sequence="10"/>
+
+    <menuitem id="menu_stakeholder_registration_category"
+              name="Eco System Partners"
+              parent="menu_stakeholder_registration_root"
+              active="False"
+              sequence="99"/>
+
+    <!-- Profile menu for Association & School Users (opens login user profile as main menu before Discuss) -->
+    <menuitem id="menu_stakeholder_registration_profile"
+              name="Profile"
+              action="action_stakeholder_association_profile"
+              groups="stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"
+              sequence="1"/>
+
+    <!-- School menu for Association User as Main Menu (replaces Eco System Partners for Association user) -->
+    <menuitem id="menu_stakeholder_registration_association_school"
+              name="School"
+              action="action_stakeholder_organisation"
+              web_icon="stakeholder_registration,static/description/icon.png"
+              groups="stakeholder_registration.group_association_user"
+              sequence="10"/>
+
+    <!-- Category Menus under Eco System Partners (ordered according to website registration roles) -->
+    <menuitem id="menu_stakeholder_registration_honna_staff"
+              name="Honna Staff"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_honna_staff"
+              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
+              sequence="10"/>
+
+    <menuitem id="menu_stakeholder_registration_association"
+              name="Association"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_association"
+              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
+              sequence="20"/>
+
+    <menuitem id="menu_stakeholder_registration_organisation"
+              name="School"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_organisation"
+              groups="stakeholder_registration.group_school_user,stakeholder_registration.group_stakeholder_user"
+              sequence="30"/>
+
+    <menuitem id="menu_stakeholder_registration_college"
+              name="College"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_college"
+              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
+              sequence="40"/>
+
+    <menuitem id="menu_stakeholder_registration_academy"
+              name="Academy"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_academy"
+              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
+              sequence="50"/>
+
+    <menuitem id="menu_stakeholder_registration_partner"
+              name="Partner"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_partner"
+              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
+              sequence="60"/>
+
+    <menuitem id="menu_stakeholder_registration_others"
+              name="Others"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_others"
+              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
+              sequence="70"/>
+
+    <menuitem id="menu_stakeholder_registration_student"
+              name="Student"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_student"
+              groups="stakeholder_registration.group_stakeholder_user"
+              sequence="80"/>
+
+    <menuitem id="menu_stakeholder_registration_parent"
+              name="Parent"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_parent"
+              groups="stakeholder_registration.group_stakeholder_user"
+              sequence="90"/>
+
+    <function model="ir.ui.menu" name="write">
+        <value eval="[
+            ref('menu_stakeholder_registration_honna_staff'),
+            ref('menu_stakeholder_registration_association'),
+            ref('menu_stakeholder_registration_organisation'),
+            ref('menu_stakeholder_registration_college'),
+            ref('menu_stakeholder_registration_academy'),
+            ref('menu_stakeholder_registration_partner'),
+            ref('menu_stakeholder_registration_others'),
+            ref('menu_stakeholder_registration_student'),
+            ref('menu_stakeholder_registration_parent'),
+        ]"/>
+        <value eval="{'parent_id': ref('menu_stakeholder_registration_root')}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_honna_staff')]"/>
+        <value eval="{'name': 'Honna Staff', 'sequence': 10}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_root')]"/>
+        <value eval="{'group_ids': [(6, 0, [ref('stakeholder_registration.group_stakeholder_user'), ref('stakeholder_registration.group_school_user')])]}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_association')]"/>
+        <value eval="{'name': 'Association', 'sequence': 20, 'group_ids': [(6, 0, [ref('stakeholder_registration.group_stakeholder_user'), ref('stakeholder_registration.group_school_user')])]}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_organisation')]"/>
+        <value eval="{'name': 'School', 'sequence': 30, 'group_ids': [(6, 0, [ref('stakeholder_registration.group_stakeholder_user'), ref('stakeholder_registration.group_school_user')])]}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_association_school')]"/>
+        <value eval="{'name': 'School', 'parent_id': False, 'sequence': 10, 'group_ids': [(6, 0, [ref('stakeholder_registration.group_association_user')])]}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_college')]"/>
+        <value eval="{'name': 'College', 'sequence': 40}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_academy')]"/>
+        <value eval="{'name': 'Academy', 'sequence': 50}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_partner')]"/>
+        <value eval="{'name': 'Partner', 'sequence': 60}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_others')]"/>
+        <value eval="{'name': 'Others', 'sequence': 70}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_student')]"/>
+        <value eval="{'name': 'Student', 'sequence': 80}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_parent')]"/>
+        <value eval="{'name': 'Parent', 'sequence': 90}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_profile')]"/>
+        <value eval="{'name': 'Profile', 'parent_id': False, 'sequence': 1, 'group_ids': [(6, 0, [ref('stakeholder_registration.group_association_user'), ref('stakeholder_registration.group_school_user')])]}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_category')]"/>
+        <value eval="{'active': False}"/>
+    </function>
+</odoo>

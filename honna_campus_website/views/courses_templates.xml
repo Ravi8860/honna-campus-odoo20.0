@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="curriculum_page_template" name="Honna Curriculum">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Curriculum &amp; Programs - Honna Education</t>
+            
+            <div id="wrap" class="oe_structure oe_empty">
+                <t t-call="honna_campus_website.honna_header"/>
+
+                <section class="py-5 text-white" style="background: linear-gradient(135deg, #071326 0%, #1874c7 100%);">
+                    <div class="container py-4 text-center">
+                        <span class="badge text-bg-warning px-3 py-2 rounded-pill mb-3 text-uppercase">NEP 2020 Aligned</span>
+                        <h1 class="display-4 fw-bold">Comprehensive K-12 STEM Curriculum</h1>
+                        <p class="lead opacity-90 max-w-2xl mx-auto" style="max-width: 680px;">
+                            Progressive educational pathways from Grade 1 through Grade 10 integrating Robotics, IoT, AI, and Computational Thinking.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="py-5 bg-light">
+                    <div class="container py-4">
+                        <div class="row g-4">
+                            <t t-foreach="programs" t-as="prog">
+                                <div class="col-lg-4 col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                                        <div class="card-body p-4 text-center">
+                                            <div class="p-3 rounded-circle bg-primary-subtle text-primary d-inline-flex mb-3">
+                                                <i class="oi oi-star fs-2"></i>
+                                            </div>
+                                            <h4 class="card-title fw-bold text-dark"><t t-out="prog.name"/></h4>
+                                            <span class="badge bg-secondary-subtle text-secondary mb-3"><t t-out="prog.category"/></span>
+                                            <p class="card-text text-muted"><t t-out="prog.description"/></p>
+                                        </div>
+                                        <div class="card-footer bg-transparent border-0 pb-4 text-center">
+                                            <a href="/contactus" class="btn btn-outline-primary rounded-pill px-4">Explore Program</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </section>
+
+                <t t-call="honna_campus_website.honna_footer"/>
+                <t t-call="honna_campus_website.honna_login_modal"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="feature_page_template" name="Honna Feature Detail">
+        <t t-call="website.layout">
+            <t t-set="additional_title"><t t-out="feature_title"/> - Honna Education</t>
+            
+            <div id="wrap" class="oe_structure oe_empty">
+                <t t-call="honna_campus_website.honna_header"/>
+
+                <section class="py-5 text-white" style="background: linear-gradient(135deg, #071326 0%, #1874c7 100%);">
+                    <div class="container py-4 text-center">
+                        <h1 class="display-4 fw-bold text-capitalize"><t t-out="feature_title"/></h1>
+                        <p class="lead opacity-90 max-w-2xl mx-auto" style="max-width: 650px;">
+                            Empowering educators and students with hands-on innovation infrastructure.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="py-5">
+                    <div class="container py-4 text-center">
+                        <div class="card p-5 border-0 shadow rounded-4 max-w-2xl mx-auto" style="max-width: 700px;">
+                            <h3 class="fw-bold mb-3 text-primary">Discover <t t-out="feature_title"/></h3>
+                            <p class="text-muted mb-4">
+                                Our <t t-out="feature_title"/> ecosystem integrates experiential equipment, structured lesson plans, teacher mentorship, and industry benchmark challenges.
+                            </p>
+                            <div>
+                                <a href="/contactus" class="btn btn-honna-portal px-4 py-2">Schedule School Visit</a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <t t-call="honna_campus_website.honna_footer"/>
+                <t t-call="honna_campus_website.honna_login_modal"/>
+            </div>
+        </t>
+    </template>
+</odoo>

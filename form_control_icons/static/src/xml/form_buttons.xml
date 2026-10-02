@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.FormViewDialog.ToMany.buttons" t-inherit="web.FormViewDialog.ToMany.buttons" t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('o_form_button_save')]" position="replace">
+            <button class="btn btn-primary o_form_button_save" t-on-click="this.saveButtonClicked" data-hotkey="c">Save &amp; Close</button>
+        </xpath>
+    </t>
+
+    <t t-name="web.FormViewDialog.ToOne.buttons" t-inherit="web.FormViewDialog.ToOne.buttons" t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('o_form_button_save')]" position="replace">
+            <button class="btn btn-primary o_form_button_save" t-on-click="this.saveButtonClicked" data-hotkey="c">Save &amp; Close</button>
+        </xpath>
+    </t>
+
+    <t t-name="web.ListView.Buttons" t-inherit="web.ListView.Buttons" t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('o_list_button_discard')]" position="replace">
+            <button t-if="this.editedRecord" type="button" class="btn btn-secondary o_list_button_discard" data-hotkey="j" t-on-click.stop="this.onClickDiscard" t-on-mousedown="this.onMouseDownDiscard">
+                Cancel
+            </button>
+        </xpath>
+    </t>
+
+    <t t-name="web.X2ManyFieldDialogDefaultButtons" t-inherit="web.X2ManyFieldDialogDefaultButtons" t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('o_form_button_cancel') and hasclass('btn-secondary')]" position="replace">
+            <button class="btn btn-secondary o_form_button_cancel" t-on-click="this.discard" data-hotkey="j">
+                Cancel
+            </button>
+        </xpath>
+    </t>
+
+</templates>

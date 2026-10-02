@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_stakeholder_association_form_crm" model="ir.ui.view">
+        <field name="name">stakeholder.association.form.crm</field>
+        <field name="model">stakeholder.association</field>
+        <field name="inherit_id" ref="stakeholder_registration.view_stakeholder_association_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="lead_id" invisible="1"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_organisation_form_crm" model="ir.ui.view">
+        <field name="name">stakeholder.organisation.form.crm</field>
+        <field name="model">stakeholder.organisation</field>
+        <field name="inherit_id" ref="stakeholder_registration.view_stakeholder_organisation_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="lead_id" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_student_form_crm" model="ir.ui.view">
+        <field name="name">stakeholder.student.form.crm</field>
+        <field name="model">stakeholder.student</field>
+        <field name="inherit_id" ref="stakeholder_registration.view_stakeholder_student_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="lead_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_stakeholder_parent_form_crm" model="ir.ui.view">
+        <field name="name">stakeholder.parent.form.crm</field>
+        <field name="model">stakeholder.parent</field>
+        <field name="inherit_id" ref="stakeholder_registration.view_stakeholder_parent_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="lead_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
