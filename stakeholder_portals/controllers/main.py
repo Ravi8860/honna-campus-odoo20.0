@@ -42,39 +42,6 @@ class StakeholderPortalController(http.Controller):
         lines.append("</ul>")
         return Markup("".join(lines))
 
-    def _send_signup_email(self, user, env):
-        """
-        Trigger Odoo-based signup email notification.
-        Prepares signup token and sends set_password_email.
-        Guarantees that a mail.mail record is generated and delivery is attempted.
-        """
-        try:
-            # 1. Prepare partner signup token and validity
-            user.partner_id.sudo().signup_prepare(signup_type='signup')
-
-            # 2. Get Odoo auth_signup invitation email template
-            tmpl = env.ref('auth_signup.set_password_email', raise_if_not_found=False) or \
-                   env.ref('auth_signup.portal_set_password_email', raise_if_not_found=False)
-
-            if tmpl:
-                mail_id = tmpl.sudo().send_mail(
-                    user.id,
-                    force_send=True,
-                    raise_exception=False,
-                    email_values={
-                        'email_to': user.email,
-                        'auto_delete': False,
-                    }
-                )
-                _logger.info("Odoo signup email created with id %s for user %s (%s)", mail_id, user.name, user.login)
-                return mail_id
-            else:
-                # Fallback to standard action_reset_password if template ref not found
-                user.sudo().with_context(create_user=1).action_reset_password()
-                _logger.info("Odoo signup email sent via action_reset_password for user %s", user.login)
-        except Exception as e:
-            _logger.exception("Failed to send signup email for user %s: %s", user.login, e)
-
     def _create_crm_lead(self, env, lead_vals):
         """Create a CRM lead for a portal registration. Failures are logged only."""
         try:
@@ -96,13 +63,11 @@ class StakeholderPortalController(http.Controller):
     @http.route(['/stakeholder-portals', '/registration'], type='http', auth='public', website=True)
     def portals_index(self, **kw):
         """ Renders the stakeholder account creation page matching Figma """
-        success_message = kw.get('success_message')
-        if kw.get('success') and kw.get('email'):
-            success_message = _("Registration submitted successfully! A signup invitation email has been sent to %s. Please check your email to set your password and log in.") % kw.get('email')
         return request.render('stakeholder_portals.registration_page', {
             'errors': {},
             'values': kw,
-            'success_message': success_message,
+            'success_message': kw.get('success_message'),
+            'submitted': kw.get('submitted') == '1',
         })
 
     @http.route(['/stakeholder-portals/submit', '/registration/submit'], type='http', auth='public', website=True, methods=['POST'], csrf=True)
@@ -143,6 +108,11 @@ class StakeholderPortalController(http.Controller):
                 errors['email'] = _('An account with this email address already exists. Please sign in.')
 
         if errors:
+            if request.httprequest.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.httprequest.headers.get('Accept', ''):
+                return request.make_json_response({
+                    'status': 'error',
+                    'errors': errors
+                })
             return self._render_form_with_errors(errors, values)
 
         # Phone formatting
@@ -202,23 +172,15 @@ class StakeholderPortalController(http.Controller):
                 if school_group:
                     group_ids.append(school_group.id)
 
-            # 3. Create res.users
-            user_vals = {
-                'name': display_name or full_name,
-                'login': email,
-                'email': email,
-                'phone': phone,
-                'partner_id': partner.id,
-                'group_ids': [(6, 0, list(set(group_ids)))],
-                'share': False,
-                'user_category': user_cat,
-            }
-            user = sudo_env['res.users'].sudo().create(user_vals)
-
-            # 4. Create stakeholder record
+            # 3. Find or Create stakeholder record FIRST (prevent duplicate records)
             rec_id = False
             rec = None
             if portal_type == 'association':
+                assoc_obj = sudo_env['stakeholder.association'].sudo()
+                rec = partner and assoc_obj.search([('partner_id', '=', partner.id)], limit=1)
+                if not rec and email:
+                    rec = assoc_obj.search([('email', '=', email)], limit=1)
+
                 assoc_vals = {
                     'name': display_name,
                     'contact_name': display_name,
@@ -226,14 +188,21 @@ class StakeholderPortalController(http.Controller):
                     'primary_contact_last_name': last_name,
                     'email': email,
                     'phone': phone,
-                    'state': 'approved',
+                    'state': 'draft',
                     'partner_id': partner.id,
-                    'user_id': user.id,
                 }
-                rec = sudo_env['stakeholder.association'].sudo().create(assoc_vals)
+                if rec:
+                    rec.write(assoc_vals)
+                else:
+                    rec = assoc_obj.create(assoc_vals)
                 rec_id = rec.id
             else:
                 cat_val = 'honna_staff' if portal_type == 'honna_staff' else ('school' if portal_type in ('school', 'school_college', 'organisation') else portal_type)
+                org_obj = sudo_env['stakeholder.organisation'].sudo()
+                rec = partner and org_obj.search([('partner_id', '=', partner.id), ('category', '=', cat_val)], limit=1)
+                if not rec and email:
+                    rec = org_obj.search([('email', '=', email), ('category', '=', cat_val)], limit=1)
+
                 org_vals = {
                     'name': display_name,
                     'contact_name': display_name,
@@ -244,10 +213,47 @@ class StakeholderPortalController(http.Controller):
                     'category': cat_val,
                     'state': 'approved' if portal_type == 'honna_staff' else 'draft',
                     'partner_id': partner.id,
-                    'user_id': user.id,
                 }
-                rec = sudo_env['stakeholder.organisation'].sudo().create(org_vals)
+                if rec:
+                    rec.write(org_vals)
+                else:
+                    rec = org_obj.create(org_vals)
                 rec_id = rec.id
+
+            # 4. Find or Create res.users with skip_sync_assoc=True (prevent duplicate users & duplicate profiles)
+            user_obj = sudo_env['res.users'].sudo()
+            user = user_obj.search([('login', '=', email)], limit=1)
+            if not user and partner:
+                user = user_obj.search([('partner_id', '=', partner.id)], limit=1)
+
+            if not user:
+                user_vals = {
+                    'name': display_name or full_name,
+                    'login': email,
+                    'email': email,
+                    'phone': phone,
+                    'partner_id': partner.id,
+                    'group_ids': [(6, 0, list(set(group_ids)))],
+                    'share': False,
+                    'user_category': user_cat,
+                }
+                if portal_type == 'association' and rec:
+                    user_vals['association_id'] = rec.id
+                user = user_obj.with_context(skip_sync_assoc=True).create(user_vals)
+            else:
+                user_write_vals = {'user_category': user_cat}
+                current_gids = user.group_ids.ids
+                new_gids = [gid for gid in group_ids if gid not in current_gids]
+                if new_gids:
+                    user_write_vals['group_ids'] = [(4, gid) for gid in new_gids]
+                if not user.phone and phone:
+                    user_write_vals['phone'] = phone
+                if portal_type == 'association' and rec and user.association_id != rec:
+                    user_write_vals['association_id'] = rec.id
+                user.with_context(skip_sync_assoc=True).write(user_write_vals)
+
+            if rec and hasattr(rec, 'user_id') and not rec.user_id:
+                rec.sudo().write({'user_id': user.id})
 
             # 5. Create CRM Lead for tracking & visibility
             lead = self._create_crm_lead(sudo_env, {
@@ -282,17 +288,23 @@ class StakeholderPortalController(http.Controller):
             if lead and rec and hasattr(rec, 'lead_id'):
                 rec.sudo().write({'lead_id': lead.id})
 
-            # 6. Trigger Odoo-based signup email notification
-            self._send_signup_email(user, sudo_env)
+            # 6. Response for popup notification and redirect to login page
+            if request.httprequest.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.httprequest.headers.get('Accept', ''):
+                return request.make_json_response({
+                    'status': 'success',
+                    'message': _("Registration submitted successfully!"),
+                    'redirect_url': '/web/login?registered=1',
+                })
 
-            # 7. Redirect to login with confirmation message
-            msg = _("Registration submitted successfully! A signup invitation email has been sent to %s. Please check your email to set your password and log in.") % email
-            return request.redirect('/web/login?%s' % urlencode({'login': email, 'message': msg}))
-
-
+            return request.redirect('/web/login?registered=1')
 
         except Exception as e:
             _logger.exception("Error processing stakeholder registration submission")
+            if request.httprequest.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.httprequest.headers.get('Accept', ''):
+                return request.make_json_response({
+                    'status': 'error',
+                    'errors': {'global': str(e)}
+                })
             errors['global'] = str(e)
             return self._render_form_with_errors(errors, values)
 

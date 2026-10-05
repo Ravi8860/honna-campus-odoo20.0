@@ -107,6 +107,24 @@ function initHonnaWebsite() {
             );
         });
     }
+
+    // 5. Toast Notification for Login Page (when redirected with ?registered=1)
+    const loginToast = document.getElementById('honna_login_toast');
+    const urlParams = new URLSearchParams(window.location.search);
+    if (loginToast && urlParams.get('registered') === '1') {
+        loginToast.classList.remove('d-none');
+        void loginToast.offsetWidth;
+        loginToast.classList.add('show');
+        setTimeout(() => {
+            loginToast.classList.remove('show');
+            setTimeout(() => {
+                loginToast.classList.add('d-none');
+            }, 300);
+        }, 2000);
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, window.location.pathname + (window.location.hash || ''));
+        }
+    }
 }
 
 // Odoo ES modules often load after DOMContentLoaded — run immediately when ready.

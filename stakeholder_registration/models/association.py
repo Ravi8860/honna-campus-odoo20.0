@@ -323,16 +323,19 @@ class StakeholderAssociation(models.Model):
         if partner.email:
             user_obj = self.env['res.users'].sudo()
             existing_user = user_obj.search([('login', '=', partner.email)], limit=1)
+            if not existing_user and partner:
+                existing_user = user_obj.search([('partner_id', '=', partner.id)], limit=1)
             group_user = self.env.ref('base.group_user', raise_if_not_found=False)
             assoc_group = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
             if not existing_user:
                 groups = [g.id for g in [group_user, assoc_group] if g]
-                user = user_obj.create({
+                user = user_obj.with_context(skip_sync_assoc=True).create({
                     'name': self.contact_name or self.name or partner.name,
                     'login': partner.email,
                     'email': partner.email,
                     'phone': self.phone or partner.phone,
                     'partner_id': partner.id,
+                    'association_id': self.id,
                     'group_ids': [(6, 0, groups)],
                     'share': False,
                     'user_category': 'association',
@@ -346,7 +349,9 @@ class StakeholderAssociation(models.Model):
                 user_write_vals = {'user_category': 'association'}
                 if assoc_group and assoc_group not in existing_user.group_ids:
                     user_write_vals['group_ids'] = [(4, assoc_group.id)]
-                existing_user.write(user_write_vals)
+                if not user.association_id or user.association_id != self:
+                    user_write_vals['association_id'] = self.id
+                existing_user.with_context(skip_sync_assoc=True).write(user_write_vals)
             
         for member in self.member_ids:
             mem_name = member.name or ' '.join(filter(None, [member.first_name, member.last_name])).strip() or 'Member'
