@@ -358,6 +358,107 @@
                             <field name="contact_method"/>
                         </group>
                     </group>
+                     <group string="Other Details">
+                        <field name="show_other_details" widget="radio" options="{'horizontal': true}"/>
+                    </group>
+                    <group invisible="show_other_details != 'yes'">
+                        <group>
+                            <field name="affiliation_number"/>
+                            <field name="branch_code"/>
+                            <field name="area"/>
+                            <field name="capacity"/>
+                            <field name="accreditation"/>
+                            <field name="residential"/>
+                        </group>
+                    </group>
+                     <group invisible="show_other_details != 'yes'">
+                        <group string="Billing Address">
+                            <field name="billing_same_as_primary"/>
+                            <label for="billing_street" string="Billing Address"/>
+                            <div class="o_address_format">
+                                <field name="billing_street" placeholder="Address line 1..." class="o_address_street"/>
+                                <field name="billing_street2" placeholder="Address line 2..." class="o_address_street"/>
+                                <field name="billing_city" placeholder="Town / City" class="o_address_city"/>
+                                <field name="billing_district" placeholder="District"/>
+                                <field name="billing_state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('country_id.code', '=', 'IN')]" context="{'country_id': billing_country_id, 'default_country_id': billing_country_id}"/>
+                                <field name="billing_zip" placeholder="PIN Code" class="o_address_zip"/>
+                                <field name="billing_country_id" placeholder="Country" class="o_address_country" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('code', '=', 'IN')]"/>
+                            </div>
+                        </group>
+                        <group string="Shipping Address">
+                            <field name="shipping_same_as_primary"/>
+                            <label for="shipping_street" string="Shipping Address"/>
+                            <div class="o_address_format">
+                                <field name="shipping_street" placeholder="Address line 1..." class="o_address_street"/>
+                                <field name="shipping_street2" placeholder="Address line 2..." class="o_address_street"/>
+                                <field name="shipping_city" placeholder="Town / City" class="o_address_city"/>
+                                <field name="shipping_district" placeholder="District"/>
+                                <field name="shipping_state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('country_id.code', '=', 'IN')]" context="{'country_id': shipping_country_id, 'default_country_id': shipping_country_id}"/>
+                                <field name="shipping_zip" placeholder="PIN Code" class="o_address_zip"/>
+                                <field name="shipping_country_id" placeholder="Country" class="o_address_country" options="{'no_open': True, 'no_quick_create': True, 'no_create': True}" domain="[('code', '=', 'IN')]"/>
+                            </div>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Executive">
+                            <field name="board_member_ids">
+                                <list editable="bottom">
+                                    <field name="first_name"/>
+                                    <field name="last_name"/>
+                                    <field name="role"/>
+                                    <field name="email"/>
+                                    <field name="phone"/>
+                                    <field name="contact_method"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Academic">
+                            <field name="dept_head_ids">
+                                <list editable="bottom">
+                                    <field name="first_name"/>
+                                    <field name="last_name"/>
+                                    <field name="role"/>
+                                    <field name="email"/>
+                                    <field name="phone"/>
+                                    <field name="contact_method"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Operations">
+                            <field name="operation_member_ids">
+                                <list editable="bottom">
+                                    <field name="first_name"/>
+                                    <field name="last_name"/>
+                                    <field name="role"/>
+                                    <field name="email"/>
+                                    <field name="phone"/>
+                                    <field name="contact_method"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Association Partners">
+                            <field name="assoc_memberships_ids">
+                                <list editable="bottom">
+                                    <field name="association_id"/>
+                                    <field name="membership_number"/>
+                                    <field name="expiry_date"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Branch Schools / Campuses" invisible="is_branch">
+                            <field name="child_school_ids" context="{'default_parent_school_id': id, 'default_parent_organisation_id': parent_organisation_id}">
+                                <list editable="bottom">
+                                    <field name="name" string="Branch Name"/>
+                                    <field name="branch_code" string="Branch Code"/>
+                                    <field name="city" string="Town / City"/>
+                                    <field name="phone" string="Phone"/>
+                                    <field name="email" string="Email"/>
+                                    <field name="contact_name" string="Principal / Contact"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-muted="state == 'draft'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
