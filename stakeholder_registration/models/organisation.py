@@ -478,6 +478,8 @@ class StakeholderOrganisation(models.Model):
         if partner.email:
             user_obj = self.env['res.users'].sudo()
             existing_user = user_obj.search([('login', '=', partner.email)], limit=1)
+            if not existing_user and partner:
+                existing_user = user_obj.search([('partner_id', '=', partner.id)], limit=1)
             cat = self.category or 'school'
             group_user = self.env.ref('base.group_user', raise_if_not_found=False)
             if cat == 'honna_staff':

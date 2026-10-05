@@ -30,13 +30,6 @@
                                 </div>
                             </t>
 
-                            <!-- Success Message Alert -->
-                            <t t-if="success_message">
-                                <div class="alert alert-success d-flex align-items-center mb-3 rounded-3 shadow-sm py-2 px-3" role="alert">
-                                    <i class="oi oi-check-circle me-2 fs-5"></i>
-                                    <div class="fw-semibold small"><t t-out="success_message"/></div>
-                                </div>
-                            </t>
 
                             <!-- Form wrapper -->
                             <form action="/stakeholder-portals/submit" method="post" class="needs-validation" id="honna_registration_form">
@@ -203,6 +196,21 @@
                                     </div>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Toast Popup matching user request -->
+                <div id="honna_toast_notification" class="honna-toast-notification d-none" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="honna-toast-content">
+                        <div class="honna-toast-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" fill="#ecfdf5"></circle>
+                                <polyline points="8 12 11 15 16 9"></polyline>
+                            </svg>
+                        </div>
+                        <div class="honna-toast-message" id="honna_toast_message">
+                            Registration submitted successfully!
                         </div>
                     </div>
                 </div>

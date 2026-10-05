@@ -37,6 +37,7 @@ class HonnaWebsiteLogin(Home):
             'login': kw.get('login', values.get('login', '')),
             'error': values.get('error', None),
             'message': kw.get('message', values.get('message', None)),
+            'registered': kw.get('registered') == '1',
         })
         return request.render('honna_campus_website.login_page_template', values)
 
