@@ -5,10 +5,21 @@ from odoo.tools import sql
 
 class StakeholderAssociation(models.Model):
     _name = 'stakeholder.association'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Association Registration Record'
 
     active = fields.Boolean(string='Active', default=True)
-    name = fields.Char(string='Official Organisation Name', required=True)
+    name = fields.Char(string='Official Organisation Name', required=True, tracking=True)
+    organisation_type = fields.Selection([
+        ('educational_trust', 'Educational Trust'),
+        ('society', 'Registered Society'),
+        ('association', 'Non-Profit Association'),
+        ('board', 'School Board / Council'),
+        ('foundation', 'Foundation'),
+        ('other', 'Other'),
+    ], string='Organisation Type', default='educational_trust')
+    parent_org = fields.Char(string='Parent Organisation')
+    parent_head_office = fields.Char(string='Parent School/Head Office')
     phone = fields.Char(string='Association Phone')
     email = fields.Char(string='Association Email')
     website = fields.Char(string='Website')
@@ -86,7 +97,7 @@ class StakeholderAssociation(models.Model):
         ('draft', 'Draft'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected')
-    ], string='Status', default='draft', required=True)
+    ], string='Status', default='draft', required=True, tracking=True)
     partner_id = fields.Many2one('res.partner', string='Approved Partner', readonly=True)
     user_id = fields.Many2one('res.users', string='Related User', compute='_compute_user_id', store=True, readonly=False)
     school_ids = fields.Many2many(
@@ -189,6 +200,14 @@ class StakeholderAssociation(models.Model):
             'views': [(tree_view.id, 'list'), (form_view.id, 'form')] if tree_view and form_view else False,
             'target': 'current',
             'context': {'create': False, 'delete': False},
+        }
+
+    def action_view_portal_profile(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/association/profile?id={self.id}',
+            'target': 'new',
         }
 
     @api.depends('primary_contact_first_name', 'primary_contact_last_name')

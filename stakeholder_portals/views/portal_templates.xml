@@ -222,6 +222,857 @@
         </t>
     </template>
 
+    <!-- Association Profile Page Matching Figma Screenshots 2 & 3 -->
+    <template id="association_profile_page" name="Association Organisation Profile">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Organisation Profile - Honna Campus</t>
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div id="wrap" class="oe_structure oe_empty honna-profile-page bg-light min-vh-100 py-4 py-md-5">
+                <!-- Reused Main Website Header Component -->
+                <t t-call="honna_campus_website.honna_header">
+                    <t t-set="page_name" t-value="'profile'"/>
+                </t>
+
+                <div class="container py-4" style="max-width: 920px;">
+                    <!-- Save Alert if redirected with saved=1 -->
+                    <t t-if="saved">
+                        <div class="alert alert-success d-flex align-items-center mb-4 rounded-3 shadow-sm py-3 px-4 border-0" role="alert">
+                            <i class="oi oi-check me-2 fs-5 text-success"></i>
+                            <div>
+                                <span class="fw-semibold">Success! </span>
+                                <t t-if="action_type == 'draft'">
+                                    <span>Profile saved as draft.</span>
+                                </t>
+                                <t t-else="">
+                                    <span>Profile updated successfully!</span>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+
+                    <form action="/association/profile/save" method="post" enctype="multipart/form-data" id="association_profile_form">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="association_id" t-att-value="association.id if association else ''"/>
+                        <input type="hidden" name="action" id="profile_form_action" value="save"/>
+                        <input type="hidden" name="delete_member_id" id="delete_member_id_input" value=""/>
+
+                        <!-- Top Header Section matching Figma Screen 2 -->
+                        <div class="d-flex justify-content-between align-items-start mb-4 pb-2 flex-wrap gap-3">
+                            <div>
+                                <h1 class="honna-profile-title fw-bold text-dark mb-1" style="font-size: 28px; letter-spacing: -0.02em;">Organisation Profile</h1>
+                                <p class="text-muted mb-0" style="font-size: 15px;">Manage your organisation information and keep your profile up to date.</p>
+                            </div>
+                            <div class="d-flex gap-3 align-items-center">
+                                <button type="button" class="btn btn-outline-primary fw-semibold px-4 py-2 rounded-2 honna-btn-draft" onclick="submitProfileForm('draft')">
+                                    Save as Draft
+                                </button>
+                                <button type="button" class="btn fw-semibold px-4 py-2 rounded-2 text-white honna-btn-save" style="background-color: #fa5a1e; border-color: #fa5a1e;" onclick="submitProfileForm('save')">
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 1: Avatar & Organisation Details -->
+                        <div class="card p-4 mb-4 border rounded-3 bg-white shadow-sm honna-profile-card">
+                            <div class="row align-items-center g-4">
+                                <div class="col-md-3 text-center d-flex flex-column align-items-center justify-content-center">
+                                    <div class="honna-avatar-dashed-circle position-relative mb-2">
+                                        <t t-if="association and association.logo">
+                                            <img t-attf-src="/web/image/stakeholder.association/#{association.id}/logo" id="avatar_preview" class="rounded-circle object-fit-cover w-100 h-100" alt="Avatar"/>
+                                        </t>
+                                        <t t-else="">
+                                            <img src="/web/static/img/placeholder.png" id="avatar_preview" class="rounded-circle object-fit-cover w-100 h-100" alt="Avatar Placeholder"/>
+                                        </t>
+                                    </div>
+                                    <input type="file" id="logo_file_input" name="logo" accept="image/*" class="d-none" onchange="previewAvatar(this)"/>
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold honna-upload-photo-btn" onclick="document.getElementById('logo_file_input').click()">
+                                        + Upload Photo
+                                    </button>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="org_name">Organisation Name <span class="text-danger">*</span></label>
+                                        <input type="text" name="name" id="org_name" class="form-control form-control-lg honna-input" placeholder="Bright Futures Education Trust" t-att-value="association.name if association else ''" required="required"/>
+                                    </div>
+                                    <div>
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="org_type">Organisation Type <span class="text-danger">*</span></label>
+                                        <select name="organisation_type" id="org_type" class="form-select honna-select" required="required">
+                                            <option value="educational_trust" t-att-selected="association and association.organisation_type == 'educational_trust' and 'selected'">Educational Trust</option>
+                                            <option value="society" t-att-selected="association and association.organisation_type == 'society' and 'selected'">Registered Society</option>
+                                            <option value="association" t-att-selected="association and association.organisation_type == 'association' and 'selected'">Non-Profit Association</option>
+                                            <option value="board" t-att-selected="association and association.organisation_type == 'board' and 'selected'">School Board / Council</option>
+                                            <option value="foundation" t-att-selected="association and association.organisation_type == 'foundation' and 'selected'">Foundation</option>
+                                            <option value="other" t-att-selected="association and association.organisation_type == 'other' and 'selected'">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Primary Address -->
+                        <div class="card p-4 mb-4 border rounded-3 bg-white shadow-sm honna-profile-card">
+                            <h5 class="fw-bold mb-3 text-dark" style="font-size: 16px;">Primary Address</h5>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="addr_street">Address <span class="text-danger">*</span></label>
+                                    <input type="text" name="street" id="addr_street" class="form-control honna-input" placeholder="Street, Building, Area" t-att-value="association.street if association else ''" required="required"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="addr_country">Country <span class="text-danger">*</span></label>
+                                    <select name="country_id" id="addr_country" class="form-select honna-select" required="required">
+                                        <t t-foreach="countries" t-as="country">
+                                            <option t-att-value="country.id" t-att-selected="association and association.country_id and association.country_id.id == country.id and 'selected'">
+                                                <t t-out="country.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="addr_state">State <span class="text-danger">*</span></label>
+                                    <select name="state_id" id="addr_state" class="form-select honna-select">
+                                        <option value="">Select State</option>
+                                        <t t-foreach="states" t-as="state">
+                                            <option t-att-value="state.id" t-att-selected="association and association.state_id and association.state_id.id == state.id and 'selected'">
+                                                <t t-out="state.name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="addr_city">City <span class="text-danger">*</span></label>
+                                    <input type="text" name="city" id="addr_city" class="form-control honna-input" placeholder="Bengaluru" t-att-value="association.city if association else ''" required="required"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="addr_zip">Postal Code <span class="text-danger">*</span></label>
+                                    <input type="text" name="zip" id="addr_zip" class="form-control honna-input" placeholder="560034" t-att-value="association.zip if association else ''" required="required"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: School Information / Association Details -->
+                        <div class="card p-4 mb-4 border rounded-3 bg-white shadow-sm honna-profile-card">
+                            <h5 class="fw-bold mb-3 text-dark" style="font-size: 16px;">School Information</h5>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="assoc_school_name">School Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="assoc_name" id="assoc_school_name" class="form-control honna-input" placeholder="Bright Futures International School" t-att-value="association.name if association else ''" required="required"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="assoc_email">Email Address <span class="text-danger">*</span></label>
+                                    <input type="email" name="email" id="assoc_email" class="form-control honna-input" placeholder="info@brightfutures.edu" t-att-value="association.email if association else ''" required="required"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="assoc_website">Website <span class="text-danger">*</span></label>
+                                    <input type="text" name="website" id="assoc_website" class="form-control honna-input" placeholder="www.brightfutures.edu" t-att-value="association.website if association else ''"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="assoc_phone">Phone <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0 text-muted fw-semibold" style="font-size: 14px;">+91 <i class="oi oi-chevron-down ms-1 fs-6"></i></span>
+                                        <input type="tel" name="phone" id="assoc_phone" class="form-control honna-input border-start-0" placeholder="98765 43210" t-att-value="association.phone if association else ''"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="assoc_parent_org">Parent Organisation</label>
+                                    <input type="text" name="parent_org" id="assoc_parent_org" class="form-control honna-input" placeholder="Bright Futures Education Trust" t-att-value="association.parent_org if association else ''"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="assoc_head_office">Parent School/Head Office</label>
+                                    <input type="text" name="parent_head_office" id="assoc_head_office" class="form-control honna-input" placeholder="Regional Headquarters, North Zone" t-att-value="association.parent_head_office if association else ''"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="assoc_board">Board</label>
+                                    <select name="board_affiliation" id="assoc_board" class="form-select honna-select">
+                                        <option value="">CBSE / ICSE / IB (Select appropriate)</option>
+                                        <option value="cbse" t-att-selected="association and association.board_affiliation == 'cbse' and 'selected'">CBSE</option>
+                                        <option value="icse" t-att-selected="association and association.board_affiliation == 'icse' and 'selected'">ICSE</option>
+                                        <option value="ib" t-att-selected="association and association.board_affiliation == 'ib' and 'selected'">IB</option>
+                                        <option value="state" t-att-selected="association and association.board_affiliation == 'state' and 'selected'">State Board</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="assoc_medium">Medium of instruction</label>
+                                    <select name="medium" id="assoc_medium" class="form-select honna-select">
+                                        <option value="English" t-att-selected="association and association.medium == 'English' and 'selected'">English</option>
+                                        <option value="Hindi" t-att-selected="association and association.medium == 'Hindi' and 'selected'">Hindi</option>
+                                        <option value="Regional" t-att-selected="association and association.medium == 'Regional' and 'selected'">Regional</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="assoc_year">Year Established</label>
+                                    <input type="text" name="year_established" id="assoc_year" class="form-control honna-input" placeholder="2010" t-att-value="association.year_established if association else ''"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Primary Contact -->
+                        <div class="card p-4 mb-4 border rounded-3 bg-white shadow-sm honna-profile-card">
+                            <h5 class="fw-bold mb-3 text-dark" style="font-size: 16px;">Primary Contact</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="contact_first_name">First Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="primary_contact_first_name" id="contact_first_name" class="form-control honna-input" placeholder="Sarah" t-att-value="association.primary_contact_first_name if association else ''" required="required"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="contact_last_name">Last Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="primary_contact_last_name" id="contact_last_name" class="form-control honna-input" placeholder="Jenkins" t-att-value="association.primary_contact_last_name if association else ''"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="contact_role_field">Job Title/ Role <span class="text-danger">*</span></label>
+                                    <input type="text" name="contact_role" id="contact_role_field" class="form-control honna-input" placeholder="Principal" t-att-value="association.contact_role if association else ''" required="required"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="contact_email_field">Email Address <span class="text-danger">*</span></label>
+                                    <input type="email" name="contact_email" id="contact_email_field" class="form-control honna-input" placeholder="principal@brightfutures.edu" t-att-value="association.contact_email if association else ''" required="required"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="contact_phone_field">Phone <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0 text-muted fw-semibold" style="font-size: 14px;">+91 <i class="oi oi-chevron-down ms-1 fs-6"></i></span>
+                                        <input type="tel" name="contact_phone" id="contact_phone_field" class="form-control honna-input border-start-0" placeholder="98765 43211" t-att-value="association.contact_phone if association else ''" required="required"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="contact_method_field">Preferred contact Method</label>
+                                    <select name="contact_method" id="contact_method_field" class="form-select honna-select">
+                                        <option value="email" t-att-selected="association and association.contact_method == 'email' and 'selected'">Email / Phone (Select appropriate)</option>
+                                        <option value="email" t-att-selected="association and association.contact_method == 'email' and 'selected'">Email</option>
+                                        <option value="phone" t-att-selected="association and association.contact_method == 'phone' and 'selected'">Phone</option>
+                                        <option value="whatsapp" t-att-selected="association and association.contact_method == 'whatsapp' and 'selected'">WhatsApp</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 5: Management Members -->
+                        <div class="card p-4 mb-4 border rounded-3 bg-white shadow-sm honna-profile-card">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold mb-0 text-dark" style="font-size: 16px;">Management Members</h5>
+                                <button type="button" class="btn btn-outline-primary btn-sm rounded-2 px-3 fw-semibold" id="btn_toggle_add_member" onclick="toggleMemberAddSection()">
+                                    Add New Member
+                                </button>
+                            </div>
+
+                            <!-- Members Table -->
+                            <div class="table-responsive mb-4 border rounded-2">
+                                <table class="table table-hover align-middle mb-0" id="honna_members_table">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="py-3 px-3 text-secondary small fw-semibold">Name</th>
+                                            <th class="py-3 px-3 text-secondary small fw-semibold">Designation</th>
+                                            <th class="py-3 px-3 text-secondary small fw-semibold">Email</th>
+                                            <th class="py-3 px-3 text-secondary small fw-semibold">Role</th>
+                                            <th class="py-3 px-3 text-secondary small fw-semibold text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-if="association and association.member_ids">
+                                            <t t-foreach="association.member_ids" t-as="mem">
+                                                <tr t-att-id="'member_row_' + str(mem.id)">
+                                                    <td class="px-3 fw-medium text-dark"><t t-out="mem.name or (mem.first_name + ' ' + (mem.last_name or ''))"/></td>
+                                                    <td class="px-3 text-muted"><t t-out="mem.designation or mem.role"/></td>
+                                                    <td class="px-3 text-muted"><t t-out="mem.email"/></td>
+                                                    <td class="px-3 text-muted"><t t-out="mem.role"/></td>
+                                                    <td class="px-3 text-end">
+                                                        <button type="button" class="btn btn-link text-secondary p-1 me-2" title="Edit Member" t-att-onclick="'editMemberRow(%s)' % mem.id">
+                                                            <i class="oi oi-pencil fs-6"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-link text-secondary p-1" title="Delete Member" t-att-onclick="'deleteMemberRow(%s)' % mem.id">
+                                                            <i class="oi oi-trash fs-6"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                        <t t-else="">
+                                            <tr>
+                                                <td class="px-3 fw-medium text-dark">Ravi Kumar</td>
+                                                <td class="px-3 text-muted">Super Admin</td>
+                                                <td class="px-3 text-muted">ravikumar@gmail.com</td>
+                                                <td class="px-3 text-muted">Super Admin</td>
+                                                <td class="px-3 text-end">
+                                                    <button type="button" class="btn btn-link text-secondary p-1 me-2"><i class="oi oi-pencil fs-6"></i></button>
+                                                    <button type="button" class="btn btn-link text-secondary p-1"><i class="oi oi-trash fs-6"></i></button>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                        <!-- Inline New Member Row -->
+                                        <tr id="inline_add_member_row" class="d-none bg-light">
+                                            <td class="px-2 py-2"><input type="text" id="inline_name" class="form-control form-control-sm" placeholder="Name"/></td>
+                                            <td class="px-2 py-2"><input type="text" id="inline_desig" class="form-control form-control-sm" placeholder="Designation"/></td>
+                                            <td class="px-2 py-2"><input type="email" id="inline_email" class="form-control form-control-sm" placeholder="Email"/></td>
+                                            <td class="px-2 py-2"><input type="text" id="inline_role" class="form-control form-control-sm" placeholder="Role"/></td>
+                                            <td class="px-2 py-2 text-end">
+                                                <button type="button" class="btn btn-sm btn-outline-success p-1 px-2 me-1" onclick="saveInlineMember()"><i class="oi oi-check"></i></button>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary p-1 px-2" onclick="cancelInlineMember()"><i class="oi oi-close"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Add Member Details Form Subsection matching Screen 3 -->
+                            <div id="add_member_details_section" class="pt-2 border-top">
+                                <h6 class="fw-bold mb-3 text-dark" style="font-size: 14px;">Add Member Details</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="new_mem_fname">First Name <span class="text-danger">*</span></label>
+                                        <input type="text" name="new_member_first_name" id="new_mem_fname" class="form-control honna-input" placeholder="John"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="new_mem_lname">Last Name <span class="text-danger">*</span></label>
+                                        <input type="text" name="new_member_last_name" id="new_mem_lname" class="form-control honna-input" placeholder="Smith"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="new_mem_role">Job Title/ Role <span class="text-danger">*</span></label>
+                                        <input type="text" name="new_member_role" id="new_mem_role" class="form-control honna-input" placeholder="Trustee / Administrator"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="new_mem_email">Email Address <span class="text-danger">*</span></label>
+                                        <input type="email" name="new_member_email" id="new_mem_email" class="form-control honna-input" placeholder="john.smith@brightfutures.edu"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Action Buttons matching Screen 3 -->
+                        <div class="d-flex gap-3 justify-content-start my-4">
+                            <button type="button" class="btn fw-semibold px-5 py-2 rounded-2 text-white honna-btn-save" style="background-color: #fa5a1e; border-color: #fa5a1e;" onclick="submitProfileForm('save')">
+                                Save
+                            </button>
+                            <button type="button" class="btn btn-outline-primary fw-semibold px-4 py-2 rounded-2 honna-btn-draft" onclick="submitProfileForm('draft')">
+                                Save as Draft
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Reused Main Website Footer Component -->
+                <t t-call="honna_campus_website.honna_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <!-- School Profile Page Matching Screenshots 1, 2, 3 -->
+    <template id="school_profile_page" name="School Profile">
+        <t t-call="website.layout">
+            <t t-set="additional_title">School Profile - Honna Campus</t>
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+
+            <div id="wrap" class="oe_structure oe_empty honna-profile-page bg-light min-vh-100 py-4 py-md-5">
+                <!-- Reused Main Website Header Component -->
+                <t t-call="honna_campus_website.honna_header">
+                    <t t-set="page_name" t-value="'profile'"/>
+                </t>
+
+                <div class="container py-4" style="max-width: 920px;">
+                    <!-- Save Alert if redirected with saved=1 -->
+                    <t t-if="saved">
+                        <div class="alert alert-success d-flex align-items-center mb-4 rounded-3 shadow-sm py-3 px-4 border-0" role="alert">
+                            <i class="oi oi-check me-2 fs-5 text-success"></i>
+                            <div>
+                                <span class="fw-semibold">Success! </span>
+                                <t t-if="action_type == 'draft'">
+                                    <span>Profile saved as draft.</span>
+                                </t>
+                                <t t-else="">
+                                    <span>School profile updated successfully!</span>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+
+                    <form action="/school/profile/save" method="post" enctype="multipart/form-data" id="school_profile_form">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="school_id" t-att-value="school.id if school else ''"/>
+                        <input type="hidden" name="action" id="school_form_action" value="save"/>
+                        <input type="hidden" name="current_step" id="school_current_step_input" t-att-value="current_step or 1"/>
+                        <input type="hidden" name="delete_member_id" id="school_delete_member_id_input" value=""/>
+                        <input type="hidden" name="delete_member_type" id="school_delete_member_type_input" value="executive"/>
+                        <input type="hidden" name="edit_member_id" id="school_edit_member_id_input" value=""/>
+                        <input type="hidden" name="member_category" id="school_new_member_category_input" value="executive"/>
+
+                        <!-- Header Title & Subtitle matching Screenshots -->
+                        <div class="mb-4">
+                            <h1 class="fw-bold text-dark mb-1" style="font-size: 28px; letter-spacing: -0.02em;">Welcome!</h1>
+                            <p class="text-muted mb-0" id="school_header_subtitle" style="font-size: 15px;">
+                                <t t-if="current_step == 1">Add your school details below to get started.</t>
+                                <t t-else="">Add your organisation details below to get started.</t>
+                            </p>
+                        </div>
+
+                        <!-- Step Indicator Bar Widget matching Screenshot 1, 2, 3 -->
+                        <div class="card p-3 mb-4 border rounded-3 bg-white shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                <div class="honna-step-nav">
+                                    <div id="school_nav_step_1" t-attf-class="honna-step-item #{current_step == 1 and 'active' or 'completed'}" onclick="setSchoolStep(1)">
+                                        School Details <t t-if="current_step &gt; 1"><i class="oi oi-check text-success"></i></t>
+                                    </div>
+                                    <div id="school_nav_step_2" t-attf-class="honna-step-item #{current_step == 2 and 'active' or (current_step &gt; 2 and 'completed' or '')}" onclick="setSchoolStep(2)">
+                                        Member Details <t t-if="current_step &gt; 2"><i class="oi oi-check text-success"></i></t>
+                                    </div>
+                                    <div id="school_nav_step_3" t-attf-class="honna-step-item #{current_step == 3 and 'active' or ''}" onclick="setSchoolStep(3)">
+                                        Primary Contact
+                                    </div>
+                                </div>
+                                <div class="honna-progress-pill">
+                                    <div class="honna-progress-bar-bg">
+                                        <div class="honna-progress-bar-fill" id="school_progress_fill" t-attf-style="width: #{current_step == 1 and '20%' or (current_step == 2 and '60%' or '90%')};"></div>
+                                    </div>
+                                    <span class="honna-progress-text" id="school_progress_text">
+                                        <t t-if="current_step == 1">20% complete</t>
+                                        <t t-elif="current_step == 2">60% complete</t>
+                                        <t t-else="">90% complete</t>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ==========================================
+                             STEP 1: School Details (Matching Screenshot 1)
+                             ========================================== -->
+                        <div id="school_step_1_content" t-attf-class="#{current_step != 1 and 'd-none' or ''}">
+                            <!-- Card 1: School Information & Avatar -->
+                            <div class="card p-4 mb-4 border rounded-3 bg-white shadow-sm honna-profile-card">
+                                <div class="row align-items-center g-4 mb-4">
+                                    <div class="col-md-3 text-center d-flex flex-column align-items-center justify-content-center">
+                                        <div class="honna-avatar-dashed-circle position-relative mb-2">
+                                            <t t-if="school and school.logo">
+                                                <img t-attf-src="/web/image/stakeholder.organisation/#{school.id}/logo" id="school_avatar_preview" class="rounded-circle object-fit-cover w-100 h-100" alt="Avatar"/>
+                                            </t>
+                                            <t t-else="">
+                                                <img src="/web/static/img/placeholder.png" id="school_avatar_preview" class="rounded-circle object-fit-cover w-100 h-100" alt="Avatar Placeholder"/>
+                                            </t>
+                                        </div>
+                                        <input type="file" id="school_logo_file_input" name="logo" accept="image/*" class="d-none" onchange="previewSchoolAvatar(this, 'school_avatar_preview')"/>
+                                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold honna-upload-photo-btn" onclick="document.getElementById('school_logo_file_input').click()">
+                                            + Upload Photo
+                                        </button>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold text-secondary small mb-1" for="school_name">School Name <span class="text-danger">*</span></label>
+                                            <input type="text" name="name" id="school_name" class="form-control form-control-lg honna-input" placeholder="Bright Futures Education Trust" t-att-value="school.name if school else ''" required="required"/>
+                                        </div>
+                                        <div>
+                                            <label class="form-label fw-semibold text-secondary small mb-1" for="school_website">Website <span class="text-danger">*</span></label>
+                                            <input type="text" name="website" id="school_website" class="form-control honna-input" placeholder="www.brightfutures.in" t-att-value="school.website if school else ''" required="required"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="school_board">Board <span class="text-danger">*</span></label>
+                                        <select name="board_affiliation" id="school_board" class="form-select honna-select" required="required">
+                                            <option value="cbse" t-att-selected="school and school.board_affiliation == 'cbse' and 'selected'">CBSE</option>
+                                            <option value="icse" t-att-selected="school and school.board_affiliation == 'icse' and 'selected'">ICSE</option>
+                                            <option value="state" t-att-selected="school and school.board_affiliation == 'state' and 'selected'">State Board</option>
+                                            <option value="ib" t-att-selected="school and school.board_affiliation == 'ib' and 'selected'">IB</option>
+                                            <option value="state_en" t-att-selected="school and school.board_affiliation == 'state_en' and 'selected'">State Board – English Medium</option>
+                                            <option value="state_kn" t-att-selected="school and school.board_affiliation == 'state_kn' and 'selected'">State Board – Kannada Medium</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="school_medium">Medium o f Instruction <span class="text-danger">*</span></label>
+                                        <select name="medium" id="school_medium" class="form-select honna-select" required="required">
+                                            <option value="English" t-att-selected="school and school.medium == 'English' and 'selected'">English</option>
+                                            <option value="Hindi" t-att-selected="school and school.medium == 'Hindi' and 'selected'">Hindi</option>
+                                            <option value="Kannada" t-att-selected="school and school.medium == 'Kannada' and 'selected'">Kannada</option>
+                                            <option value="Regional" t-att-selected="school and school.medium == 'Regional' and 'selected'">Regional</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="school_year_established">Year Established <span class="text-danger">*</span></label>
+                                        <input type="text" name="year_established" id="school_year_established" class="form-control honna-input" placeholder="2005" t-att-value="school.year_established if school else ''" required="required"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="school_residential">Residential Status <span class="text-danger">*</span></label>
+                                        <select name="residential" id="school_residential" class="form-select honna-select" required="required">
+                                            <option value="residential" t-att-selected="school and school.residential == 'residential' and 'selected'">Residential</option>
+                                            <option value="none" t-att-selected="school and school.residential == 'none' and 'selected'">Day School / Non-Residential</option>
+                                            <option value="boys" t-att-selected="school and school.residential == 'boys' and 'selected'">Boys</option>
+                                            <option value="girls" t-att-selected="school and school.residential == 'girls' and 'selected'">Girls</option>
+                                            <option value="coed" t-att-selected="school and school.residential == 'coed' and 'selected'">Co-ed / Both</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="school_parent_org">Parent Organisation <span class="text-danger">*</span></label>
+                                        <input type="text" name="parent_org_name" id="school_parent_org" class="form-control honna-input" placeholder="Bright Futures Education" t-att-value="school.parent_organisation_id.name if school and school.parent_organisation_id else ''" required="required"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="school_parent_head_office">Parent School / Head Office <span class="text-danger">*</span></label>
+                                        <input type="text" name="parent_school_name" id="school_parent_head_office" class="form-control honna-input" placeholder="Regional Headquarters" t-att-value="school.parent_school_id.name if school and school.parent_school_id else ''" required="required"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: Primary Address matching Screenshot 1 -->
+                            <div class="card p-4 mb-4 border rounded-3 bg-white shadow-sm honna-profile-card">
+                                <h5 class="fw-bold mb-3 text-dark" style="font-size: 16px;">Primary Address</h5>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="addr_street">Address <span class="text-danger">*</span></label>
+                                    <input type="text" name="street" id="addr_street" class="form-control honna-input" placeholder="Street, Building, Area" t-att-value="school.street if school else ''" required="required"/>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="addr_country">Country <span class="text-danger">*</span></label>
+                                        <select name="country_id" id="addr_country" class="form-select honna-select" required="required">
+                                            <t t-foreach="countries" t-as="country">
+                                                <option t-att-value="country.id" t-att-selected="school and school.country_id and school.country_id.id == country.id and 'selected'">
+                                                    <t t-out="country.name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="addr_state">State <span class="text-danger">*</span></label>
+                                        <select name="state_id" id="addr_state" class="form-select honna-select" required="required">
+                                            <t t-foreach="states" t-as="state">
+                                                <option t-att-value="state.id" t-att-selected="school and school.state_id and school.state_id.id == state.id and 'selected'">
+                                                    <t t-out="state.name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="addr_city">City <span class="text-danger">*</span></label>
+                                        <input type="text" name="city" id="addr_city" class="form-control honna-input" placeholder="Bengaluru" t-att-value="school.city if school else 'Bengaluru'" required="required"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="addr_zip">Postal Code <span class="text-danger">*</span></label>
+                                        <input type="text" name="zip" id="addr_zip" class="form-control honna-input" placeholder="560034" t-att-value="school.zip if school else '560034'" required="required"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 1 Bottom Button -->
+                            <div class="d-flex justify-content-end my-4">
+                                <button type="button" class="btn fw-semibold px-5 py-2 rounded-2 text-white honna-btn-save" style="background-color: #fa5a1e; border-color: #fa5a1e;" onclick="setSchoolStep(2)">
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ==========================================
+                             STEP 2: Member Details (Matching Screenshot 2)
+                             ========================================== -->
+                        <div id="school_step_2_content" t-attf-class="#{current_step != 2 and 'd-none' or ''}">
+                            <!-- Card 1: Management Members Table -->
+                            <div class="card p-4 mb-4 border rounded-3 bg-white shadow-sm honna-profile-card">
+                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                    <h5 class="fw-bold mb-0 text-dark" style="font-size: 16px;">Management Members</h5>
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-2 px-3 fw-semibold" onclick="toggleSchoolMemberAddSection()">
+                                        Add New Member
+                                    </button>
+                                </div>
+
+                                <!-- Sub-tabs: Executive | Academic | Operations -->
+                                <div class="honna-subtab-group mb-3">
+                                    <button type="button" id="school_tab_btn_executive" class="honna-subtab-btn active" onclick="switchSchoolMemberTab('executive')">Executive</button>
+                                    <button type="button" id="school_tab_btn_academic" class="honna-subtab-btn" onclick="switchSchoolMemberTab('academic')">Academic</button>
+                                    <button type="button" id="school_tab_btn_operations" class="honna-subtab-btn" onclick="switchSchoolMemberTab('operations')">Operations</button>
+                                </div>
+
+                                <!-- Executive Table -->
+                                <div class="table-responsive border rounded-2" id="school_table_executive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="bg-light">
+                                            <tr>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold">Name</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold">Role</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold">Email</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold">Phone</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold text-center">Primary Member</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold text-end">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-if="school and school.board_member_ids">
+                                                <t t-foreach="school.board_member_ids" t-as="mem">
+                                                    <tr>
+                                                        <td class="px-3 fw-medium text-dark">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <t t-if="mem.image">
+                                                                    <img t-attf-src="/web/image/stakeholder.organisation.board.member/#{mem.id}/image" class="honna-member-avatar-thumb" alt="Photo"/>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <img src="/web/static/img/placeholder.png" class="honna-member-avatar-thumb" alt="Avatar"/>
+                                                                </t>
+                                                                <span><t t-out="mem.name or (mem.first_name + ' ' + (mem.last_name or ''))"/></span>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-3 text-muted"><t t-out="mem.role or mem.designation or 'Super Admin'"/></td>
+                                                        <td class="px-3 text-muted"><t t-out="mem.email"/></td>
+                                                        <td class="px-3 text-muted"><t t-out="mem.phone"/></td>
+                                                        <td class="px-3 text-center">
+                                                            <input type="checkbox" class="form-check-input" t-att-checked="mem.is_primary and 'checked'" disabled="disabled"/>
+                                                        </td>
+                                                        <td class="px-3 text-end">
+                                                            <button type="button" class="btn btn-link text-secondary p-1 me-2" title="Edit" t-att-onclick="'editSchoolMemberRow(%s, \'executive\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', %s)' % (mem.id, mem.first_name or '', mem.last_name or '', mem.role or '', mem.email or '', mem.phone or '', 'true' if mem.is_primary else 'false')">
+                                                                <i class="oi oi-pencil fs-6"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-link text-secondary p-1" title="Delete" t-att-onclick="'deleteSchoolMemberRow(%s, \'executive\')' % mem.id">
+                                                                <i class="oi oi-trash fs-6"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                            <t t-else="">
+                                                <tr>
+                                                    <td class="px-3 fw-medium text-dark">
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <img src="/web/static/img/placeholder.png" class="honna-member-avatar-thumb" alt="Avatar"/>
+                                                            <span>Ravi Kumar</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-3 text-muted">Super Admin</td>
+                                                    <td class="px-3 text-muted">ravikumar@gmail.com</td>
+                                                    <td class="px-3 text-muted">+91 98877 66665</td>
+                                                    <td class="px-3 text-center">
+                                                        <input type="checkbox" class="form-check-input" checked="checked" disabled="disabled"/>
+                                                    </td>
+                                                    <td class="px-3 text-end">
+                                                        <button type="button" class="btn btn-link text-secondary p-1 me-2"><i class="oi oi-pencil fs-6"></i></button>
+                                                        <button type="button" class="btn btn-link text-secondary p-1"><i class="oi oi-trash fs-6"></i></button>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Academic Table -->
+                                <div class="table-responsive border rounded-2 d-none" id="school_table_academic">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="bg-light">
+                                            <tr>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold">Name</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold">Role</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold">Email</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold">Phone</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold text-center">Primary Member</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold text-end">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-if="school and school.dept_head_ids">
+                                                <t t-foreach="school.dept_head_ids" t-as="mem">
+                                                    <tr>
+                                                        <td class="px-3 fw-medium text-dark">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <t t-if="mem.image">
+                                                                    <img t-attf-src="/web/image/stakeholder.organisation.dept.head/#{mem.id}/image" class="honna-member-avatar-thumb" alt="Photo"/>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <img src="/web/static/img/placeholder.png" class="honna-member-avatar-thumb" alt="Avatar"/>
+                                                                </t>
+                                                                <span><t t-out="mem.name or (mem.first_name + ' ' + (mem.last_name or ''))"/></span>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-3 text-muted"><t t-out="mem.role or mem.designation or 'Academic Member'"/></td>
+                                                        <td class="px-3 text-muted"><t t-out="mem.email"/></td>
+                                                        <td class="px-3 text-muted"><t t-out="mem.phone"/></td>
+                                                        <td class="px-3 text-center">
+                                                            <input type="checkbox" class="form-check-input" t-att-checked="mem.is_primary and 'checked'" disabled="disabled"/>
+                                                        </td>
+                                                        <td class="px-3 text-end">
+                                                            <button type="button" class="btn btn-link text-secondary p-1 me-2" title="Edit" t-att-onclick="'editSchoolMemberRow(%s, \'academic\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', %s)' % (mem.id, mem.first_name or '', mem.last_name or '', mem.role or '', mem.email or '', mem.phone or '', 'true' if mem.is_primary else 'false')">
+                                                                <i class="oi oi-pencil fs-6"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-link text-secondary p-1" title="Delete" t-att-onclick="'deleteSchoolMemberRow(%s, \'academic\')' % mem.id">
+                                                                <i class="oi oi-trash fs-6"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                            <t t-else="">
+                                                <tr>
+                                                    <td colspan="6" class="text-center py-4 text-muted">No academic members added yet.</td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Operations Table -->
+                                <div class="table-responsive border rounded-2 d-none" id="school_table_operations">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="bg-light">
+                                            <tr>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold">Name</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold">Role</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold">Email</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold">Phone</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold text-center">Primary Member</th>
+                                                <th class="py-3 px-3 text-secondary small fw-semibold text-end">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-if="school and school.operation_member_ids">
+                                                <t t-foreach="school.operation_member_ids" t-as="mem">
+                                                    <tr>
+                                                        <td class="px-3 fw-medium text-dark">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <t t-if="mem.image">
+                                                                    <img t-attf-src="/web/image/stakeholder.organisation.operation.member/#{mem.id}/image" class="honna-member-avatar-thumb" alt="Photo"/>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <img src="/web/static/img/placeholder.png" class="honna-member-avatar-thumb" alt="Avatar"/>
+                                                                </t>
+                                                                <span><t t-out="mem.name or (mem.first_name + ' ' + (mem.last_name or ''))"/></span>
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-3 text-muted"><t t-out="mem.role or mem.designation or 'Operations Member'"/></td>
+                                                        <td class="px-3 text-muted"><t t-out="mem.email"/></td>
+                                                        <td class="px-3 text-muted"><t t-out="mem.phone"/></td>
+                                                        <td class="px-3 text-center">
+                                                            <input type="checkbox" class="form-check-input" t-att-checked="mem.is_primary and 'checked'" disabled="disabled"/>
+                                                        </td>
+                                                        <td class="px-3 text-end">
+                                                            <button type="button" class="btn btn-link text-secondary p-1 me-2" title="Edit" t-att-onclick="'editSchoolMemberRow(%s, \'operations\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', %s)' % (mem.id, mem.first_name or '', mem.last_name or '', mem.role or '', mem.email or '', mem.phone or '', 'true' if mem.is_primary else 'false')">
+                                                                <i class="oi oi-pencil fs-6"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-link text-secondary p-1" title="Delete" t-att-onclick="'deleteSchoolMemberRow(%s, \'operations\')' % mem.id">
+                                                                <i class="oi oi-trash fs-6"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                            <t t-else="">
+                                                <tr>
+                                                    <td colspan="6" class="text-center py-4 text-muted">No operations members added yet.</td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: Add Member Details Form Subsection matching Screenshot 2 -->
+                            <div id="school_add_member_details_section" class="card p-4 mb-4 border rounded-3 bg-white shadow-sm honna-profile-card">
+                                <h5 class="fw-bold mb-3 text-dark" style="font-size: 16px;">Add Member Details</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="school_new_mem_fname">First Name <span class="text-danger">*</span></label>
+                                        <input type="text" name="new_member_first_name" id="school_new_mem_fname" class="form-control honna-input" placeholder="John"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="school_new_mem_lname">Last Name <span class="text-danger">*</span></label>
+                                        <input type="text" name="new_member_last_name" id="school_new_mem_lname" class="form-control honna-input" placeholder="Smith"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="school_new_mem_role">Job Title/ Role <span class="text-danger">*</span></label>
+                                        <input type="text" name="new_member_role" id="school_new_mem_role" class="form-control honna-input" placeholder="Trustee / Administrator"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="school_new_mem_email">Email Address <span class="text-danger">*</span></label>
+                                        <input type="email" name="new_member_email" id="school_new_mem_email" class="form-control honna-input" placeholder="john.smith@brightfutures.edu"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="school_new_mem_phone">Phone <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white border-end-0 text-muted small fw-semibold">+91 <i class="oi oi-chevron-down ms-1" style="font-size: 10px;"></i></span>
+                                            <input type="tel" name="new_member_phone" id="school_new_mem_phone" class="form-control honna-input border-start-0" placeholder="98765 43211"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 d-flex align-items-center gap-3">
+                                        <div class="honna-avatar-dashed-circle position-relative" style="width: 75px; height: 75px;">
+                                            <img src="/web/static/img/placeholder.png" id="school_new_mem_avatar_preview" class="rounded-circle object-fit-cover w-100 h-100" alt="Avatar"/>
+                                        </div>
+                                        <div>
+                                            <input type="file" id="school_new_mem_file_input" name="new_member_image" accept="image/*" class="d-none" onchange="previewSchoolAvatar(this, 'school_new_mem_avatar_preview')"/>
+                                            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold honna-upload-photo-btn mb-1" onclick="document.getElementById('school_new_mem_file_input').click()">
+                                                + Upload Photo
+                                            </button>
+                                            <div class="text-muted small">.png or jpg format</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mt-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="new_member_is_primary" id="school_new_mem_primary" value="1"/>
+                                            <label class="form-check-label text-dark fw-medium" for="school_new_mem_primary">
+                                                Primary member
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 2 Bottom Action Buttons matching Screenshot 2 -->
+                            <div class="d-flex justify-content-end gap-3 my-4">
+                                <button type="button" class="btn btn-outline-primary fw-semibold px-4 py-2 rounded-2 honna-btn-draft" onclick="submitSchoolProfileForm('save', 2)">
+                                    Save
+                                </button>
+                                <button type="button" class="btn fw-semibold px-5 py-2 rounded-2 text-white honna-btn-save" style="background-color: #fa5a1e; border-color: #fa5a1e;" onclick="setSchoolStep(3)">
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ==========================================
+                             STEP 3: Primary Contact (Matching Screenshot 3)
+                             ========================================== -->
+                        <div id="school_step_3_content" t-attf-class="#{current_step != 3 and 'd-none' or ''}">
+                            <div class="card p-4 mb-4 border rounded-3 bg-white shadow-sm honna-profile-card">
+                                <h5 class="fw-bold mb-4 text-dark" style="font-size: 16px;">Primary Contact</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="contact_fname">First Name <span class="text-danger">*</span></label>
+                                        <input type="text" name="primary_contact_first_name" id="contact_fname" class="form-control honna-input" placeholder="First Name" t-att-value="school.primary_contact_first_name if school else ''"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="contact_lname">Last Name</label>
+                                        <input type="text" name="primary_contact_last_name" id="contact_lname" class="form-control honna-input" placeholder="Last Name" t-att-value="school.primary_contact_last_name if school else ''"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="contact_role">Job Title / Role <span class="text-danger">*</span></label>
+                                        <input type="text" name="contact_role" id="contact_role" class="form-control honna-input" placeholder="E.g., Principal, Director, Trustee, Administrator" t-att-value="school.contact_role if school else ''"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="contact_email">Email <span class="text-danger">*</span></label>
+                                        <input type="email" name="contact_email" id="contact_email" class="form-control honna-input" placeholder="principal@brightfutures.edu" t-att-value="school.contact_email if school else ''"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="contact_phone">Mobile <span class="text-danger">*</span></label>
+                                        <input type="tel" name="contact_phone" id="contact_phone" class="form-control honna-input" placeholder="+91 98866 77445" t-att-value="school.contact_phone if school else ''"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold text-secondary small mb-1" for="contact_method">Preferred Contact Method</label>
+                                        <select name="contact_method" id="contact_method" class="form-select honna-select">
+                                            <option value="email" t-att-selected="school and school.contact_method == 'email' and 'selected'">Email</option>
+                                            <option value="phone" t-att-selected="school and school.contact_method == 'phone' and 'selected'">Phone</option>
+                                            <option value="whatsapp" t-att-selected="school and school.contact_method == 'whatsapp' and 'selected'">WhatsApp</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 3 Bottom Action Buttons matching Screenshot 3 -->
+                            <div class="d-flex justify-content-end gap-3 my-4">
+                                <button type="button" class="btn btn-outline-primary fw-semibold px-4 py-2 rounded-2 honna-btn-draft" onclick="submitSchoolProfileForm('draft', 3)">
+                                    Save as Draft
+                                </button>
+                                <button type="button" class="btn fw-semibold px-5 py-2 rounded-2 text-white honna-btn-save" style="background-color: #fa5a1e; border-color: #fa5a1e;" onclick="submitSchoolProfileForm('save', 3)">
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Reused Main Website Footer Component -->
+                <t t-call="honna_campus_website.honna_footer"/>
+            </div>
+        </t>
+    </template>
+
     <template id="portal_user_registration_link" inherit_id="portal.user_sign_in" name="User Sign In Header Registration Link">
         <xpath expr="//li" position="after">
             <li t-attf-class="#{_item_class} o_no_autohide_item">

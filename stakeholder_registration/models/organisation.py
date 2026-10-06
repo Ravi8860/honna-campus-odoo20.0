@@ -36,6 +36,7 @@ ORGANISATION_CATEGORY_SELECTION = [
 
 class StakeholderOrganisation(models.Model):
     _name = 'stakeholder.organisation'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Organisation / Institution Registration Record'
 
     active = fields.Boolean(string='Active', default=True)
@@ -46,7 +47,7 @@ class StakeholderOrganisation(models.Model):
         index=True,
         required=True,
     )
-    name = fields.Char(string='Institution Name', required=True)
+    name = fields.Char(string='Institution Name', required=True, tracking=True)
     phone = fields.Char(string='School Phone')
     email = fields.Char(string='School Email')
     website = fields.Char(string='Website')
@@ -145,11 +146,15 @@ class StakeholderOrganisation(models.Model):
         ('girls', 'Girls'),
         ('coed', 'Co-ed / Both'),
         ('none', 'Day School / Non-Residential'),
+        ('residential', 'Residential'),
+        ('day_school', 'Day School'),
     ], string='Residential')
 
     principal_name = fields.Char(string='Principal Name')
     principal_phone = fields.Char(string='Principal Phone')
     principal_email = fields.Char(string='Principal Email')
+    principal_image = fields.Binary(string='Principal Photo')
+    primary_contact_image = fields.Binary(string='Primary Contact Photo')
     vp_name = fields.Char(string='Vice Principal Name')
     vp_phone = fields.Char(string='Vice Principal Phone')
     vp_email = fields.Char(string='Vice Principal Email')
@@ -200,13 +205,65 @@ class StakeholderOrganisation(models.Model):
     dept_head_ids = fields.One2many('stakeholder.organisation.dept.head', 'organisation_id', string='Academic')
     operation_member_ids = fields.One2many('stakeholder.organisation.operation.member', 'organisation_id', string='Operations')
     assoc_memberships_ids = fields.One2many('stakeholder.organisation.association.membership', 'organisation_id', string='Association Partners')
+    principal_contact_method = fields.Selection([
+        ('email', 'Email'),
+        ('phone', 'Phone'),
+        ('whatsapp', 'WhatsApp'),
+    ], string='Principal Preferred Contact Method', default='email')
+    vp_contact_method = fields.Selection([
+        ('email', 'Email'),
+        ('phone', 'Phone'),
+        ('whatsapp', 'WhatsApp'),
+    ], string='Vice Principal Preferred Contact Method', default='email')
     state = fields.Selection([
         ('draft', 'Draft'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected')
-    ], string='Status', default='draft', required=True)
+    ], string='Status', default='draft', required=True, tracking=True)
     partner_id = fields.Many2one('res.partner', string='Approved Partner', readonly=True)
     user_id = fields.Many2one('res.users', string='Related User', compute='_compute_user_id', store=True, readonly=False)
+    form_step = fields.Selection([
+        ('1', 'School Details'),
+        ('2', 'Member Details'),
+        ('3', 'Primary Contact'),
+    ], string='Form Step', default='1', required=True)
+
+    def action_next_step(self):
+        self.ensure_one()
+        current = int(self.form_step or 1)
+        if current < 3:
+            self.write({'form_step': str(current + 1)})
+        return True
+
+    def action_prev_step(self):
+        self.ensure_one()
+        current = int(self.form_step or 1)
+        if current > 1:
+            self.write({'form_step': str(current - 1)})
+        return True
+
+    def action_set_step_1(self):
+        self.ensure_one()
+        self.write({'form_step': '1'})
+        return True
+
+    def action_set_step_2(self):
+        self.ensure_one()
+        self.write({'form_step': '2'})
+        return True
+
+    def action_set_step_3(self):
+        self.ensure_one()
+        self.write({'form_step': '3'})
+        return True
+
+    def action_view_portal_profile(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/school/profile?id={self.id}',
+            'target': 'new',
+        }
 
     @api.depends('partner_id', 'email')
     def _compute_user_id(self):
@@ -588,6 +645,8 @@ class StakeholderOrganisationBoardMember(models.Model):
     designation = fields.Char(string='Designation')
     phone = fields.Char(string='Phone')
     email = fields.Char(string='Email')
+    is_primary = fields.Boolean(string='Primary Member', default=False)
+    image = fields.Binary(string='Photo')
     contact_method = fields.Selection([
         ('email', 'Email'),
         ('whatsapp', 'WhatsApp'),
@@ -637,6 +696,8 @@ class StakeholderOrganisationDeptHead(models.Model):
     designation = fields.Char(string='Designation')
     phone = fields.Char(string='Phone')
     email = fields.Char(string='Email')
+    is_primary = fields.Boolean(string='Primary Member', default=False)
+    image = fields.Binary(string='Photo')
     contact_method = fields.Selection([
         ('email', 'Email'),
         ('whatsapp', 'WhatsApp'),
@@ -684,6 +745,8 @@ class StakeholderOrganisationOperationMember(models.Model):
     designation = fields.Char(string='Designation')
     phone = fields.Char(string='Phone')
     email = fields.Char(string='Email')
+    is_primary = fields.Boolean(string='Primary Member', default=False)
+    image = fields.Binary(string='Photo')
     contact_method = fields.Selection([
         ('email', 'Email'),
         ('whatsapp', 'WhatsApp'),

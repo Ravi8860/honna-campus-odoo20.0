@@ -495,3 +495,260 @@
         min-width: auto;
     }
 }
+
+/* ==========================================================================
+   Association / Organisation Profile Page Styles (Matching Figma Screens 2 & 3)
+   ========================================================================== */
+.honna-profile-page {
+    background-color: #f4f7fb !important;
+}
+
+.honna-profile-card {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+    transition: box-shadow 0.2s ease;
+}
+
+.honna-profile-card:hover {
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05) !important;
+}
+
+.honna-avatar-dashed-circle {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    border: 2.5px dashed #93c5fd;
+    background-color: #eef2f6;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.honna-avatar-dashed-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.honna-upload-photo-btn {
+    border: 1.5px solid #2563eb !important;
+    color: #2563eb !important;
+    background: transparent !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 5px 16px !important;
+    transition: all 0.2s ease;
+}
+
+.honna-upload-photo-btn:hover {
+    background-color: #eff6ff !important;
+    color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+}
+
+.honna-btn-save {
+    background-color: #fa5a1e !important;
+    border-color: #fa5a1e !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    padding: 9px 24px !important;
+    box-shadow: 0 2px 6px rgba(250, 90, 30, 0.2) !important;
+    transition: all 0.2s ease;
+}
+
+.honna-btn-save:hover {
+    background-color: #ea4d13 !important;
+    border-color: #ea4d13 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(250, 90, 30, 0.3) !important;
+}
+
+.honna-btn-draft {
+    background-color: transparent !important;
+    border: 1.5px solid #2563eb !important;
+    color: #2563eb !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    padding: 8px 22px !important;
+    transition: all 0.2s ease;
+}
+
+.honna-btn-draft:hover {
+    background-color: #eff6ff !important;
+    color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+}
+
+.honna-input, .honna-select {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 9px 14px !important;
+    font-size: 14px !important;
+    color: #1e293b !important;
+    background-color: #ffffff !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.honna-input:focus, .honna-select:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+    outline: none !important;
+}
+
+/* ==========================================================================
+   School Profile Multi-Step Wizard Styles (Matching Screenshots 1, 2, 3)
+   ========================================================================== */
+.honna-step-container {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 18px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.honna-step-nav {
+    display: inline-flex;
+    border: 1.5px solid #93c5fd;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.honna-step-item {
+    padding: 8px 24px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #64748b;
+    text-decoration: none;
+    cursor: pointer;
+    border-right: 1.5px solid #93c5fd;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+}
+
+.honna-step-item:last-child {
+    border-right: none;
+}
+
+.honna-step-item.active {
+    background-color: #eff6ff !important;
+    color: #2563eb !important;
+    font-weight: 700;
+}
+
+.honna-step-item.completed {
+    background-color: #ecfdf5 !important;
+    color: #10b981 !important;
+    border-color: #10b981 !important;
+    font-weight: 700;
+}
+
+.honna-progress-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.honna-progress-bar-bg {
+    width: 140px;
+    height: 10px;
+    background-color: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.honna-progress-bar-fill {
+    height: 100%;
+    background-color: #22c55e;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+.honna-progress-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: #16a34a;
+}
+
+.honna-subtab-group {
+    display: inline-flex;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.honna-subtab-btn {
+    padding: 7px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    background: #ffffff;
+    color: #64748b;
+    cursor: pointer;
+    border-right: 1px solid #cbd5e1;
+    transition: all 0.2s ease;
+}
+
+.honna-subtab-btn:last-child {
+    border-right: none;
+}
+
+.honna-subtab-btn.active {
+    background-color: #eff6ff !important;
+    color: #2563eb !important;
+    box-shadow: inset 0 0 0 1px #93c5fd;
+}
+
+.honna-contact-card {
+    border: 1px solid #cbd5e1;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.honna-contact-card:hover {
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+.honna-contact-card-header {
+    background-color: #0f2b48 !important;
+    color: #ffffff !important;
+    padding: 12px 20px;
+    font-weight: 700;
+    font-size: 16px;
+    text-align: center;
+    letter-spacing: -0.01em;
+}
+
+.honna-contact-card-body {
+    padding: 24px 20px;
+    text-align: center;
+}
+
+.honna-contact-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    border: 3px solid #cbd5e1;
+    object-fit: cover;
+    margin: 0 auto 16px;
+    display: block;
+}
+
+.honna-member-avatar-thumb {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid #cbd5e1;
+}
