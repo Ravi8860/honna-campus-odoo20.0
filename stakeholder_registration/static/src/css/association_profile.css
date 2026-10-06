@@ -1,0 +1,108 @@
+/* Association & School Profile View Styling matching Figma screenshots */
+.o_association_profile_sheet,
+.o_school_profile_sheet {
+    background-color: #f8fafc !important;
+}
+
+.o_association_card,
+.o_school_card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04) !important;
+    transition: box-shadow 0.2s ease;
+}
+
+.o_association_card:hover,
+.o_school_card:hover {
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06) !important;
+}
+
+/* Circular avatar with dashed border matching Figma */
+.o_association_card .oe_avatar img,
+.o_school_card .oe_avatar img,
+.o_association_avatar_wrapper img,
+.o_school_avatar_wrapper img {
+    border-radius: 50% !important;
+    border: 2.5px dashed #93c5fd !important;
+    background-color: #eef2f6 !important;
+    width: 110px !important;
+    height: 110px !important;
+    object-fit: cover !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* Save button: Solid Orange */
+.btn-association-save,
+.btn-school-save {
+    background-color: #fa5a1e !important;
+    border: 1px solid #fa5a1e !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    padding: 8px 24px !important;
+    transition: all 0.2s ease;
+}
+
+.btn-association-save:hover,
+.btn-school-save:hover {
+    background-color: #e64c12 !important;
+    border-color: #e64c12 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(250, 90, 30, 0.25) !important;
+}
+
+/* Save as Draft button: Blue Outline */
+.btn-association-draft,
+.btn-school-draft {
+    background-color: transparent !important;
+    border: 1.5px solid #2563eb !important;
+    color: #2563eb !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    padding: 8px 20px !important;
+    transition: all 0.2s ease;
+}
+
+.btn-association-draft:hover,
+.btn-school-draft:hover {
+    background-color: #eff6ff !important;
+    border-color: #1d4ed8 !important;
+    color: #1d4ed8 !important;
+}
+
+/* Card titles */
+.o_association_card_title,
+.o_school_card_title {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    letter-spacing: -0.01em;
+}
+
+/* Table styling */
+.o_association_member_list .table thead th,
+.o_school_member_list .table thead th {
+    background-color: #f8fafc !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    border-bottom: 1.5px solid #e2e8f0 !important;
+}
+
+/* Navy Contact Cards matching Screenshot 3 */
+.o_contact_navy_card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.o_contact_navy_header {
+    background-color: #0f2b48 !important;
+    color: #ffffff !important;
+    padding: 10px 16px;
+    font-weight: 700;
+    text-align: center;
+    font-size: 15px;
+}

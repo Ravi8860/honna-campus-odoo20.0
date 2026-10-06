@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Product Template Form View Inheritance -->
+    <record id="product_template_form_view_inherit_honna" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.honna</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="website_sale.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='website_sale']" position="inside">
+                <group name="honna_shop_display" string="Honna Shop Showcase Configuration">
+                    <group name="honna_display_flags">
+                        <field name="website_featured"/>
+                        <field name="website_sequence"/>
+                        <field name="website_cta_type"/>
+                    </group>
+                    <group name="honna_display_badges">
+                        <field name="website_product_label" placeholder="e.g. K-12 Kit, Advanced Lab, AI Assistant"/>
+                        <field name="website_product_badge" placeholder="e.g. School Edition, Turnkey Lab, SaaS Solution"/>
+                    </group>
+                    <group name="honna_display_desc" colspan="2">
+                        <field name="website_short_description" placeholder="Brief summary shown on website shop cards..."/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Product Template List View Inheritance -->
+    <record id="product_template_tree_view_inherit_honna" model="ir.ui.view">
+        <field name="name">product.template.list.inherit.honna</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="website_featured" optional="show" widget="boolean_toggle"/>
+                <field name="website_cta_type" optional="hide"/>
+                <field name="website_product_label" optional="hide"/>
+                <field name="website_product_badge" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Product Template Search View Inheritance -->
+    <record id="product_template_search_view_inherit_honna" model="ir.ui.view">
+        <field name="name">product.template.search.inherit.honna</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <filter name="favorites" position="after">
+                <filter string="Featured on Website" name="website_featured" domain="[('website_featured', '=', True)]"/>
+            </filter>
+        </field>
+    </record>
+
+    <!-- Action & Menu for Shop Products in Honna Campus Admin -->
+    <record id="action_honna_featured_products" model="ir.actions.act_window">
+        <field name="name">Shop Featured Products</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('sale_ok', '=', True)]</field>
+        <field name="context">{'default_website_featured': True, 'default_sale_ok': True, 'search_default_website_featured': 1}</field>
+    </record>
+
+    <menuitem id="menu_honna_featured_products"
+              name="Shop Products"
+              parent="honna_campus_website.menu_honna_campus_root"
+              action="action_honna_featured_products"
+              sequence="25"/>
+</odoo>

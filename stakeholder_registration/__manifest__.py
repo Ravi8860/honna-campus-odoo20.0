@@ -32,6 +32,11 @@ Security
         'views/res_users_views.xml',
         'views/res_partner_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'stakeholder_registration/static/src/css/association_profile.css',
+        ],
+    },
 
     'installable': True,
     'application': True,
