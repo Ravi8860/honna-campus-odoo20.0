@@ -254,7 +254,6 @@
         const name = (document.getElementById('inline_name')?.value || '').trim();
         const desig = (document.getElementById('inline_desig')?.value || '').trim();
         const email = (document.getElementById('inline_email')?.value || '').trim();
-        const role = (document.getElementById('inline_role')?.value || '').trim();
 
         if (!name && !email) {
             alert('Please enter at least a name or email for the member.');
@@ -269,7 +268,7 @@
         const parts = name.split(' ');
         if (fnameInput) fnameInput.value = parts[0] || '';
         if (lnameInput) lnameInput.value = parts.slice(1).join(' ') || '';
-        if (roleInput) roleInput.value = role || desig || 'Member';
+        if (roleInput) roleInput.value = desig || 'Member';
         if (emailInput) emailInput.value = email || '';
 
         window.submitProfileForm('save');
@@ -294,12 +293,11 @@
         const row = document.getElementById('member_row_' + memberId);
         if (!row) return;
         const cells = row.querySelectorAll('td');
-        if (cells.length < 5) return;
+        if (cells.length < 4) return;
 
         const name = cells[0].textContent.trim();
         const desig = cells[1].textContent.trim();
         const email = cells[2].textContent.trim();
-        const role = cells[3].textContent.trim();
 
         const inlineRow = document.getElementById('inline_add_member_row');
         if (inlineRow) {
@@ -307,7 +305,6 @@
             document.getElementById('inline_name').value = name;
             document.getElementById('inline_desig').value = desig;
             document.getElementById('inline_email').value = email;
-            document.getElementById('inline_role').value = role;
             inlineRow.scrollIntoView({ behavior: 'smooth' });
         }
     };

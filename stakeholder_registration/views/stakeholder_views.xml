@@ -38,15 +38,9 @@
                     <field name="partner_id" invisible="1"/>
 
                     <!-- Header block matching Figma -->
-                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom flex-wrap gap-2">
-                        <div>
-                            <h2 class="fw-bold mb-1" style="color: #1e293b; font-size: 26px;">Organisation Profile</h2>
-                            <p class="text-muted mb-0" style="font-size: 14px;">Manage your organisation information and keep your profile up to date.</p>
-                        </div>
-                        <div class="d-flex gap-2 align-items-center">
-                            <button name="action_draft" string="Save as Draft" type="object" class="btn btn-association-draft" invisible="state == 'draft'"/>
-                            <button name="action_approve" string="Save" type="object" class="btn btn-association-save" invisible="state == 'approved'"/>
-                        </div>
+                    <div class="mb-4 pb-2 border-bottom">
+                        <h2 class="fw-bold mb-1" style="color: #1e293b; font-size: 26px;">Organisation Profile</h2>
+                        <p class="text-muted mb-0" style="font-size: 14px;">Manage your organisation information and keep your profile up to date.</p>
                     </div>
 
                     <!-- Card 1: Avatar & Basic Organisation Details -->
@@ -81,7 +75,7 @@
                             <group>
                                 <field name="country_id" string="Country *" placeholder="Country" options="{'no_open': True, 'no_create': True}" required="1"/>
                                 <field name="city" string="City *" placeholder="Bengaluru" required="1"/>
-                                <field name="geolocation" string="Geo-location Coordinates"/>
+                                <field name="geolocation" string="Map"/>
                             </group>
                             <group>
                                 <field name="state_id" string="State *" placeholder="State" options="{'no_open': True, 'no_create': True}" domain="[('country_id', '=', country_id)]" required="1"/>
@@ -100,14 +94,10 @@
                             <group>
                                 <field name="email" string="Email Address *" required="1" placeholder="info@brightfutures.edu"/>
                                 <field name="phone" string="Phone *" required="1" placeholder="+91 98765 43210"/>
-                                <field name="parent_head_office" string="Parent School/Head Office" placeholder="Regional Headquarters, North Zone"/>
-                                <field name="medium" string="Medium of instruction" placeholder="English"/>
                                 <field name="vat" string="Tax ID / GSTIN" placeholder="GSTIN / PAN"/>
                             </group>
                             <group>
                                 <field name="website" string="Website *" placeholder="www.brightfutures.edu"/>
-                                <field name="parent_org" string="Parent Organisation" placeholder="Bright Futures Education Trust"/>
-                                <field name="board_affiliation" string="Board"/>
                                 <field name="year_established" string="Year Established" placeholder="2010"/>
                                 <field name="school_ids" widget="many2many_tags" string="School" groups="stakeholder_registration.group_stakeholder_user"/>
                             </group>
@@ -144,18 +134,13 @@
                                 <field name="name" string="Name"/>
                                 <field name="designation" string="Designation"/>
                                 <field name="email" string="Email"/>
-                                <field name="role" string="Role"/>
                                 <field name="phone" string="Phone" optional="show"/>
                                 <field name="contact_method" string="Preferred Contact Method" optional="hide"/>
                             </list>
                         </field>
                     </div>
 
-                    <!-- Bottom Action Buttons matching Figma -->
-                    <div class="d-flex gap-3 justify-content-start my-4">
-                        <button name="action_approve" string="Save" type="object" class="btn btn-association-save" invisible="state == 'approved'"/>
-                        <button name="action_draft" string="Save as Draft" type="object" class="btn btn-association-draft" invisible="state == 'draft'"/>
-                    </div>
+
                 </sheet>
                 <chatter/>
             </form>
