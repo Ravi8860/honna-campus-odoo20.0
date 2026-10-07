@@ -47,7 +47,7 @@ class StakeholderAssociation(models.Model):
     )
     zip = fields.Char(string='PIN Code')
     address = fields.Text(string='Registered Office Address')
-    geolocation = fields.Char(string='Geo-location Coordinates')
+    geolocation = fields.Char(string='Map')
 
     # Primary Contact fields
     primary_contact_first_name = fields.Char(string='First Name')
@@ -439,3 +439,8 @@ class StakeholderAssociationMember(models.Model):
     def _onchange_role(self):
         if self.role and not self.designation:
             self.designation = self.role
+
+    @api.onchange('designation')
+    def _onchange_designation(self):
+        if self.designation and not self.role:
+            self.role = self.designation
