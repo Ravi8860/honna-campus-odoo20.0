@@ -97,7 +97,7 @@ class StakeholderAssociation(models.Model):
         ('draft', 'Draft'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected')
-    ], string='Status', default='draft', required=True, tracking=True)
+    ], string='Status', default='approved', required=True, tracking=True)
     partner_id = fields.Many2one('res.partner', string='Approved Partner', readonly=True)
     user_id = fields.Many2one('res.users', string='Related User', compute='_compute_user_id', store=True, readonly=False)
     school_ids = fields.Many2many(
@@ -273,16 +273,57 @@ class StakeholderAssociation(models.Model):
             if user.association_id != self:
                 user.sudo().write({'association_id': self.id})
 
+    def _sync_to_partner(self):
+        partner_obj = self.env['res.partner']
+        for rec in self:
+            if not rec.name:
+                continue
+            partner = rec.partner_id
+            if not partner and rec.email:
+                partner = partner_obj.sudo().search([('email', '=', rec.email)], limit=1)
+            if not partner and rec.phone:
+                partner = partner_obj.sudo().search([('phone', '=', rec.phone)], limit=1)
+            if not partner:
+                partner = partner_obj.sudo().search([('name', '=', rec.name)], limit=1)
+
+            vals = {
+                'name': rec.name,
+                'email': rec.email,
+                'phone': rec.phone,
+                'website': rec.website,
+                'vat': rec.vat,
+                'street': rec.street or rec.address,
+                'street2': rec.street2,
+                'city': rec.city,
+                'state_id': rec.state_id.id if rec.state_id else False,
+                'zip': rec.zip,
+                'country_id': rec.country_id.id if rec.country_id else False,
+                'is_company': True,
+                'user_category': 'association',
+            }
+            if partner:
+                partner.sudo().write(vals)
+            else:
+                partner = partner_obj.sudo().create(vals)
+            if rec.partner_id != partner:
+                rec.sudo().write({'partner_id': partner.id})
+
     @api.model_create_multi
     def create(self, vals_list):
         india = self._default_country_id()
-        if india:
-            for vals in vals_list:
-                if not vals.get('country_id'):
-                    vals['country_id'] = india.id
+        for vals in vals_list:
+            if india and not vals.get('country_id'):
+                vals['country_id'] = india.id
+            if not vals.get('state'):
+                vals['state'] = 'approved'
         records = super().create(vals_list)
         for rec in records:
             rec._link_matching_user()
+            if not rec.partner_id:
+                try:
+                    rec._sync_to_partner()
+                except Exception:
+                    pass
         return records
 
     def write(self, vals):
@@ -290,6 +331,20 @@ class StakeholderAssociation(models.Model):
         if any(f in vals for f in ('name', 'email', 'partner_id', 'user_id')):
             for rec in self:
                 rec._link_matching_user()
+        for rec in self:
+            if rec.partner_id:
+                partner_vals = {}
+                for f in ('name', 'email', 'phone', 'website', 'vat', 'street', 'street2', 'city', 'zip'):
+                    if f in vals:
+                        partner_vals[f] = getattr(rec, f)
+                if 'address' in vals and 'street' not in vals:
+                    partner_vals['street'] = rec.address
+                if 'state_id' in vals:
+                    partner_vals['state_id'] = rec.state_id.id if rec.state_id else False
+                if 'country_id' in vals:
+                    partner_vals['country_id'] = rec.country_id.id if rec.country_id else False
+                if partner_vals:
+                    rec.partner_id.sudo().write(partner_vals)
         return res
 
     def init(self):

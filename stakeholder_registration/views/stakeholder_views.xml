@@ -3,7 +3,7 @@
     <!-- ==========================================
          ASSOCIATION REGISTRATION VIEWS
          ========================================== -->
-    <record id="view_stakeholder_association_tree" model="ir.ui.view">
+        <record id="view_stakeholder_association_tree" model="ir.ui.view">
         <field name="name">stakeholder.association.tree</field>
         <field name="model">stakeholder.association</field>
         <field name="arch" type="xml">
@@ -15,7 +15,6 @@
                 <field name="contact_name" string="Primary Contact Name" optional="hide"/>
                 <field name="contact_phone" string="Primary Contact Mobile" optional="hide"/>
                 <field name="website"/>
-                <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-muted="state == 'draft'"/>
             </list>
         </field>
     </record>
@@ -25,13 +24,6 @@
         <field name="model">stakeholder.association</field>
         <field name="arch" type="xml">
             <form string="Association Registration">
-                <header>
-                    <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="not id or state == 'approved'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
-                    <button name="action_reject" string="Reject" type="object" class="btn-secondary" invisible="not id or state == 'rejected'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
-                    <button name="action_draft" string="Reset to Draft" type="object" class="btn-secondary" invisible="not id or state == 'draft'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
-                    <button name="action_view_portal_profile" string="Open Web Profile" type="object" class="btn btn-outline-info" icon="fa-globe"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,rejected"/>
-                </header>
                 <sheet class="o_association_profile_sheet">
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <field name="active" invisible="1"/>
@@ -54,8 +46,8 @@
                             </div>
                             <div class="col-md-9">
                                 <group>
-                                    <field name="name" string="Organisation Name *" placeholder="Bright Futures Education Trust" required="1"/>
-                                    <field name="organisation_type" string="Organisation Type *" required="1"/>
+                                    <field name="name" string="Organisation Name" placeholder="Bright Futures Education Trust"/>
+                                    <field name="organisation_type" string="Organisation Type"/>
                                 </group>
                             </div>
                         </div>
@@ -65,21 +57,21 @@
                     <div class="card p-4 mb-4 o_association_card">
                         <div class="h5 fw-bold mb-3 o_association_card_title">Primary Address</div>
                         <group>
-                            <label for="street" string="Address *"/>
+                            <label for="street" string="Address"/>
                             <div class="o_address_format">
-                                <field name="street" placeholder="Street, Building, Area" class="o_address_street" required="1"/>
+                                <field name="street" placeholder="Street, Building, Area" class="o_address_street"/>
                                 <field name="street2" placeholder="Address line 2..." class="o_address_street"/>
                             </div>
                         </group>
                         <group>
                             <group>
-                                <field name="country_id" string="Country *" placeholder="Country" options="{'no_open': True, 'no_create': True}" required="1"/>
-                                <field name="city" string="City *" placeholder="Bengaluru" required="1"/>
+                                <field name="country_id" string="Country" placeholder="Country" options="{'no_open': True, 'no_create': True}"/>
+                                <field name="city" string="City" placeholder="Bengaluru"/>
                                 <field name="geolocation" string="Map"/>
                             </group>
                             <group>
-                                <field name="state_id" string="State *" placeholder="State" options="{'no_open': True, 'no_create': True}" domain="[('country_id', '=', country_id)]" required="1"/>
-                                <field name="zip" string="Postal Code *" placeholder="560034" required="1"/>
+                                <field name="state_id" string="State" placeholder="State" options="{'no_open': True, 'no_create': True}" domain="[('country_id', '=', country_id)]"/>
+                                <field name="zip" string="Postal Code" placeholder="560034"/>
                             </group>
                         </group>
                     </div>
@@ -88,16 +80,16 @@
                     <div class="card p-4 mb-4 o_association_card">
                         <div class="h5 fw-bold mb-3 o_association_card_title">Association Information</div>
                         <group>
-                            <field name="name" string="Association Name *" required="1"/>
+                            <field name="name" string="Association Name"/>
                         </group>
                         <group>
                             <group>
-                                <field name="email" string="Email Address *" required="1" placeholder="info@brightfutures.edu"/>
-                                <field name="phone" string="Phone *" required="1" placeholder="+91 98765 43210"/>
+                                <field name="email" string="Email Address" placeholder="info@brightfutures.edu"/>
+                                <field name="phone" string="Phone" placeholder="+91 98765 43210"/>
                                 <field name="vat" string="Tax ID / GSTIN" placeholder="GSTIN / PAN"/>
                             </group>
                             <group>
-                                <field name="website" string="Website *" placeholder="www.brightfutures.edu"/>
+                                <field name="website" string="Website" placeholder="www.brightfutures.edu"/>
                                 <field name="year_established" string="Year Established" placeholder="2010"/>
                                 <field name="school_ids" widget="many2many_tags" string="School" groups="stakeholder_registration.group_stakeholder_user"/>
                             </group>
@@ -112,13 +104,13 @@
                         <div class="h5 fw-bold mb-3 o_association_card_title">Primary Contact</div>
                         <group>
                             <group>
-                                <field name="primary_contact_first_name" string="First Name *" placeholder="Sarah" required="1"/>
-                                <field name="contact_role" string="Job Title / Role *" placeholder="Principal" required="1"/>
-                                <field name="contact_phone" string="Phone *" placeholder="+91 98765 43211" required="1"/>
+                                <field name="primary_contact_first_name" string="First Name" placeholder="Sarah"/>
+                                <field name="contact_role" string="Job Title / Role" placeholder="Principal"/>
+                                <field name="contact_phone" string="Phone" placeholder="+91 98765 43211"/>
                             </group>
                             <group>
-                                <field name="primary_contact_last_name" string="Last Name *" placeholder="Jenkins"/>
-                                <field name="contact_email" string="Email Address *" placeholder="principal@brightfutures.edu" required="1"/>
+                                <field name="primary_contact_last_name" string="Last Name" placeholder="Jenkins"/>
+                                <field name="contact_email" string="Email Address" placeholder="principal@brightfutures.edu"/>
                                 <field name="contact_method" string="Preferred contact Method"/>
                             </group>
                         </group>
@@ -142,7 +134,6 @@
 
 
                 </sheet>
-                <chatter/>
             </form>
         </field>
     </record>
@@ -156,15 +147,9 @@
                 <field name="email" string="Association Email"/>
                 <field name="phone" string="Association Phone"/>
                 <field name="contact_name" string="Primary Contact"/>
-                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
-                <filter string="Approved" name="approved" domain="[('state', '=', 'approved')]"/>
-                <filter string="Rejected" name="rejected" domain="[('state', '=', 'rejected')]"/>
                 <separator/>
                 <filter string="Active" name="active" domain="[('active', '=', True)]"/>
                 <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
-                <group>
-                    <filter string="Status" name="group_by_state" domain="[]" context="{'group_by': 'state'}"/>
-                </group>
             </search>
         </field>
     </record>
@@ -197,15 +182,10 @@
                 <field name="city" string="Place"/>
                 <field name="zip" string="Pincode"/>
 
-                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
-                <filter string="Approved" name="approved" domain="[('state', '=', 'approved')]"/>
-                <filter string="Rejected" name="rejected" domain="[('state', '=', 'rejected')]"/>
-                <separator/>
                 <filter string="Active" name="active" domain="[('active', '=', True)]"/>
                 <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
 
                 <group>
-                    <filter string="Status" name="group_by_state" domain="[]" context="{'group_by': 'state'}"/>
                     <filter string="Category" name="group_by_category" domain="[]" context="{'group_by': 'category'}"/>
                     <filter string="Place" name="group_by_place" domain="[]" context="{'group_by': 'city'}"/>
                     <filter string="Pincode" name="group_by_pincode" domain="[]" context="{'group_by': 'zip'}"/>
@@ -229,7 +209,6 @@
                 <field name="contact_name" string="Primary Contact Name" optional="hide"/>
                 <field name="contact_phone" string="Primary Contact Mobile" optional="hide"/>
                 <field name="website"/>
-                <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-muted="state == 'draft'"/>
             </list>
         </field>
     </record>
@@ -352,13 +331,6 @@
         <field name="model">stakeholder.organisation</field>
         <field name="arch" type="xml">
             <form string="School Registration">
-                <header>
-                    <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="not id or state == 'approved'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
-                    <button name="action_reject" string="Reject" type="object" class="btn-secondary" invisible="not id or state == 'rejected'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
-                    <button name="action_draft" string="Reset to Draft" type="object" class="btn-secondary" invisible="not id or state == 'draft'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
-                    <button name="action_view_portal_profile" string="Open Web Profile" type="object" class="btn btn-outline-info" icon="fa-globe"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,rejected"/>
-                </header>
                 <sheet class="o_school_profile_sheet">
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <field name="active" invisible="1"/>
@@ -368,16 +340,10 @@
                     <field name="form_step" invisible="1"/>
 
                     <!-- Top Header Section Matching Screenshots -->
-                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom flex-wrap gap-2">
-                        <div>
-                            <h2 class="fw-bold mb-1" style="color: #1e293b; font-size: 26px;">Welcome!</h2>
-                            <p class="text-muted mb-0" invisible="form_step != '1'" style="font-size: 14px;">Add your school details below to get started.</p>
-                            <p class="text-muted mb-0" invisible="form_step == '1'" style="font-size: 14px;">Add your organisation details below to get started.</p>
-                        </div>
-                        <div class="d-flex gap-2 align-items-center">
-                            <button name="action_draft" string="Save as Draft" type="object" class="btn btn-school-draft" invisible="state == 'draft'"/>
-                            <button name="action_approve" string="Save" type="object" class="btn btn-school-save" invisible="state == 'approved'"/>
-                        </div>
+                    <div class="mb-4 pb-2 border-bottom">
+                        <h2 class="fw-bold mb-1" style="color: #1e293b; font-size: 26px;">Welcome!</h2>
+                        <p class="text-muted mb-0" invisible="form_step != '1'" style="font-size: 14px;">Add your school details below to get started.</p>
+                        <p class="text-muted mb-0" invisible="form_step == '1'" style="font-size: 14px;">Add your organisation details below to get started.</p>
                     </div>
 
                     <!-- Step Indicator Bar Widget matching Screenshots -->
@@ -460,21 +426,21 @@
                                 </div>
                                 <div class="col-md-9">
                                     <group>
-                                        <field name="name" string="School Name *" placeholder="Bright Futures Education Trust" required="1"/>
-                                        <field name="website" string="Website *" placeholder="www.brightfutures.in"/>
+                                        <field name="name" string="School Name" placeholder="Bright Futures Education Trust"/>
+                                        <field name="website" string="Website" placeholder="www.brightfutures.in"/>
                                     </group>
                                 </div>
                             </div>
                             <group>
                                 <group>
-                                    <field name="board_affiliation" string="Board *" required="1"/>
-                                    <field name="year_established" string="Year Established *" placeholder="2005" required="1"/>
-                                    <field name="parent_organisation_id" string="Parent Organisation *" placeholder="Bright Futures Education"/>
+                                    <field name="board_affiliation" string="Board"/>
+                                    <field name="year_established" string="Year Established" placeholder="2005"/>
+                                    <field name="parent_organisation_id" string="Parent Organisation" placeholder="Bright Futures Education"/>
                                 </group>
                                 <group>
-                                    <field name="medium" string="Medium of Instruction *" placeholder="English" required="1"/>
-                                    <field name="residential" string="Residential Status *" required="1"/>
-                                    <field name="parent_school_id" string="Parent School / Head Office *" placeholder="Regional Headquarters"/>
+                                    <field name="medium" string="Medium of Instruction" placeholder="English"/>
+                                    <field name="residential" string="Residential Status"/>
+                                    <field name="parent_school_id" string="Parent School / Head Office" placeholder="Regional Headquarters"/>
                                 </group>
                             </group>
                         </div>
@@ -483,21 +449,21 @@
                         <div class="card p-4 mb-4 o_school_card">
                             <div class="h5 fw-bold mb-3 o_school_card_title">Primary Address</div>
                             <group>
-                                <label for="street" string="Address *"/>
+                                <label for="street" string="Address"/>
                                 <div class="o_address_format">
-                                    <field name="street" placeholder="Street, Building, Area" class="o_address_street" required="1"/>
+                                    <field name="street" placeholder="Street, Building, Area" class="o_address_street"/>
                                     <field name="street2" placeholder="Address line 2..." class="o_address_street"/>
                                 </div>
                             </group>
                             <group>
                                 <group>
-                                    <field name="country_id" string="Country *" placeholder="India" options="{'no_open': True, 'no_create': True}" domain="[('code', '=', 'IN')]" required="1"/>
-                                    <field name="city" string="City *" placeholder="Bengaluru" required="1"/>
-                                    <field name="geolocation" string="Geo-location Coordinates"/>
+                                    <field name="country_id" string="Country" placeholder="India" options="{'no_open': True, 'no_create': True}" domain="[('code', '=', 'IN')]"/>
+                                    <field name="city" string="City" placeholder="Bengaluru"/>
+                                    <field name="geolocation" string="Map"/>
                                 </group>
                                 <group>
-                                    <field name="state_id" string="State *" placeholder="Karnataka" options="{'no_open': True, 'no_create': True}" domain="[('country_id', '=', country_id)]" context="{'country_id': country_id, 'default_country_id': country_id}" required="1"/>
-                                    <field name="zip" string="Postal Code *" placeholder="560034" required="1"/>
+                                    <field name="state_id" string="State" placeholder="Karnataka" options="{'no_open': True, 'no_create': True}" domain="[('country_id', '=', country_id)]" context="{'country_id': country_id, 'default_country_id': country_id}"/>
+                                    <field name="zip" string="Postal Code" placeholder="560034"/>
                                 </group>
                             </group>
                         </div>
@@ -517,10 +483,7 @@
                             </group>
                         </div>
 
-                        <!-- Step 1 Navigation Button -->
-                        <div class="d-flex justify-content-end my-4">
-                            <button name="action_next_step" string="Next" type="object" class="btn btn-school-save px-5 py-2"/>
-                        </div>
+
                     </div>
 
                     <!-- ==========================================
@@ -603,12 +566,7 @@
                             </notebook>
                         </div>
 
-                        <!-- Step 2 Navigation Buttons matching Screenshot 2 -->
-                        <div class="d-flex justify-content-end gap-2 my-4">
-                            <button name="action_prev_step" string="Previous" type="object" class="btn btn-secondary px-4 py-2"/>
-                            <button name="action_draft" string="Save" type="object" class="btn btn-school-draft px-4 py-2"/>
-                            <button name="action_next_step" string="Next" type="object" class="btn btn-school-save px-5 py-2"/>
-                        </div>
+
                     </div>
 
                     <!-- ==========================================
@@ -680,15 +638,9 @@
                             </group>
                         </div>
 
-                        <!-- Step 3 Navigation Buttons matching Screenshot 3 -->
-                        <div class="d-flex justify-content-end gap-2 my-4">
-                            <button name="action_prev_step" string="Previous" type="object" class="btn btn-secondary px-4 py-2"/>
-                            <button name="action_draft" string="Save as Draft" type="object" class="btn btn-school-draft px-4 py-2"/>
-                            <button name="action_approve" string="Save" type="object" class="btn btn-school-save px-5 py-2"/>
-                        </div>
+
                     </div>
                 </sheet>
-                <chatter/>
             </form>
         </field>
     </record>
