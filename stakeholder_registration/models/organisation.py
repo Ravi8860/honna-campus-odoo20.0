@@ -382,6 +382,35 @@ class StakeholderOrganisation(models.Model):
             else:
                 rec.contact_name_phone = False
 
+    @api.onchange('board_member_ids', 'dept_head_ids', 'operation_member_ids')
+    def _onchange_primary_member(self):
+        all_primaries = [m for m in (list(self.board_member_ids) + list(self.dept_head_ids) + list(self.operation_member_ids)) if m.is_primary]
+        if len(all_primaries) > 1:
+            primary = next((m for m in all_primaries if m.first_name != self.primary_contact_first_name or m.last_name != self.primary_contact_last_name), all_primaries[-1])
+            for m in all_primaries:
+                if m != primary:
+                    m.is_primary = False
+        elif len(all_primaries) == 1:
+            primary = all_primaries[0]
+        else:
+            primary = None
+
+        if primary:
+            self.primary_contact_first_name = primary.first_name
+            self.primary_contact_last_name = primary.last_name
+            role_dict = dict(primary._fields['role'].selection) if hasattr(primary._fields.get('role'), 'selection') else {}
+            self.contact_role = role_dict.get(primary.role, primary.role) or primary.designation or False
+            self.contact_email = primary.email
+            self.contact_phone = primary.phone
+            self.contact_method = primary.contact_method or 'email'
+        else:
+            self.primary_contact_first_name = False
+            self.primary_contact_last_name = False
+            self.contact_role = False
+            self.contact_email = False
+            self.contact_phone = False
+            self.contact_method = 'email' 
+
     @api.onchange('state_id')
     def _onchange_state_id(self):
         if self.state_id and self.state_id.country_id:
@@ -483,6 +512,17 @@ class StakeholderOrganisation(models.Model):
                     vals['user_id'] = self.env.user.id
         records = super(StakeholderOrganisation, self.sudo()).create(vals_list)
         for rec in records:
+            primary = next((m for m in rec.board_member_ids if m.is_primary), None) or                       next((m for m in rec.dept_head_ids if m.is_primary), None) or                       next((m for m in rec.operation_member_ids if m.is_primary), None)
+            if primary and not rec.primary_contact_first_name:
+                role_dict = dict(primary._fields['role'].selection) if hasattr(primary._fields.get('role'), 'selection') else {}
+                rec.sudo().write({
+                    'primary_contact_first_name': primary.first_name,
+                    'primary_contact_last_name': primary.last_name,
+                    'contact_role': role_dict.get(primary.role, primary.role) or primary.designation,
+                    'contact_email': primary.email,
+                    'contact_phone': primary.phone,
+                    'contact_method': primary.contact_method or 'email',
+                })
             if not rec.partner_id and rec.name:
                 try:
                     rec._sync_to_partner()
@@ -496,6 +536,27 @@ class StakeholderOrganisation(models.Model):
 
     def write(self, vals):
         res = super(StakeholderOrganisation, self.sudo()).write(vals)
+        if any(f in vals for f in ('board_member_ids', 'dept_head_ids', 'operation_member_ids')):
+            for rec in self:
+                primary = next((m for m in rec.board_member_ids if m.is_primary), None) or                           next((m for m in rec.dept_head_ids if m.is_primary), None) or                           next((m for m in rec.operation_member_ids if m.is_primary), None)
+                if primary:
+                    role_dict = dict(primary._fields['role'].selection) if hasattr(primary._fields.get('role'), 'selection') else {}
+                    rec.sudo().write({
+                        'primary_contact_first_name': primary.first_name,
+                        'primary_contact_last_name': primary.last_name,
+                        'contact_role': role_dict.get(primary.role, primary.role) or primary.designation,
+                        'contact_email': primary.email,
+                        'contact_phone': primary.phone,
+                        'contact_method': primary.contact_method or 'email',
+                    })
+                elif any(getattr(rec, f) for f in ('primary_contact_first_name', 'primary_contact_last_name', 'contact_email', 'contact_phone')):
+                    rec.sudo().write({
+                        'primary_contact_first_name': False,
+                        'primary_contact_last_name': False,
+                        'contact_role': False,
+                        'contact_email': False,
+                        'contact_phone': False,
+                    })
         for rec in self:
             if rec.partner_id:
                 partner_vals = {}
@@ -725,6 +786,19 @@ class StakeholderOrganisationBoardMember(models.Model):
         if self.role and not self.designation:
             self.designation = dict(EXECUTIVE_ROLE_SELECTION).get(self.role, self.role)
 
+    @api.onchange('is_primary')
+    def _onchange_is_primary(self):
+        if self.is_primary and self.organisation_id:
+            for m in self.organisation_id.board_member_ids:
+                if m != self and m.is_primary:
+                    m.is_primary = False
+            for m in self.organisation_id.dept_head_ids:
+                if m.is_primary:
+                    m.is_primary = False
+            for m in self.organisation_id.operation_member_ids:
+                if m.is_primary:
+                    m.is_primary = False
+
     def init(self):
         super().init()
         if sql.table_exists(self.env.cr, self._table) and sql.column_exists(self.env.cr, self._table, 'role'):
@@ -776,6 +850,19 @@ class StakeholderOrganisationDeptHead(models.Model):
         if self.role and not self.designation:
             self.designation = dict(ACADEMIC_ROLE_SELECTION).get(self.role, self.role)
 
+    @api.onchange('is_primary')
+    def _onchange_is_primary(self):
+        if self.is_primary and self.organisation_id:
+            for m in self.organisation_id.board_member_ids:
+                if m.is_primary:
+                    m.is_primary = False
+            for m in self.organisation_id.dept_head_ids:
+                if m != self and m.is_primary:
+                    m.is_primary = False
+            for m in self.organisation_id.operation_member_ids:
+                if m.is_primary:
+                    m.is_primary = False
+
     def init(self):
         super().init()
         if sql.table_exists(self.env.cr, self._table) and sql.column_exists(self.env.cr, self._table, 'role'):
@@ -824,6 +911,19 @@ class StakeholderOrganisationOperationMember(models.Model):
     def _onchange_role(self):
         if self.role and not self.designation:
             self.designation = dict(OPERATIONS_ROLE_SELECTION).get(self.role, self.role)
+
+    @api.onchange('is_primary')
+    def _onchange_is_primary(self):
+        if self.is_primary and self.organisation_id:
+            for m in self.organisation_id.board_member_ids:
+                if m.is_primary:
+                    m.is_primary = False
+            for m in self.organisation_id.dept_head_ids:
+                if m.is_primary:
+                    m.is_primary = False
+            for m in self.organisation_id.operation_member_ids:
+                if m != self and m.is_primary:
+                    m.is_primary = False
 
 class StakeholderOrganisationAssociationMembership(models.Model):
     _name = 'stakeholder.organisation.association.membership'
