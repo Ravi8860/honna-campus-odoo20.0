@@ -219,7 +219,7 @@ class StakeholderOrganisation(models.Model):
         ('draft', 'Draft'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected')
-    ], string='Status', default='draft', required=True, tracking=True)
+    ], string='Status', default='approved', required=True, tracking=True)
     partner_id = fields.Many2one('res.partner', string='Approved Partner', readonly=True)
     user_id = fields.Many2one('res.users', string='Related User', compute='_compute_user_id', store=True, readonly=False)
     form_step = fields.Selection([
@@ -418,6 +418,41 @@ class StakeholderOrganisation(models.Model):
         if self.shipping_country_id and self.shipping_state_id and self.shipping_state_id.country_id != self.shipping_country_id:
             self.shipping_state_id = False
 
+    def _sync_to_partner(self):
+        partner_obj = self.env['res.partner']
+        for rec in self:
+            if not rec.name:
+                continue
+            partner = rec.partner_id
+            if not partner and rec.email:
+                partner = partner_obj.sudo().search([('email', '=', rec.email)], limit=1)
+            if not partner and rec.phone:
+                partner = partner_obj.sudo().search([('phone', '=', rec.phone)], limit=1)
+            if not partner:
+                partner = partner_obj.sudo().search([('name', '=', rec.name)], limit=1)
+
+            vals = {
+                'name': rec.name,
+                'email': rec.email,
+                'phone': rec.phone,
+                'website': rec.website,
+                'vat': rec.vat,
+                'street': rec.street or rec.address,
+                'street2': rec.street2,
+                'city': rec.city,
+                'state_id': rec.state_id.id if rec.state_id else False,
+                'zip': rec.zip,
+                'country_id': rec.country_id.id if rec.country_id else False,
+                'is_company': True,
+                'user_category': rec.category or 'school',
+            }
+            if partner:
+                partner.sudo().write(vals)
+            else:
+                partner = partner_obj.sudo().create(vals)
+            if rec.partner_id != partner:
+                rec.sudo().write({'partner_id': partner.id})
+
     @api.model_create_multi
     def create(self, vals_list):
         india = self._default_country_id()
@@ -432,6 +467,8 @@ class StakeholderOrganisation(models.Model):
                     vals['billing_country_id'] = india.id
                 if not vals.get('shipping_country_id'):
                     vals['shipping_country_id'] = india.id
+            if not vals.get('state'):
+                vals['state'] = 'approved'
             if is_association_user and assoc:
                 if not vals.get('parent_organisation_id') and not vals.get('association_ids'):
                     vals['association_ids'] = [Command.link(assoc.id)]
@@ -445,6 +482,12 @@ class StakeholderOrganisation(models.Model):
                 if not vals.get('user_id'):
                     vals['user_id'] = self.env.user.id
         records = super(StakeholderOrganisation, self.sudo()).create(vals_list)
+        for rec in records:
+            if not rec.partner_id and rec.name:
+                try:
+                    rec._sync_to_partner()
+                except Exception:
+                    pass
         if is_school_user:
             for rec in records:
                 if not self.env.user.organisation_id and not rec.parent_school_id:
@@ -452,7 +495,22 @@ class StakeholderOrganisation(models.Model):
         return records
 
     def write(self, vals):
-        return super(StakeholderOrganisation, self.sudo()).write(vals)
+        res = super(StakeholderOrganisation, self.sudo()).write(vals)
+        for rec in self:
+            if rec.partner_id:
+                partner_vals = {}
+                for f in ('name', 'email', 'phone', 'website', 'vat', 'street', 'street2', 'city', 'zip'):
+                    if f in vals:
+                        partner_vals[f] = getattr(rec, f)
+                if 'address' in vals and 'street' not in vals:
+                    partner_vals['street'] = rec.address
+                if 'state_id' in vals:
+                    partner_vals['state_id'] = rec.state_id.id if rec.state_id else False
+                if 'country_id' in vals:
+                    partner_vals['country_id'] = rec.country_id.id if rec.country_id else False
+                if partner_vals:
+                    rec.partner_id.sudo().write(partner_vals)
+        return res
 
     def init(self):
         super().init()
