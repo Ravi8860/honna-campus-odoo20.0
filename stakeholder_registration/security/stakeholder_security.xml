@@ -130,6 +130,15 @@
     </record>
 
     <!-- Partner / Contacts Record Rules -->
+    <!-- Restrict base internal user read access so each user only sees their own / created contacts -->
+    <record id="base.res_partner_rule_user" model="ir.access">
+        <field name="domain">['|', '|',
+            ('id', '=', user.partner_id.id),
+            ('user_id', '=', user.id),
+            ('create_uid', '=', user.id)
+        ]</field>
+    </record>
+
     <record id="rule_res_partner_school_user" model="ir.access">
         <field name="name">School User: Own Contacts Only</field>
         <field name="model_id" ref="base.model_res_partner"/>

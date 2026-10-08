@@ -556,6 +556,7 @@ class StakeholderOrganisation(models.Model):
                         'contact_role': False,
                         'contact_email': False,
                         'contact_phone': False,
+                        'contact_method': 'email',
                     })
         for rec in self:
             if rec.partner_id:
