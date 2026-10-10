@@ -418,3 +418,15 @@ class ResUsers(models.Model):
                 user.sudo().write(vals)
         users._sync_association_profile()
 
+        # Clean up legacy duplicate unrestricted ir.access records that conflict with domain rules
+        obsolete_xml_ids = [
+            'stakeholder_registration.access_stakeholder_organisation_association_user',
+            'stakeholder_registration.access_stakeholder_association_association_user',
+            'stakeholder_registration.access_stakeholder_association_member_association_user',
+            'stakeholder_registration.access_stakeholder_organisation_school_user',
+        ]
+        for xml_id in obsolete_xml_ids:
+            rec = self.env.ref(xml_id, raise_if_not_found=False)
+            if rec and rec._name == 'ir.access':
+                rec.sudo().unlink()
+

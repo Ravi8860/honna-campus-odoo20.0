@@ -226,12 +226,13 @@ class StakeholderOrganisation(models.Model):
         ('1', 'School Details'),
         ('2', 'Member Details'),
         ('3', 'Primary Contact'),
+        ('4', 'Other Details'),
     ], string='Form Step', default='1', required=True)
 
     def action_next_step(self):
         self.ensure_one()
         current = int(self.form_step or 1)
-        if current < 3:
+        if current < 4:
             self.write({'form_step': str(current + 1)})
         return True
 
@@ -255,6 +256,11 @@ class StakeholderOrganisation(models.Model):
     def action_set_step_3(self):
         self.ensure_one()
         self.write({'form_step': '3'})
+        return True
+
+    def action_set_step_4(self):
+        self.ensure_one()
+        self.write({'form_step': '4'})
         return True
 
     def action_view_portal_profile(self):

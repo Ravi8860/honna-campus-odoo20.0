@@ -85,7 +85,7 @@
         <field name="model_id" ref="model_stakeholder_organisation"/>
         <field name="group_id" ref="group_association_user"/>
         <field name="domain">['|', '|', '|', '|', '|', '|', ('association_ids.partner_id', '=', user.partner_id.id), ('parent_organisation_id.partner_id', '=', user.partner_id.id), ('parent_organisation_id.user_id', '=', user.id), ('association_ids.user_id', '=', user.id), ('parent_organisation_id', '=', user.association_id.id), ('id', 'in', user.association_id.school_ids.ids), ('create_uid', '=', user.id)]</field>
-        <field name="operation">cru</field>
+        <field name="operation">crud</field>
     </record>
 
     <record id="rule_stakeholder_organisation_school_user" model="ir.access">
