@@ -126,8 +126,7 @@
                                 <field name="name" string="Name"/>
                                 <field name="designation" string="Designation"/>
                                 <field name="email" string="Email"/>
-                                <field name="phone" string="Phone" optional="show"/>
-                                <field name="contact_method" string="Preferred Contact Method" optional="hide"/>
+                                <field name="phone" string="Phone"/>
                             </list>
                         </field>
                     </div>

@@ -12,7 +12,7 @@
         </field>
     </record>
 
-    <!-- Partner Form View: Add User Category -->
+    <!-- Partner Form View: Add User Category & Designation -->
     <record id="view_partner_form_user_category" model="ir.ui.view">
         <field name="name">res.partner.form.user.category</field>
         <field name="model">res.partner</field>
@@ -20,6 +20,9 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='category_id']" position="after">
                 <field name="user_category"/>
+            </xpath>
+            <xpath expr="//field[@name='function']" position="after">
+                <field name="designation"/>
             </xpath>
         </field>
     </record>

@@ -92,7 +92,11 @@ class StakeholderAssociation(models.Model):
     contact_time = fields.Char(string='Preferred Contact Time')
 
     logo = fields.Binary(string='Logo')
-    member_ids = fields.One2many('stakeholder.association.member', 'association_id', string='Management / Executive Members')
+    member_ids = fields.One2many(
+        'stakeholder.association.member',
+        'association_id',
+        string='Management / Executive Members',
+    )
     state = fields.Selection([
         ('draft', 'Draft'),
         ('approved', 'Approved'),
@@ -300,6 +304,7 @@ class StakeholderAssociation(models.Model):
                 'country_id': rec.country_id.id if rec.country_id else False,
                 'is_company': True,
                 'user_category': 'association',
+                'association_id': rec.id,
             }
             if partner:
                 partner.sudo().write(vals)
@@ -324,6 +329,8 @@ class StakeholderAssociation(models.Model):
                     rec._sync_to_partner()
                 except Exception:
                     pass
+            elif rec.partner_id and rec.partner_id.association_id != rec:
+                rec.partner_id.sudo().write({'association_id': rec.id})
         return records
 
     def write(self, vals):
@@ -345,6 +352,8 @@ class StakeholderAssociation(models.Model):
                     partner_vals['country_id'] = rec.country_id.id if rec.country_id else False
                 if partner_vals:
                     rec.partner_id.sudo().write(partner_vals)
+        if 'member_ids' in vals:
+            self.env['ir.access']._clear_caches()
         return res
 
     def init(self):
@@ -428,7 +437,7 @@ class StakeholderAssociation(models.Model):
                 existing_user.with_context(skip_sync_assoc=True).write(user_write_vals)
             
         for member in self.member_ids:
-            mem_name = member.name or ' '.join(filter(None, [member.first_name, member.last_name])).strip() or 'Member'
+            mem_name = member.name.name if member.name else 'Member'
             self.env['stakeholder.team.member'].sudo().create({
                 'partner_id': partner.id,
                 'name': mem_name,
@@ -468,34 +477,30 @@ class StakeholderAssociationMember(models.Model):
     _description = 'Association Management Member'
 
     association_id = fields.Many2one('stakeholder.association', string='Association', ondelete='cascade')
-    first_name = fields.Char(string='First Name')
-    last_name = fields.Char(string='Last Name')
-    name = fields.Char(string='Name', compute='_compute_name', store=True, readonly=False)
-    role = fields.Char(string='Role')
+    name = fields.Many2one('res.partner', string='Name')
     designation = fields.Char(string='Designation')
-    phone = fields.Char(string='Phone')
     email = fields.Char(string='Email')
-    contact_method = fields.Selection([
-        ('email', 'Email'),
-        ('whatsapp', 'WhatsApp'),
-        ('phone', 'Phone'),
-    ], string='Preferred Contact Method', default='email')
+    phone = fields.Char(string='Phone')
 
-    @api.depends('first_name', 'last_name')
-    def _compute_name(self):
-        for rec in self:
-            full_name = ' '.join(filter(None, [rec.first_name, rec.last_name])).strip()
-            if full_name:
-                rec.name = full_name
-            elif not rec.name:
-                rec.name = False
+    @api.onchange('name')
+    def _onchange_name(self):
+        if self.name:
+            self.designation = self.name.designation or self.name.function or ''
+            self.email = self.name.email or ''
+            self.phone = self.name.phone or ''
 
-    @api.onchange('role')
-    def _onchange_role(self):
-        if self.role and not self.designation:
-            self.designation = self.role
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        self.env['ir.access']._clear_caches()
+        return records
 
-    @api.onchange('designation')
-    def _onchange_designation(self):
-        if self.designation and not self.role:
-            self.role = self.designation
+    def write(self, vals):
+        res = super().write(vals)
+        self.env['ir.access']._clear_caches()
+        return res
+
+    def unlink(self):
+        res = super().unlink()
+        self.env['ir.access']._clear_caches()
+        return res

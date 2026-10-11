@@ -357,7 +357,7 @@
                             <div class="row g-3">
                                 <div class="col-12">
                                     <label class="form-label fw-semibold text-secondary small mb-1" for="assoc_school_name">Association Name <span class="text-danger">*</span></label>
-                                    <input type="text" name="assoc_name" id="assoc_school_name" class="form-control honna-input" placeholder="Karnataka Unaided Schools Management Association" t-att-value="association.name if association else ''" required="required"/>
+                                    <input type="text" name="assoc_name" id="assoc_school_name" class="form-control honna-input"     t-att-value="association.name if association else ''" required="required"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-secondary small mb-1" for="assoc_email">Email Address <span class="text-danger">*</span></label>
@@ -444,8 +444,8 @@
                                         <t t-if="association and association.member_ids">
                                             <t t-foreach="association.member_ids" t-as="mem">
                                                 <tr t-att-id="'member_row_' + str(mem.id)">
-                                                    <td class="px-3 fw-medium text-dark"><t t-out="mem.name or (mem.first_name + ' ' + (mem.last_name or ''))"/></td>
-                                                    <td class="px-3 text-muted"><t t-out="mem.designation or mem.role"/></td>
+                                                    <td class="px-3 fw-medium text-dark"><t t-out="mem.name.name if mem.name else ''"/></td>
+                                                    <td class="px-3 text-muted"><t t-out="mem.designation or ''"/></td>
                                                     <td class="px-3 text-muted"><t t-out="mem.email"/></td>
                                                     <td class="px-3 text-end">
                                                         <button type="button" class="btn btn-link text-secondary p-1 me-2" title="Edit Member" t-att-onclick="'editMemberRow(%s)' % mem.id">
