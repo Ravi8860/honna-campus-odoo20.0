@@ -512,12 +512,15 @@ class StakeholderPortalController(http.Controller):
         mem_desig = (post.get('new_member_designation') or mem_role).strip()
 
         if mem_first or mem_last or mem_email:
+            full_name = f"{mem_first} {mem_last}".strip() or mem_email
+            partner = sudo_env['res.partner'].create({
+                'name': full_name,
+                'designation': mem_desig or mem_role or 'Member',
+                'email': mem_email,
+            })
             sudo_env['stakeholder.association.member'].create({
                 'association_id': assoc.id,
-                'first_name': mem_first,
-                'last_name': mem_last,
-                'name': f"{mem_first} {mem_last}".strip() or mem_email,
-                'role': mem_role or 'Member',
+                'name': partner.id,
                 'designation': mem_desig or mem_role or 'Member',
                 'email': mem_email,
             })

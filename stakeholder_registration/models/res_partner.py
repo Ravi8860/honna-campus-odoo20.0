@@ -12,13 +12,17 @@ class ResPartner(models.Model):
         string='Category',
         index=True,
     )
+    designation = fields.Char(string='Designation')
+    association_member_ids = fields.One2many(
+        'stakeholder.association.member',
+        'name',
+        string='Association Memberships',
+    )
 
     @api.onchange('parent_id')
     def _onchange_parent_id_user_category(self):
         if self.parent_id and self.parent_id.user_category and not self.user_category:
             self.user_category = self.parent_id.user_category
-
-
 
     @api.model
     def default_get(self, fields_list):
@@ -55,8 +59,8 @@ class ResPartner(models.Model):
             user.user_category == 'honna_staff' or
             user.has_group('stakeholder_registration.group_stakeholder_user')
         )
-        if is_honna_staff:
-            for vals in vals_list:
+        for vals in vals_list:
+            if is_honna_staff:
                 if not vals.get('user_id'):
                     vals['user_id'] = user.id
                 if not vals.get('user_category'):
@@ -123,4 +127,3 @@ class ResPartner(models.Model):
         children = self.sudo().search([('parent_id.user_category', '!=', False), ('user_category', '=', False)])
         for child in children:
             child.write({'user_category': child.parent_id.user_category})
-
