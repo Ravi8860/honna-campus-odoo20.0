@@ -216,10 +216,36 @@ class ResUsers(models.Model):
                 user.sudo().write({'group_ids': commands})
         self._sync_association_profile()
 
+    def _ensure_main_company_access(self):
+        """Keep Association/School users on main company so Contacts multi-company rules pass."""
+        main = self.env.ref('base.main_company', raise_if_not_found=False)
+        if not main:
+            return
+        assoc_group = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
+        school_group = self.env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
+        for user in self:
+            is_restricted = (
+                (assoc_group and assoc_group in user.all_group_ids)
+                or (school_group and school_group in user.all_group_ids)
+                or user.user_category == 'association'
+                or getattr(user, 'is_association', False)
+                or getattr(user, 'is_school', False)
+            )
+            if not is_restricted or user.has_group('stakeholder_registration.group_stakeholder_user'):
+                continue
+            vals = {}
+            if user.company_id != main:
+                vals['company_id'] = main.id
+            if main not in user.company_ids:
+                vals['company_ids'] = [Command.link(main.id)]
+            if vals:
+                user.sudo().with_context(skip_sync_assoc=True).write(vals)
+
     def _sync_association_profile(self):
         if self.env.context.get('skip_sync_assoc'):
             return
         assoc_group = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
+        self._ensure_main_company_access()
         for user in self:
             is_assoc = (
                 user.user_category == 'association' or
@@ -416,6 +442,10 @@ class ResUsers(models.Model):
                 vals['group_ids'] = cmds
             if vals:
                 user.sudo().write(vals)
+        school_users = self.sudo().search([
+            ('group_ids', 'in', [school_group.id]),
+        ]) if school_group else self.browse()
+        (users | school_users)._ensure_main_company_access()
         users._sync_association_profile()
 
         # Clean up legacy duplicate unrestricted ir.access records that conflict with domain rules
@@ -424,9 +454,12 @@ class ResUsers(models.Model):
             'stakeholder_registration.access_stakeholder_association_association_user',
             'stakeholder_registration.access_stakeholder_association_member_association_user',
             'stakeholder_registration.access_stakeholder_organisation_school_user',
+            'stakeholder_registration.rule_res_partner_association_user_write',
         ]
         for xml_id in obsolete_xml_ids:
             rec = self.env.ref(xml_id, raise_if_not_found=False)
             if rec and rec._name == 'ir.access':
                 rec.sudo().unlink()
+
+
 

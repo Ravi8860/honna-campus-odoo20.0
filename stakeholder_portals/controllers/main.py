@@ -4,7 +4,6 @@ import json
 import logging
 import re
 from urllib.parse import urlencode
-from markupsafe import Markup, escape
 
 from odoo import http, _
 from odoo.http import request
@@ -30,35 +29,6 @@ ROLE_TITLES = {
 
 
 class StakeholderPortalController(http.Controller):
-
-    def _format_lead_description(self, title, rows):
-        """Build an HTML notes block for the CRM lead from label/value pairs."""
-        lines = [f"<p><strong>{escape(title)}</strong></p><ul>"]
-        for label, value in rows:
-            if value not in (None, False, ''):
-                lines.append(
-                    f"<li><strong>{escape(str(label))}:</strong> {escape(str(value))}</li>"
-                )
-        lines.append("</ul>")
-        return Markup("".join(lines))
-
-    def _create_crm_lead(self, env, lead_vals):
-        """Create a CRM lead for a portal registration. Failures are logged only."""
-        try:
-            vals = {
-                'type': 'lead',
-                'user_id': False,
-                **lead_vals,
-            }
-            if not vals.get('company_id') and request.website:
-                vals['company_id'] = request.website.company_id.id
-            medium = env.ref('utm.utm_medium_website', raise_if_not_found=False)
-            if medium and not vals.get('medium_id'):
-                vals['medium_id'] = medium.id
-            return env['crm.lead'].sudo().create(vals)
-        except Exception:
-            _logger.exception("Failed to create CRM lead for portal registration")
-            return env['crm.lead']
 
     @http.route(['/stakeholder-portals', '/registration'], type='http', auth='public', website=True)
     def portals_index(self, **kw):
@@ -255,8 +225,8 @@ class StakeholderPortalController(http.Controller):
             if rec and hasattr(rec, 'user_id') and not rec.user_id:
                 rec.sudo().write({'user_id': user.id})
 
-            # 5. Create CRM Lead for tracking & visibility
-            lead = self._create_crm_lead(sudo_env, {
+            # 5. Create CRM Lead based on selected category
+            lead_vals = {
                 'name': _('%s Registration: %s') % (role_title, display_name),
                 'partner_name': display_name,
                 'contact_name': display_name,
@@ -271,20 +241,10 @@ class StakeholderPortalController(http.Controller):
                 'registration_id_ref': str(rec_id) if rec_id else '',
                 'org_registration_id': rec_id if portal_type != 'association' else False,
                 'assoc_registration_id': rec_id if portal_type == 'association' else False,
-                'description': self._format_lead_description(
-                    _('%s Registration') % role_title,
-                    [
-                        (_('Role'), role_title),
-                        (_('Salutation'), salutation),
-                        (_('First Name'), first_name),
-                        (_('Last Name'), last_name),
-                        (_('Full Name'), display_name),
-                        (_('Email'), email),
-                        (_('Phone'), phone),
-                        (_('Registration ID'), rec_id),
-                    ]
-                ),
-            })
+                'type': 'lead',
+                'company_id': request.env.company.id if hasattr(request, 'env') and request.env.company else False,
+            }
+            lead = sudo_env['crm.lead'].create(lead_vals)
             if lead and rec and hasattr(rec, 'lead_id'):
                 rec.sudo().write({'lead_id': lead.id})
 
@@ -326,7 +286,7 @@ class StakeholderPortalController(http.Controller):
             'phone': phone,
             'roll': roll,
         })
-        lead = self._create_crm_lead(env, {
+        lead = env['crm.lead'].sudo().create({
             'name': _('Student Registration: %s') % name,
             'contact_name': name,
             'email_from': email,
@@ -336,6 +296,7 @@ class StakeholderPortalController(http.Controller):
             'first_name': post.get('first_name') or name,
             'last_name': post.get('last_name') or '',
             'registration_id_ref': str(student_rec.id),
+            'type': 'lead',
         })
         if lead:
             student_rec.sudo().write({'lead_id': lead.id})
@@ -351,7 +312,7 @@ class StakeholderPortalController(http.Controller):
             'email': email,
             'phone': phone,
         })
-        lead = self._create_crm_lead(env, {
+        lead = env['crm.lead'].sudo().create({
             'name': _('Parent Registration: %s') % name,
             'contact_name': name,
             'email_from': email,
@@ -361,6 +322,7 @@ class StakeholderPortalController(http.Controller):
             'first_name': post.get('first_name') or name,
             'last_name': post.get('last_name') or '',
             'registration_id_ref': str(parent_rec.id),
+            'type': 'lead',
         })
         if lead:
             parent_rec.sudo().write({'lead_id': lead.id})
@@ -384,7 +346,7 @@ class StakeholderPortalController(http.Controller):
         user = request.env.user
         if not assoc and user and user.id != request.env.ref('base.public_user').id:
             if hasattr(user, 'association_id') and user.association_id:
-                assoc = user.association_id
+                assoc = user.association_id.sudo()
             elif user.partner_id:
                 assoc = sudo_env['stakeholder.association'].search([('partner_id', '=', user.partner_id.id)], limit=1)
             if not assoc and user.email:
@@ -560,7 +522,9 @@ class StakeholderPortalController(http.Controller):
 
         user = request.env.user
         if not school and user and user.id != request.env.ref('base.public_user').id:
-            if user.partner_id:
+            if hasattr(user, 'organisation_id') and user.organisation_id:
+                school = user.organisation_id.sudo()
+            elif user.partner_id:
                 school = sudo_env['stakeholder.organisation'].search([
                     ('partner_id', '=', user.partner_id.id),
                     ('category', '=', 'school')

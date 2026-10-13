@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Stakeholder Registration',
-    'version': '20.0.1.0.0',
+    'version': '20.0.1.0.7',
     'category': 'Administration',
     'summary': 'Dedicated tables for capturing Association, Organisation, Student, and Parent registrations',
     'description': """
@@ -21,7 +21,7 @@ Security
     'author': 'leapai.ai',
     'website': 'https://leapai.ai',
     'license': 'LGPL-3',
-    'depends': ['base', 'mail'],
+    'depends': ['base', 'mail', 'iap'],
     'data': [
         'security/stakeholder_security.xml',
         'security/ir.access.csv',

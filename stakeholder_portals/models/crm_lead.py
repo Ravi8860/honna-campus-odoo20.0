@@ -18,7 +18,7 @@ class CrmLead(models.Model):
         ('ecosystem_partner', 'Ecosystem Partner'),
         ('student', 'Student'),
         ('parent', 'Parent'),
-    ], string='User Category', index=True, copy=False)
+    ], string='Category', index=True, copy=False)
 
     salutation = fields.Char(string='Salutation', copy=False)
     first_name = fields.Char(string='First Name', copy=False)

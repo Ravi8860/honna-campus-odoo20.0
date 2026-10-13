@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _
-from odoo.exceptions import AccessError
+from odoo import api, fields, models, Command, _
+from odoo.fields import Domain
 from .res_users import USER_CATEGORY_SELECTION
 
 
@@ -18,6 +18,96 @@ class ResPartner(models.Model):
         'name',
         string='Association Memberships',
     )
+    association_id = fields.Many2one(
+        'stakeholder.association',
+        string='Association',
+        compute='_compute_association_id',
+        inverse='_inverse_association_id',
+        store=False,
+    )
+
+    def _compute_association_id(self):
+        for partner in self:
+            assoc = False
+            if partner.id and not isinstance(partner.id, models.NewId):
+                assoc = self.env['stakeholder.association'].sudo().search([('partner_id', '=', partner.id)], limit=1)
+                if not assoc and partner.association_member_ids:
+                    assoc = partner.association_member_ids[0].association_id
+            partner.association_id = assoc
+
+    def _inverse_association_id(self):
+        for partner in self:
+            if partner.id and not isinstance(partner.id, models.NewId):
+                if partner.association_id and partner.association_id.partner_id != partner:
+                    partner.association_id.sudo().write({'partner_id': partner.id})
+
+    def _is_association_or_school_user(self):
+        user = self.env.user
+        if (
+            user.has_group('stakeholder_registration.group_stakeholder_user')
+            or user.has_group('base.group_system')
+        ):
+            return False
+        return (
+            user.has_group('stakeholder_registration.group_association_user')
+            or user.has_group('stakeholder_registration.group_school_user')
+        )
+
+    @api.model
+    def _access_domain(self, operation):
+        """Scope Association/School Contacts without leaking all internal partners.
+
+        List shows: login partner, management members, schools, and own created/assigned.
+        Chatter authors: archived system partners + Administrator (hidden from list via _search).
+        """
+        if self.env.su or not self._is_association_or_school_user():
+            return super()._access_domain(operation)
+
+        user = self.env.user
+        company = (
+            Domain('company_id', '=', False)
+            | Domain('company_id', 'parent_of', self.env.companies.ids)
+        )
+        parts = [
+            Domain('id', '=', user.partner_id.id),
+            Domain('create_uid', '=', user.id),
+            Domain('user_id', '=', user.id),
+            # Archived system partners (Public, OdooBot) — not listed (active_test)
+            Domain('active', '=', False),
+        ]
+        admin = self.env.ref('base.partner_admin', raise_if_not_found=False)
+        if admin:
+            parts.append(Domain('id', '=', admin.id))
+
+        if user.has_group('stakeholder_registration.group_association_user'):
+            assoc = user.association_id
+            if assoc:
+                if assoc.partner_id:
+                    parts.append(Domain('id', '=', assoc.partner_id.id))
+                member_ids = assoc.member_ids.name.ids
+                school_ids = assoc.school_ids.partner_id.ids
+                if member_ids:
+                    parts.append(Domain('id', 'in', member_ids))
+                if school_ids:
+                    parts.append(Domain('id', 'in', school_ids))
+        else:
+            org = user.organisation_id
+            if org and org.partner_id:
+                parts.append(Domain('id', '=', org.partner_id.id))
+
+        return Domain.OR(parts) & company
+
+    @api.model
+    def _search(self, domain, offset=0, limit=None, order=None, *, active_test=True, bypass_access=False):
+        # Keep Administrator readable for chatter, but out of Contacts list.
+        if not self.env.su and not bypass_access and self._is_association_or_school_user():
+            admin = self.env.ref('base.partner_admin', raise_if_not_found=False)
+            if admin:
+                domain = Domain(domain) & Domain('id', '!=', admin.id)
+        return super()._search(
+            domain, offset=offset, limit=limit, order=order,
+            active_test=active_test, bypass_access=bypass_access,
+        )
 
     @api.onchange('parent_id')
     def _onchange_parent_id_user_category(self):
@@ -47,6 +137,8 @@ class ResPartner(models.Model):
         if is_restricted:
             if 'user_id' in fields_list and not defaults.get('user_id'):
                 defaults['user_id'] = user.id
+            if 'company_id' in fields_list:
+                defaults['company_id'] = False
         return defaults
 
     @api.model_create_multi
@@ -73,7 +165,84 @@ class ResPartner(models.Model):
             for vals in vals_list:
                 if not vals.get('user_id'):
                     vals['user_id'] = user.id
-        return super().create(vals_list)
+                vals['company_id'] = False
+        partners = super().create(vals_list)
+        if is_restricted or self._is_association_or_school_user():
+            partners._create_users_from_contacts()
+        return partners
+
+    def _create_users_from_contacts(self):
+        """Create a login user from contact name + email (Association/School create).
+
+        Link the user to the creator's association/school so Contacts scope works
+        after login (own contact + that association's members/schools).
+        """
+        User = self.env['res.users'].sudo()
+        group_user = self.env.ref('base.group_user', raise_if_not_found=False)
+        group_assoc = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
+        group_school = self.env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
+        if not group_user:
+            return
+        creator = self.env.user
+        is_school_creator = bool(
+            group_school and creator.has_group('stakeholder_registration.group_school_user')
+        )
+        for partner in self:
+            email = (partner.email or '').strip()
+            if not email or partner.user_ids:
+                continue
+            if User.search([
+                '|',
+                ('login', '=', email),
+                ('partner_id', '=', partner.id),
+            ], limit=1):
+                continue
+
+            if is_school_creator:
+                group_ids = [group_user.id, group_school.id]
+                category = 'school'
+            else:
+                group_ids = [group_user.id] + ([group_assoc.id] if group_assoc else [])
+                category = 'association'
+
+            user = User.with_context(no_reset_password=True, skip_sync_assoc=True).create({
+                'name': partner.name,
+                'login': email,
+                'email': email,
+                'partner_id': partner.id,
+                'user_category': category,
+                'group_ids': [Command.set(group_ids)],
+            })
+            # Set after create so stored compute does not wipe the creator's link
+            link_vals = {}
+            if is_school_creator and creator.organisation_id:
+                link_vals['organisation_id'] = creator.organisation_id.id
+            elif creator.association_id:
+                link_vals['association_id'] = creator.association_id.id
+            if link_vals:
+                user.with_context(skip_sync_assoc=True).write(link_vals)
+
+            # Keep contact in Association Management Members (creator + new user scope)
+            if not is_school_creator and creator.association_id:
+                Member = self.env['stakeholder.association.member'].sudo()
+                exists = Member.search([
+                    ('association_id', '=', creator.association_id.id),
+                    ('name', '=', partner.id),
+                ], limit=1)
+                if not exists:
+                    Member.create({
+                        'association_id': creator.association_id.id,
+                        'name': partner.id,
+                        'email': email,
+                        'phone': partner.phone or False,
+                        'designation': partner.designation or partner.function or False,
+                    })
+                    self.env['ir.access']._clear_caches()
+                    self.env.transaction.invalidate_ormcache()
+            try:
+                user.action_reset_password()
+            except Exception:
+                pass
 
     @api.model
     def _init_partner_user_category(self):
@@ -127,3 +296,18 @@ class ResPartner(models.Model):
         children = self.sudo().search([('parent_id.user_category', '!=', False), ('user_category', '=', False)])
         for child in children:
             child.write({'user_category': child.parent_id.user_category})
+
+        # 8. Association/School created contacts: clear company to avoid multi-company AccessError
+        assoc_group = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
+        school_group = self.env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
+        group_ids = [g.id for g in (assoc_group, school_group) if g]
+        if group_ids:
+            restricted_users = self.env['res.users'].sudo().search([('group_ids', 'in', group_ids)])
+            if restricted_users:
+                stuck = self.sudo().search([
+                    ('create_uid', 'in', restricted_users.ids),
+                    ('company_id', '!=', False),
+                    ('user_ids', '=', False),
+                ])
+                if stuck:
+                    stuck.write({'company_id': False})
