@@ -8,4 +8,5 @@ from . import student
 from . import student_profile
 from . import res_users
 from . import res_partner
+from . import iap_account
 

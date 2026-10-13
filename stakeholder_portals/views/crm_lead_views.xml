@@ -9,7 +9,7 @@
                 <field name="portal_type" invisible="1"/>
             </xpath>
             <xpath expr="//sheet//group//field[@name='tag_ids']" position="after">
-                <field name="user_category" widget="badge"/>
+                <field name="user_category"/>
                 <field name="salutation" invisible="not salutation"/>
                 <field name="first_name" invisible="not first_name"/>
                 <field name="last_name" invisible="not last_name"/>

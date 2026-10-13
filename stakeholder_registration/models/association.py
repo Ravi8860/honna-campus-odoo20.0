@@ -304,7 +304,6 @@ class StakeholderAssociation(models.Model):
                 'country_id': rec.country_id.id if rec.country_id else False,
                 'is_company': True,
                 'user_category': 'association',
-                'association_id': rec.id,
             }
             if partner:
                 partner.sudo().write(vals)
@@ -329,8 +328,12 @@ class StakeholderAssociation(models.Model):
                     rec._sync_to_partner()
                 except Exception:
                     pass
-            elif rec.partner_id and rec.partner_id.association_id != rec:
-                rec.partner_id.sudo().write({'association_id': rec.id})
+            if rec.user_id and rec.user_id.association_id != rec:
+                rec.user_id.sudo().write({'association_id': rec.id})
+            elif rec.partner_id and rec.partner_id.user_ids:
+                for user in rec.partner_id.user_ids:
+                    if user.association_id != rec:
+                        user.sudo().write({'association_id': rec.id})
         return records
 
     def write(self, vals):
@@ -352,8 +355,10 @@ class StakeholderAssociation(models.Model):
                     partner_vals['country_id'] = rec.country_id.id if rec.country_id else False
                 if partner_vals:
                     rec.partner_id.sudo().write(partner_vals)
-        if 'member_ids' in vals:
+        if any(f in vals for f in ('member_ids', 'school_ids', 'partner_id')):
             self.env['ir.access']._clear_caches()
+            # Invalidate default ormcache so res.partner._access_domain refreshes
+            self.env.transaction.invalidate_ormcache()
         return res
 
     def init(self):

@@ -130,10 +130,11 @@
     </record>
 
     <!-- Partner / Contacts Record Rules -->
-    <!-- Restrict base internal user read access so each user only sees their own / created contacts -->
+    <!-- Fallback ACL domains; Association/School list scope is enforced in res.partner._access_domain -->
     <record id="base.res_partner_rule_user" model="ir.access">
-        <field name="domain">['|', '|',
+        <field name="domain">['|', '|', '|',
             ('id', '=', user.partner_id.id),
+            ('id', '=', user.company_id.partner_id.id),
             ('user_id', '=', user.id),
             ('create_uid', '=', user.id)
         ]</field>
@@ -143,11 +144,9 @@
         <field name="name">School User: Own Contacts Only</field>
         <field name="model_id" ref="base.model_res_partner"/>
         <field name="group_id" ref="group_school_user"/>
-        <field name="domain">['|', '|', '|', '|', '|',
+        <field name="domain">['|', '|', '|',
             ('id', '=', user.partner_id.id),
-            ('parent_id', '=', user.partner_id.id),
             ('id', '=', user.organisation_id.partner_id.id),
-            ('parent_id', '=', user.organisation_id.partner_id.id),
             ('user_id', '=', user.id),
             ('create_uid', '=', user.id)
         ]</field>
@@ -155,47 +154,24 @@
     </record>
 
     <record id="rule_res_partner_association_user" model="ir.access">
-        <field name="name">Association User: Own Contacts &amp; Management Members (Read)</field>
+        <field name="name">Association User: Own, Management Members &amp; Schools</field>
         <field name="model_id" ref="base.model_res_partner"/>
         <field name="group_id" ref="group_association_user"/>
-        <field name="domain">['|', '|', '|', '|', '|', '|',
+        <field name="domain">['|', '|', '|', '|',
             ('id', '=', user.partner_id.id),
-            ('parent_id', '=', user.partner_id.id),
-            ('id', '=', user.association_id.partner_id.id),
-            ('parent_id', '=', user.association_id.partner_id.id),
+            ('id', 'in', user.association_id.member_ids.name.ids),
+            ('id', 'in', user.association_id.school_ids.partner_id.ids),
             ('user_id', '=', user.id),
-            ('create_uid', '=', user.id),
-            ('association_member_ids.association_id', '=', user.association_id.id)
+            ('create_uid', '=', user.id)
         ]</field>
-        <field name="operation">r</field>
-    </record>
-
-    <record id="rule_res_partner_association_user_write" model="ir.access">
-        <field name="name">Association User: Own Contacts &amp; Management Members (CUD)</field>
-        <field name="model_id" ref="base.model_res_partner"/>
-        <field name="group_id" ref="group_association_user"/>
-        <field name="domain">['|', '|', '|', '|', '|', '|',
-            ('id', '=', user.partner_id.id),
-            ('parent_id', '=', user.partner_id.id),
-            ('id', '=', user.association_id.partner_id.id),
-            ('parent_id', '=', user.association_id.partner_id.id),
-            ('user_id', '=', user.id),
-            ('create_uid', '=', user.id),
-            ('association_member_ids.association_id', '=', user.association_id.id)
-        ]</field>
-        <field name="operation">cud</field>
+        <field name="operation">crud</field>
     </record>
 
     <record id="rule_res_partner_full" model="ir.access">
-        <field name="name">Honna Staff: Own Contacts Only</field>
+        <field name="name">Honna Staff: All Contacts</field>
         <field name="model_id" ref="base.model_res_partner"/>
         <field name="group_id" ref="group_stakeholder_user"/>
-        <field name="domain">['|', '|', '|',
-            ('id', '=', user.partner_id.id),
-            ('user_id', '=', user.id),
-            ('create_uid', '=', user.id),
-            ('id', 'in', user.partner_id.child_ids.ids)
-        ]</field>
+        <field name="domain">[(1, '=', 1)]</field>
         <field name="operation">crud</field>
     </record>
 
