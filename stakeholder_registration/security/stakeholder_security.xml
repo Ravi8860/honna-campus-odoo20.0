@@ -25,7 +25,8 @@
         <field name="sequence">10</field>
         <field name="comment">Access Association and School only. Student and Parent menus are hidden.</field>
         <field name="privilege_id" ref="res_groups_privilege_ecosystem_partners"/>
-        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <!-- Contact Creation (Master Data → Contact) so Contacts New/Save works -->
+        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('base.group_partner_manager'))]"/>
     </record>
 
     <!-- School Users: School only (Association, Student, Parent hidden). -->

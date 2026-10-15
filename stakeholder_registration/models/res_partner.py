@@ -167,82 +167,46 @@ class ResPartner(models.Model):
                     vals['user_id'] = user.id
                 vals['company_id'] = False
         partners = super().create(vals_list)
+        # Association/School: create Portal login from contact name + email
         if is_restricted or self._is_association_or_school_user():
-            partners._create_users_from_contacts()
+            portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
+            User = self.env['res.users'].sudo()
+            creator = self.env.user
+            for partner in partners:
+                email = (partner.email or '').strip()
+                if not email or not portal_group or partner.user_ids:
+                    continue
+                if User.search(['|', ('login', '=', email), ('partner_id', '=', partner.id)], limit=1):
+                    continue
+                user = User.with_context(no_reset_password=True, skip_sync_assoc=True).create({
+                    'name': partner.name,
+                    'login': email,
+                    'email': email,
+                    'partner_id': partner.id,
+                    'group_ids': [Command.set([portal_group.id])],
+                })
+                if creator.association_id and creator.has_group(
+                    'stakeholder_registration.group_association_user'
+                ):
+                    Member = self.env['stakeholder.association.member'].sudo()
+                    if not Member.search([
+                        ('association_id', '=', creator.association_id.id),
+                        ('name', '=', partner.id),
+                    ], limit=1):
+                        Member.create({
+                            'association_id': creator.association_id.id,
+                            'name': partner.id,
+                            'email': email,
+                            'phone': partner.phone or False,
+                            'designation': partner.designation or partner.function or False,
+                        })
+                        self.env['ir.access']._clear_caches()
+                        self.env.transaction.invalidate_ormcache()
+                try:
+                    user.action_reset_password()
+                except Exception:
+                    pass
         return partners
-
-    def _create_users_from_contacts(self):
-        """Create a login user from contact name + email (Association/School create).
-
-        Link the user to the creator's association/school so Contacts scope works
-        after login (own contact + that association's members/schools).
-        """
-        User = self.env['res.users'].sudo()
-        group_user = self.env.ref('base.group_user', raise_if_not_found=False)
-        group_assoc = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
-        group_school = self.env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
-        if not group_user:
-            return
-        creator = self.env.user
-        is_school_creator = bool(
-            group_school and creator.has_group('stakeholder_registration.group_school_user')
-        )
-        for partner in self:
-            email = (partner.email or '').strip()
-            if not email or partner.user_ids:
-                continue
-            if User.search([
-                '|',
-                ('login', '=', email),
-                ('partner_id', '=', partner.id),
-            ], limit=1):
-                continue
-
-            if is_school_creator:
-                group_ids = [group_user.id, group_school.id]
-                category = 'school'
-            else:
-                group_ids = [group_user.id] + ([group_assoc.id] if group_assoc else [])
-                category = 'association'
-
-            user = User.with_context(no_reset_password=True, skip_sync_assoc=True).create({
-                'name': partner.name,
-                'login': email,
-                'email': email,
-                'partner_id': partner.id,
-                'user_category': category,
-                'group_ids': [Command.set(group_ids)],
-            })
-            # Set after create so stored compute does not wipe the creator's link
-            link_vals = {}
-            if is_school_creator and creator.organisation_id:
-                link_vals['organisation_id'] = creator.organisation_id.id
-            elif creator.association_id:
-                link_vals['association_id'] = creator.association_id.id
-            if link_vals:
-                user.with_context(skip_sync_assoc=True).write(link_vals)
-
-            # Keep contact in Association Management Members (creator + new user scope)
-            if not is_school_creator and creator.association_id:
-                Member = self.env['stakeholder.association.member'].sudo()
-                exists = Member.search([
-                    ('association_id', '=', creator.association_id.id),
-                    ('name', '=', partner.id),
-                ], limit=1)
-                if not exists:
-                    Member.create({
-                        'association_id': creator.association_id.id,
-                        'name': partner.id,
-                        'email': email,
-                        'phone': partner.phone or False,
-                        'designation': partner.designation or partner.function or False,
-                    })
-                    self.env['ir.access']._clear_caches()
-                    self.env.transaction.invalidate_ormcache()
-            try:
-                user.action_reset_password()
-            except Exception:
-                pass
 
     @api.model
     def _init_partner_user_category(self):
