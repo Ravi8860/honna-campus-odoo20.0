@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Stakeholder Registration',
-    'version': '20.0.1.0.7',
+    'version': '20.0.1.0.8',
     'category': 'Administration',
     'summary': 'Dedicated tables for capturing Association, Organisation, Student, and Parent registrations',
     'description': """
