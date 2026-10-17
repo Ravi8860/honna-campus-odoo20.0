@@ -6,18 +6,12 @@ class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
     user_category = fields.Selection([
-        ('honna_staff', 'Honna Staff'),
-        ('association', 'Association'),
+        ('association', 'Organisation'),
         ('school', 'School'),
-        ('college', 'College'),
-        ('academy', 'Academy'),
-        ('partner', 'Partner'),
-        ('others', 'Others'),
-        ('school_college', 'School/College'),
-        ('educator', 'Teacher'),
-        ('ecosystem_partner', 'Ecosystem Partner'),
-        ('student', 'Student'),
         ('parent', 'Parent'),
+        ('academy', 'Academy'),
+        ('student', 'Student'),
+        ('partner', 'Vendor'),
     ], string='Category', index=True, copy=False)
 
     salutation = fields.Char(string='Salutation', copy=False)
@@ -26,19 +20,12 @@ class CrmLead(models.Model):
     registration_id_ref = fields.Char(string='Registration ID', copy=False)
 
     portal_type = fields.Selection([
-        ('honna_staff', 'Honna Staff'),
-        ('association', 'Association'),
+        ('association', 'Organisation'),
         ('school', 'School'),
-        ('college', 'College'),
-        ('academy', 'Academy'),
-        ('partner', 'Partner'),
-        ('others', 'Others'),
-        ('organisation', 'School/College'),
-        ('school_college', 'School/College'),
-        ('educator', 'Teacher'),
-        ('ecosystem_partner', 'Ecosystem Partner'),
-        ('student', 'Student'),
         ('parent', 'Parent'),
+        ('academy', 'Academy'),
+        ('student', 'Student'),
+        ('partner', 'Vendor'),
     ], string='Portal Type', copy=False, index=True)
 
     org_registration_id = fields.Many2one(

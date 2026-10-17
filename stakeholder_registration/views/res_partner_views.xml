@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="base.view_partner_tree"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='display_name']" position="after">
-                <field name="user_category" widget="badge" decoration-info="user_category == 'honna_staff'" decoration-success="user_category in ('school', 'school_college')" decoration-warning="user_category == 'association'" optional="show"/>
+                <field name="user_category" widget="badge" decoration-info="user_category == 'partner'" decoration-success="user_category == 'school'" decoration-warning="user_category == 'association'" optional="show"/>
             </xpath>
         </field>
     </record>

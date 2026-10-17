@@ -12,16 +12,15 @@
         </field>
     </record>
 
-    <!-- Form View: Add User Category and Is Association in Eco System Partners section -->
+    <!-- Form View: Add User Category and Is Association in Business Partners section -->
     <record id="view_users_form_is_association" model="ir.ui.view">
         <field name="name">res.users.form.is.association</field>
         <field name="model">res.users</field>
         <field name="inherit_id" ref="base.view_users_form"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@name='access_rights']/group[1]" position="after">
-                <group string="Eco System Partners" name="ecosystem_partners_access">
+                <group string="Business Partners" name="ecosystem_partners_access">
                     <field name="user_category"/>
-                    <field name="is_honna_staff"/>
                     <field name="is_association"/>
                     <field name="is_school"/>
                 </group>

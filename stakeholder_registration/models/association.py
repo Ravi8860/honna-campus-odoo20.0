@@ -6,7 +6,7 @@ from odoo.tools import sql
 class StakeholderAssociation(models.Model):
     _name = 'stakeholder.association'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _description = 'Association Registration Record'
+    _description = 'Organisation Registration Record'
 
     active = fields.Boolean(string='Active', default=True)
     name = fields.Char(string='Official Organisation Name', required=True, tracking=True)
@@ -16,12 +16,16 @@ class StakeholderAssociation(models.Model):
         ('association', 'Non-Profit Association'),
         ('board', 'School Board / Council'),
         ('foundation', 'Foundation'),
+        ('proprietorship', 'Proprietorship'),
+        ('partnership', 'Partnership Firm'),
+        ('llp', 'Limited Liability Partnership (LLP)'),
+        ('pvt_ltd', 'Private Limited Company (Pvt Ltd)'),
         ('other', 'Other'),
     ], string='Organisation Type', default='educational_trust')
     parent_org = fields.Char(string='Parent Organisation')
     parent_head_office = fields.Char(string='Parent School/Head Office')
-    phone = fields.Char(string='Association Phone')
-    email = fields.Char(string='Association Email')
+    phone = fields.Char(string='Organisation Phone')
+    email = fields.Char(string='Organisation Email')
     website = fields.Char(string='Website')
     year_established = fields.Char(string='Year Established')
     vat = fields.Char(string='Tax ID / GSTIN')

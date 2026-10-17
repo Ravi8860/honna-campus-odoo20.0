@@ -11,19 +11,19 @@ from odoo.http import request
 _logger = logging.getLogger(__name__)
 
 ROLE_TITLES = {
-    'honna_staff': 'Honna Staff',
-    'association': 'Association',
+    'association': 'Organisation',
     'school': 'School',
-    'college': 'College',
+    'parent': 'Parent',
     'academy': 'Academy',
-    'partner': 'Partner',
+    'student': 'Student',
+    'partner': 'Vendor',
+    'ecosystem_partner': 'Vendor',
+    'honna_staff': 'Honna Staff',
+    'college': 'College',
     'others': 'Others',
     'organisation': 'School',
     'school_college': 'School',
     'educator': 'Teacher',
-    'ecosystem_partner': 'Partner',
-    'student': 'Student',
-    'parent': 'Parent',
 }
 
 
@@ -166,8 +166,39 @@ class StakeholderPortalController(http.Controller):
                 else:
                     rec = assoc_obj.create(assoc_vals)
                 rec_id = rec.id
+            elif portal_type == 'student':
+                stud_obj = sudo_env['stakeholder.student'].sudo()
+                rec = stud_obj.search([('email', '=', email)], limit=1) if email else None
+                if not rec and phone:
+                    rec = stud_obj.search([('phone', '=', phone)], limit=1)
+                stud_vals = {
+                    'name': display_name or full_name,
+                    'email': email,
+                    'phone': phone,
+                }
+                if rec:
+                    rec.write(stud_vals)
+                else:
+                    stud_vals['roll'] = f"ADM-{sudo_env['ir.sequence'].sudo().next_by_code('stakeholder.student') or '001'}"
+                    rec = stud_obj.create(stud_vals)
+                rec_id = rec.id
+            elif portal_type == 'parent':
+                par_obj = sudo_env['stakeholder.parent'].sudo()
+                rec = par_obj.search([('email', '=', email)], limit=1) if email else None
+                if not rec and phone:
+                    rec = par_obj.search([('phone', '=', phone)], limit=1)
+                par_vals = {
+                    'name': display_name or full_name,
+                    'email': email,
+                    'phone': phone,
+                }
+                if rec:
+                    rec.write(par_vals)
+                else:
+                    rec = par_obj.create(par_vals)
+                rec_id = rec.id
             else:
-                cat_val = 'honna_staff' if portal_type == 'honna_staff' else ('school' if portal_type in ('school', 'school_college', 'organisation') else portal_type)
+                cat_val = 'school' if portal_type in ('school', 'school_college', 'organisation') else portal_type
                 org_obj = sudo_env['stakeholder.organisation'].sudo()
                 rec = partner and org_obj.search([('partner_id', '=', partner.id), ('category', '=', cat_val)], limit=1)
                 if not rec and email:
@@ -239,7 +270,7 @@ class StakeholderPortalController(http.Controller):
                 'first_name': first_name,
                 'last_name': last_name,
                 'registration_id_ref': str(rec_id) if rec_id else '',
-                'org_registration_id': rec_id if portal_type != 'association' else False,
+                'org_registration_id': rec_id if portal_type not in ('association', 'student', 'parent') else False,
                 'assoc_registration_id': rec_id if portal_type == 'association' else False,
                 'type': 'lead',
                 'company_id': request.env.company.id if hasattr(request, 'env') and request.env.company else False,

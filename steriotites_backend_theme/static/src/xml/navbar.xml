@@ -21,7 +21,7 @@
                     <div class="o_navbar_breadcrumbs d-contents"/>
 
                     <t t-if="!this.ui.isSmall">
-                        <!-- Header menus for all apps except Eco System Partners (those use the sidebar). -->
+                        <!-- Header menus for all apps except Business Partners (those use the sidebar). -->
                         <t t-if="this.currentAppSections.length and this.currentApp?.xmlid !== 'stakeholder_registration.menu_stakeholder_registration_root'"
                            t-call="web.NavBar.SectionsMenu"
                            sections="this.currentAppSections"/>

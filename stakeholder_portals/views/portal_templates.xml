@@ -38,7 +38,7 @@
                                 <!-- Role Selector Section ("I am an") matching Figma -->
                                 <div class="honna-role-selector-wrapper mb-3">
                                     <label class="honna-field-label">I am an</label>
-                                    <input type="hidden" name="portal_type" id="hidden_portal_type" t-att-value="values.get('portal_type') or 'honna_staff'"/>
+                                    <input type="hidden" name="portal_type" id="hidden_portal_type" t-att-value="values.get('portal_type') or 'association'"/>
                                     
                                     <div class="honna-custom-dropdown" id="honna_role_dropdown">
                                         <button type="button" class="honna-role-select-btn" id="honna_role_btn" aria-haspopup="listbox" aria-expanded="false">
@@ -53,16 +53,13 @@
                                                     </svg>
                                                 </div>
                                                 <span class="honna-role-label-text" id="honna_selected_role_label">
-                                                    <t t-if="values.get('portal_type') == 'honna_staff'">Honna Staff</t>
-                                                    <t t-elif="values.get('portal_type') == 'association'">Association</t>
+                                                    <t t-if="values.get('portal_type') == 'association'">Organisation</t>
                                                     <t t-elif="values.get('portal_type') == 'school'">School</t>
-                                                    <t t-elif="values.get('portal_type') == 'college'">College</t>
+                                                    <t t-elif="values.get('portal_type') == 'parent'">Parent</t>
                                                     <t t-elif="values.get('portal_type') == 'academy'">Academy</t>
-                                                    <t t-elif="values.get('portal_type') in ('partner', 'ecosystem_partner')">Partner</t>
-                                                    <t t-elif="values.get('portal_type') == 'others'">Others</t>
-                                                    <t t-elif="values.get('portal_type') in ('organisation', 'school_college')">School</t>
-                                                    <t t-elif="values.get('portal_type') == 'educator'">Teacher</t>
-                                                    <t t-else="">Honna Staff</t>
+                                                    <t t-elif="values.get('portal_type') == 'student'">Student</t>
+                                                    <t t-elif="values.get('portal_type') in ('partner', 'ecosystem_partner')">Vendor</t>
+                                                    <t t-else="">Organisation</t>
                                                 </span>
                                             </div>
                                             <div class="honna-chevron-wrap">
@@ -72,28 +69,25 @@
                                             </div>
                                         </button>
 
-                                        <!-- Dropdown Menu for Roles -->
+                                        <!-- Dropdown Menu for Roles (only Organisation, School, Parent, Academy, Student, Vendor) -->
                                         <ul class="honna-role-options-menu d-none" id="honna_role_menu" role="listbox">
-                                            <li t-attf-class="honna-role-option #{(values.get('portal_type') or 'honna_staff') == 'honna_staff' and 'active' or ''}" data-value="honna_staff" role="option">
-                                                <span>Honna Staff</span>
-                                            </li>
-                                            <li t-attf-class="honna-role-option #{values.get('portal_type') == 'association' and 'active' or ''}" data-value="association" role="option">
-                                                <span>Association</span>
+                                            <li t-attf-class="honna-role-option #{(values.get('portal_type') or 'association') == 'association' and 'active' or ''}" data-value="association" role="option">
+                                                <span>Organisation</span>
                                             </li>
                                             <li t-attf-class="honna-role-option #{values.get('portal_type') in ('school', 'school_college', 'organisation') and 'active' or ''}" data-value="school" role="option">
                                                 <span>School</span>
                                             </li>
-                                            <li t-attf-class="honna-role-option #{values.get('portal_type') == 'college' and 'active' or ''}" data-value="college" role="option">
-                                                <span>College</span>
+                                            <li t-attf-class="honna-role-option #{values.get('portal_type') == 'parent' and 'active' or ''}" data-value="parent" role="option">
+                                                <span>Parent</span>
                                             </li>
                                             <li t-attf-class="honna-role-option #{values.get('portal_type') == 'academy' and 'active' or ''}" data-value="academy" role="option">
                                                 <span>Academy</span>
                                             </li>
-                                            <li t-attf-class="honna-role-option #{values.get('portal_type') in ('partner', 'ecosystem_partner') and 'active' or ''}" data-value="partner" role="option">
-                                                <span>Partner</span>
+                                            <li t-attf-class="honna-role-option #{values.get('portal_type') == 'student' and 'active' or ''}" data-value="student" role="option">
+                                                <span>Student</span>
                                             </li>
-                                            <li t-attf-class="honna-role-option #{values.get('portal_type') == 'others' and 'active' or ''}" data-value="others" role="option">
-                                                <span>Others</span>
+                                            <li t-attf-class="honna-role-option #{values.get('portal_type') in ('partner', 'ecosystem_partner') and 'active' or ''}" data-value="partner" role="option">
+                                                <span>Vendor</span>
                                             </li>
                                         </ul>
                                     </div>
@@ -351,12 +345,12 @@
                             </div>
                         </div>
 
-                        <!-- Card 3: Association Information -->
+                        <!-- Card 3: Organisation Information -->
                         <div class="card p-4 mb-4 border rounded-3 bg-white shadow-sm honna-profile-card">
-                            <h5 class="fw-bold mb-3 text-dark" style="font-size: 16px;">Association Information</h5>
+                            <h5 class="fw-bold mb-3 text-dark" style="font-size: 16px;">Organisation Information</h5>
                             <div class="row g-3">
                                 <div class="col-12">
-                                    <label class="form-label fw-semibold text-secondary small mb-1" for="assoc_school_name">Association Name <span class="text-danger">*</span></label>
+                                    <label class="form-label fw-semibold text-secondary small mb-1" for="assoc_school_name">Organisation Name <span class="text-danger">*</span></label>
                                     <input type="text" name="assoc_name" id="assoc_school_name" class="form-control honna-input"     t-att-value="association.name if association else ''" required="required"/>
                                 </div>
                                 <div class="col-md-6">

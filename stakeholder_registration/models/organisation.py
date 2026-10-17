@@ -30,7 +30,7 @@ ORGANISATION_CATEGORY_SELECTION = [
     ('school', 'School'),
     ('college', 'College'),
     ('academy', 'Academy'),
-    ('partner', 'Partner'),
+    ('partner', 'Vendor'),
     ('others', 'Others'),
 ]
 

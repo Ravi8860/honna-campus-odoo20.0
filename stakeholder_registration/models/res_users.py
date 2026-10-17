@@ -3,18 +3,12 @@ from odoo import api, fields, models, Command
 
 
 USER_CATEGORY_SELECTION = [
-    ('honna_staff', 'Honna Staff'),
-    ('association', 'Association'),
+    ('association', 'Organisation'),
     ('school', 'School'),
-    ('college', 'College'),
-    ('academy', 'Academy'),
-    ('partner', 'Partner'),
-    ('others', 'Others'),
-    ('school_college', 'School/College'),
-    ('educator', 'Teacher'),
-    ('ecosystem_partner', 'Partner'),
-    ('student', 'Student'),
     ('parent', 'Parent'),
+    ('academy', 'Academy'),
+    ('student', 'Student'),
+    ('partner', 'Vendor'),
 ]
 
 
@@ -29,20 +23,12 @@ class ResUsers(models.Model):
     )
 
 
-    is_honna_staff = fields.Boolean(
-        string='Is Honna Staff User',
-        compute='_compute_is_honna_staff',
-        inverse='_inverse_is_honna_staff',
-        help='When enabled, the user belongs to Honna Staff (Full Access) and can access '
-             'all Eco System Partners menus with create and edit access.',
-    )
-
     is_association = fields.Boolean(
-        string='Is Association User',
+        string='Is Organisation User',
         compute='_compute_is_association',
         inverse='_inverse_is_association',
-        help='When enabled, the user belongs to Association Users and can access '
-             'Association and School only (Student and Parent menus are hidden).',
+        help='When enabled, the user belongs to Organisation Users and can access '
+             'Organisation and School only (Student and Parent menus are hidden).',
     )
 
     is_school = fields.Boolean(
@@ -50,7 +36,7 @@ class ResUsers(models.Model):
         compute='_compute_is_school',
         inverse='_inverse_is_school',
         help='When enabled, the user belongs to School Users and can access '
-             'School and Profile only (Association, Student and Parent menus are hidden).',
+             'School and Profile only (Organisation, Student and Parent menus are hidden).',
     )
 
     association_id = fields.Many2one(
@@ -142,50 +128,15 @@ class ResUsers(models.Model):
 
     @api.onchange('user_category')
     def _onchange_user_category(self):
-        if self.user_category == 'honna_staff':
-            self.is_honna_staff = True
-            self.is_association = False
-            self.is_school = False
-        elif self.user_category == 'association':
+        if self.user_category == 'association':
             self.is_association = True
             self.is_school = False
-            self.is_honna_staff = False
-        elif self.user_category in ('school_college', 'school', 'college', 'academy', 'partner', 'others'):
+        elif self.user_category == 'school':
             self.is_school = True
             self.is_association = False
-            self.is_honna_staff = False
         elif self.user_category:
             self.is_association = False
             self.is_school = False
-            self.is_honna_staff = False
-
-    @api.depends('group_ids')
-    def _compute_is_honna_staff(self):
-        group = self.env.ref(
-            'stakeholder_registration.group_stakeholder_user',
-            raise_if_not_found=False,
-        )
-        for user in self:
-            user.is_honna_staff = bool(group and group in user.all_group_ids)
-
-    def _inverse_is_honna_staff(self):
-        stakeholder_group = self.env.ref('stakeholder_registration.group_stakeholder_user')
-        school_group = self.env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
-        association_group = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
-        for user in self:
-            commands = []
-            if user.is_honna_staff:
-                commands.append(Command.link(stakeholder_group.id))
-                if school_group:
-                    commands.append(Command.unlink(school_group.id))
-                if association_group:
-                    commands.append(Command.unlink(association_group.id))
-                if not user.user_category:
-                    user.user_category = 'honna_staff'
-            else:
-                commands.append(Command.unlink(stakeholder_group.id))
-            if commands:
-                user.sudo().write({'group_ids': commands})
 
     @api.depends('group_ids')
     def _compute_is_association(self):
@@ -386,34 +337,6 @@ class ResUsers(models.Model):
             self._sync_association_profile()
         return res
 
-    @api.model
-    def _init_honna_staff_groups(self):
-        """Ensure all users marked as Honna Staff have full Eco System Partners access."""
-        honna_group = self.env.ref('stakeholder_registration.group_stakeholder_user', raise_if_not_found=False)
-        school_group = self.env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
-        assoc_group = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
-        if honna_group:
-            users = self.sudo().search([
-                '|', '|',
-                ('user_category', '=', 'honna_staff'),
-                ('login', '=', 'honna staff'),
-                ('name', '=', 'honna staff'),
-            ])
-            for user in users:
-                vals = {}
-                if user.user_category != 'honna_staff':
-                    vals['user_category'] = 'honna_staff'
-                cmds = []
-                if honna_group not in user.group_ids:
-                    cmds.append(Command.link(honna_group.id))
-                if school_group and school_group in user.group_ids:
-                    cmds.append(Command.unlink(school_group.id))
-                if assoc_group and assoc_group in user.group_ids:
-                    cmds.append(Command.unlink(assoc_group.id))
-                if cmds:
-                    vals['group_ids'] = cmds
-                if vals:
-                    user.sudo().write(vals)
 
     @api.model
     def _init_association_users(self):

@@ -3,46 +3,46 @@
     <!--
         Odoo 20: groups with privilege_id appear as a selection under the privilege name.
         Groups without privilege_id appear as checkboxes in "Extra Rights".
-        We use a privilege so Association User / Full Access show under "Eco System Partners".
+        We use a privilege so Association User / Full Access show under "Business Partners".
     -->
     <record model="ir.module.category" id="module_category_ecosystem_partners">
-        <field name="name">Eco System Partners</field>
+        <field name="name">Business Partners</field>
         <field name="parent_id" ref="base.module_category_administration"/>
         <field name="sequence">45</field>
     </record>
 
     <record model="res.groups.privilege" id="res_groups_privilege_ecosystem_partners">
-        <field name="name">Eco System Partners</field>
+        <field name="name">Business Partners</field>
         <field name="category_id" ref="module_category_ecosystem_partners"/>
         <field name="sequence">10</field>
         <field name="placeholder">No</field>
-        <field name="description">Choose Association User to hide Student and Parent menus, or Full Access for all menus.</field>
+        <field name="description">Choose Organisation User to hide Student and Parent menus, or Full Access for all menus.</field>
     </record>
 
-    <!-- Association Users: Association + School only (Student/Parent hidden). -->
+    <!-- Organisation Users: Organisation + School only (Student/Parent hidden). -->
     <record id="group_association_user" model="res.groups">
-        <field name="name">Association User</field>
+        <field name="name">Organisation User</field>
         <field name="sequence">10</field>
-        <field name="comment">Access Association and School only. Student and Parent menus are hidden.</field>
+        <field name="comment">Access Organisation and School only. Student and Parent menus are hidden.</field>
         <field name="privilege_id" ref="res_groups_privilege_ecosystem_partners"/>
         <!-- Contact Creation (Master Data → Contact) so Contacts New/Save works -->
         <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('base.group_partner_manager'))]"/>
     </record>
 
-    <!-- School Users: School only (Association, Student, Parent hidden). -->
+    <!-- School Users: School only (Organisation, Student, Parent hidden). -->
     <record id="group_school_user" model="res.groups">
         <field name="name">School User</field>
         <field name="sequence">15</field>
-        <field name="comment">Access School and Profile only. Association, Student, and Parent menus are hidden.</field>
+        <field name="comment">Access School and Profile only. Organisation, Student, and Parent menus are hidden.</field>
         <field name="privilege_id" ref="res_groups_privilege_ecosystem_partners"/>
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
-    <!-- Full Eco System access including Student and Parent. -->
+    <!-- Full Business Partners access including Student and Parent. -->
     <record id="group_stakeholder_user" model="res.groups">
         <field name="name">Full Access</field>
         <field name="sequence">20</field>
-        <field name="comment">Full Eco System Partners access, including Student and Parent menus.</field>
+        <field name="comment">Full Business Partners access, including Student and Parent menus.</field>
         <field name="privilege_id" ref="res_groups_privilege_ecosystem_partners"/>
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
@@ -185,7 +185,6 @@
         <field name="operation">crud</field>
     </record>
 
-    <function model="res.users" name="_init_honna_staff_groups"/>
     <function model="res.users" name="_init_association_users"/>
     <function model="res.partner" name="_init_partner_user_category"/>
 </odoo>

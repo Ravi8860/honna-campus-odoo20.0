@@ -7,10 +7,10 @@
         <field name="name">stakeholder.association.tree</field>
         <field name="model">stakeholder.association</field>
         <field name="arch" type="xml">
-            <list string="Association Registrations" export_xlsx="1">
-                <field name="name" string="Association Name"/>
-                <field name="email" string="Association Email"/>
-                <field name="phone" string="Association Phone"/>
+            <list string="Organisation Registrations" export_xlsx="1">
+                <field name="name" string="Organisation Name"/>
+                <field name="email" string="Organisation Email"/>
+                <field name="phone" string="Organisation Phone"/>
                 <field name="contact_name_phone" string="Primary Contact"/>
                 <field name="contact_name" string="Primary Contact Name" optional="hide"/>
                 <field name="contact_phone" string="Primary Contact Mobile" optional="hide"/>
@@ -23,7 +23,7 @@
         <field name="name">stakeholder.association.form</field>
         <field name="model">stakeholder.association</field>
         <field name="arch" type="xml">
-            <form string="Association Registration">
+            <form string="Organisation Registration">
                 <sheet class="o_association_profile_sheet">
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <field name="active" invisible="1"/>
@@ -78,9 +78,9 @@
 
                     <!-- Card 3: Association Information -->
                     <div class="card p-4 mb-4 o_association_card">
-                        <div class="h5 fw-bold mb-3 o_association_card_title">Association Information</div>
+                        <div class="h5 fw-bold mb-3 o_association_card_title">Organisation Information</div>
                         <group>
-                            <field name="name" string="Association Name"/>
+                            <field name="name" string="Organisation Name"/>
                         </group>
                         <group>
                             <group>
@@ -141,10 +141,10 @@
         <field name="name">stakeholder.association.search</field>
         <field name="model">stakeholder.association</field>
         <field name="arch" type="xml">
-            <search string="Search Association Registrations">
-                <field name="name" string="Association Name"/>
-                <field name="email" string="Association Email"/>
-                <field name="phone" string="Association Phone"/>
+            <search string="Search Organisation Registrations">
+                <field name="name" string="Organisation Name"/>
+                <field name="email" string="Organisation Email"/>
+                <field name="phone" string="Organisation Phone"/>
                 <field name="contact_name" string="Primary Contact"/>
                 <separator/>
                 <filter string="Active" name="active" domain="[('active', '=', True)]"/>
@@ -154,13 +154,13 @@
     </record>
 
     <record id="action_stakeholder_association" model="ir.actions.act_window">
-        <field name="name">Associations</field>
+        <field name="name">Organisation</field>
         <field name="res_model">stakeholder.association</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_stakeholder_association_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Manage Association Registrations.
+                Manage Organisation Registrations.
             </p>
         </field>
     </record>
@@ -925,10 +925,10 @@
         <field name="name">stakeholder.partner.tree</field>
         <field name="model">stakeholder.organisation</field>
         <field name="arch" type="xml">
-            <list string="Partner Registrations" export_xlsx="1">
-                <field name="name" string="Partner Name"/>
-                <field name="email" string="Partner Email"/>
-                <field name="phone" string="Partner Phone"/>
+            <list string="Vendor Registrations" export_xlsx="1">
+                <field name="name" string="Vendor Name"/>
+                <field name="email" string="Vendor Email"/>
+                <field name="phone" string="Vendor Phone"/>
                 <field name="contact_name_phone" string="Primary Contact"/>
                 <field name="contact_name" string="Primary Contact Name" optional="hide"/>
                 <field name="contact_phone" string="Primary Contact Mobile" optional="hide"/>
@@ -942,7 +942,7 @@
         <field name="name">stakeholder.partner.form</field>
         <field name="model">stakeholder.organisation</field>
         <field name="arch" type="xml">
-            <form string="Partner Registration">
+            <form string="Vendor Registration">
                 <header>
                     <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="not id or state == 'approved'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
                     <button name="action_reject" string="Reject" type="object" class="btn-secondary" invisible="not id or state == 'rejected'" groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"/>
@@ -981,9 +981,9 @@
                         </group>
                     </group>
                     <group>
-                        <group string="Partner Details">
-                            <field name="phone" string="Partner Phone"/>
-                            <field name="email" string="Partner Email"/>
+                        <group string="Vendor Details">
+                            <field name="phone" string="Vendor Phone"/>
+                            <field name="email" string="Vendor Email"/>
                             <field name="parent_organisation_id" string="Parent Association"/>
                             <field name="website"/>
                             <field name="year_established"/>
@@ -1004,7 +1004,7 @@
     </record>
 
     <record id="action_stakeholder_partner" model="ir.actions.act_window">
-        <field name="name">Partner</field>
+        <field name="name">Vendor</field>
         <field name="res_model">stakeholder.organisation</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('category', '=', 'partner')]</field>
@@ -1012,7 +1012,7 @@
         <field name="search_view_id" ref="view_stakeholder_organisation_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Manage Partner Registrations.
+                Manage Vendor Registrations.
             </p>
         </field>
     </record>
@@ -1397,13 +1397,13 @@ else:
          MENUS AND ACTIONS
          ========================================== -->
     <menuitem id="menu_stakeholder_registration_root"
-              name="Eco System Partners"
+              name="Business Partners"
               web_icon="stakeholder_registration,static/description/icon.png"
               groups="stakeholder_registration.group_school_user,stakeholder_registration.group_stakeholder_user"
               sequence="10"/>
 
     <menuitem id="menu_stakeholder_registration_category"
-              name="Eco System Partners"
+              name="Business Partners"
               parent="menu_stakeholder_registration_root"
               active="False"
               sequence="99"/>
@@ -1415,7 +1415,7 @@ else:
               groups="stakeholder_registration.group_association_user,stakeholder_registration.group_school_user"
               sequence="1"/>
 
-    <!-- School menu for Association User as Main Menu (replaces Eco System Partners for Association user) -->
+    <!-- School menu for Association User as Main Menu (replaces Business Partners for Association user) -->
     <menuitem id="menu_stakeholder_registration_association_school"
               name="School"
               action="action_stakeholder_organisation"
@@ -1423,127 +1423,128 @@ else:
               groups="stakeholder_registration.group_association_user"
               sequence="10"/>
 
-    <!-- Category Menus under Eco System Partners (ordered according to website registration roles) -->
-    <menuitem id="menu_stakeholder_registration_honna_staff"
-              name="Honna Staff"
-              parent="menu_stakeholder_registration_root"
-              action="action_stakeholder_honna_staff"
-              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
-              sequence="10"/>
-
+    <!-- Category Menus under Business Partners (ordered: Association, School, Parent, Academy, Student, Vendor) -->
     <menuitem id="menu_stakeholder_registration_association"
-              name="Association"
+              name="Organisation"
               parent="menu_stakeholder_registration_root"
               action="action_stakeholder_association"
               groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
-              sequence="20"/>
+              sequence="10"/>
 
     <menuitem id="menu_stakeholder_registration_organisation"
               name="School"
               parent="menu_stakeholder_registration_root"
               action="action_stakeholder_organisation"
               groups="stakeholder_registration.group_school_user,stakeholder_registration.group_stakeholder_user"
-              sequence="30"/>
-
-    <menuitem id="menu_stakeholder_registration_college"
-              name="College"
-              parent="menu_stakeholder_registration_root"
-              action="action_stakeholder_college"
-              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
-              sequence="40"/>
-
-    <menuitem id="menu_stakeholder_registration_academy"
-              name="Academy"
-              parent="menu_stakeholder_registration_root"
-              action="action_stakeholder_academy"
-              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
-              sequence="50"/>
-
-    <menuitem id="menu_stakeholder_registration_partner"
-              name="Partner"
-              parent="menu_stakeholder_registration_root"
-              action="action_stakeholder_partner"
-              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
-              sequence="60"/>
-
-    <menuitem id="menu_stakeholder_registration_others"
-              name="Others"
-              parent="menu_stakeholder_registration_root"
-              action="action_stakeholder_others"
-              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
-              sequence="70"/>
-
-    <menuitem id="menu_stakeholder_registration_student"
-              name="Student"
-              parent="menu_stakeholder_registration_root"
-              action="action_stakeholder_student"
-              groups="stakeholder_registration.group_stakeholder_user"
-              sequence="80"/>
+              sequence="20"/>
 
     <menuitem id="menu_stakeholder_registration_parent"
               name="Parent"
               parent="menu_stakeholder_registration_root"
               action="action_stakeholder_parent"
               groups="stakeholder_registration.group_stakeholder_user"
+              sequence="30"/>
+
+    <menuitem id="menu_stakeholder_registration_academy"
+              name="Academy"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_academy"
+              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
+              sequence="40"/>
+
+    <menuitem id="menu_stakeholder_registration_student"
+              name="Student"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_student"
+              groups="stakeholder_registration.group_stakeholder_user"
+              sequence="50"/>
+
+    <menuitem id="menu_stakeholder_registration_partner"
+              name="Vendor"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_partner"
+              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
+              sequence="60"/>
+
+    <!-- Inactive Category Menus (Honna Staff, College, Others removed per user request) -->
+    <menuitem id="menu_stakeholder_registration_honna_staff"
+              name="Honna Staff"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_honna_staff"
+              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
+              active="False"
+              sequence="70"/>
+
+    <menuitem id="menu_stakeholder_registration_college"
+              name="College"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_college"
+              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
+              active="False"
+              sequence="80"/>
+
+    <menuitem id="menu_stakeholder_registration_others"
+              name="Others"
+              parent="menu_stakeholder_registration_root"
+              action="action_stakeholder_others"
+              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
+              active="False"
               sequence="90"/>
 
     <function model="ir.ui.menu" name="write">
         <value eval="[
-            ref('menu_stakeholder_registration_honna_staff'),
             ref('menu_stakeholder_registration_association'),
             ref('menu_stakeholder_registration_organisation'),
-            ref('menu_stakeholder_registration_college'),
-            ref('menu_stakeholder_registration_academy'),
-            ref('menu_stakeholder_registration_partner'),
-            ref('menu_stakeholder_registration_others'),
-            ref('menu_stakeholder_registration_student'),
             ref('menu_stakeholder_registration_parent'),
+            ref('menu_stakeholder_registration_academy'),
+            ref('menu_stakeholder_registration_student'),
+            ref('menu_stakeholder_registration_partner'),
         ]"/>
         <value eval="{'parent_id': ref('menu_stakeholder_registration_root')}"/>
     </function>
     <function model="ir.ui.menu" name="write">
-        <value eval="[ref('menu_stakeholder_registration_honna_staff')]"/>
-        <value eval="{'name': 'Honna Staff', 'sequence': 10}"/>
-    </function>
-    <function model="ir.ui.menu" name="write">
         <value eval="[ref('menu_stakeholder_registration_root')]"/>
-        <value eval="{'group_ids': [(6, 0, [ref('stakeholder_registration.group_stakeholder_user'), ref('stakeholder_registration.group_school_user')])]}"/>
+        <value eval="{'name': 'Business Partners', 'group_ids': [(6, 0, [ref('stakeholder_registration.group_stakeholder_user'), ref('stakeholder_registration.group_school_user')])]}"/>
     </function>
     <function model="ir.ui.menu" name="write">
         <value eval="[ref('menu_stakeholder_registration_association')]"/>
-        <value eval="{'name': 'Association', 'sequence': 20, 'group_ids': [(6, 0, [ref('stakeholder_registration.group_stakeholder_user'), ref('stakeholder_registration.group_school_user')])]}"/>
+        <value eval="{'name': 'Organisation', 'sequence': 10, 'active': True, 'group_ids': [(6, 0, [ref('stakeholder_registration.group_stakeholder_user'), ref('stakeholder_registration.group_school_user')])]}"/>
     </function>
     <function model="ir.ui.menu" name="write">
         <value eval="[ref('menu_stakeholder_registration_organisation')]"/>
-        <value eval="{'name': 'School', 'sequence': 30, 'group_ids': [(6, 0, [ref('stakeholder_registration.group_stakeholder_user'), ref('stakeholder_registration.group_school_user')])]}"/>
+        <value eval="{'name': 'School', 'sequence': 20, 'active': True, 'group_ids': [(6, 0, [ref('stakeholder_registration.group_stakeholder_user'), ref('stakeholder_registration.group_school_user')])]}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_parent')]"/>
+        <value eval="{'name': 'Parent', 'sequence': 30, 'active': True}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_academy')]"/>
+        <value eval="{'name': 'Academy', 'sequence': 40, 'active': True}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_student')]"/>
+        <value eval="{'name': 'Student', 'sequence': 50, 'active': True}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_partner')]"/>
+        <value eval="{'name': 'Vendor', 'sequence': 60, 'active': True}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_honna_staff')]"/>
+        <value eval="{'active': False, 'parent_id': False}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_college')]"/>
+        <value eval="{'active': False, 'parent_id': False}"/>
+    </function>
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('menu_stakeholder_registration_others')]"/>
+        <value eval="{'active': False, 'parent_id': False}"/>
     </function>
     <function model="ir.ui.menu" name="write">
         <value eval="[ref('menu_stakeholder_registration_association_school')]"/>
         <value eval="{'name': 'School', 'parent_id': False, 'sequence': 10, 'group_ids': [(6, 0, [ref('stakeholder_registration.group_association_user')])]}"/>
-    </function>
-    <function model="ir.ui.menu" name="write">
-        <value eval="[ref('menu_stakeholder_registration_college')]"/>
-        <value eval="{'name': 'College', 'sequence': 40}"/>
-    </function>
-    <function model="ir.ui.menu" name="write">
-        <value eval="[ref('menu_stakeholder_registration_academy')]"/>
-        <value eval="{'name': 'Academy', 'sequence': 50}"/>
-    </function>
-    <function model="ir.ui.menu" name="write">
-        <value eval="[ref('menu_stakeholder_registration_partner')]"/>
-        <value eval="{'name': 'Partner', 'sequence': 60}"/>
-    </function>
-    <function model="ir.ui.menu" name="write">
-        <value eval="[ref('menu_stakeholder_registration_others')]"/>
-        <value eval="{'name': 'Others', 'sequence': 70}"/>
-    </function>
-    <function model="ir.ui.menu" name="write">
-        <value eval="[ref('menu_stakeholder_registration_student')]"/>
-        <value eval="{'name': 'Student', 'sequence': 80}"/>
-    </function>
-    <function model="ir.ui.menu" name="write">
-        <value eval="[ref('menu_stakeholder_registration_parent')]"/>
-        <value eval="{'name': 'Parent', 'sequence': 90}"/>
     </function>
     <function model="ir.ui.menu" name="write">
         <value eval="[ref('menu_stakeholder_registration_profile')]"/>
@@ -1551,6 +1552,6 @@ else:
     </function>
     <function model="ir.ui.menu" name="write">
         <value eval="[ref('menu_stakeholder_registration_category')]"/>
-        <value eval="{'active': False}"/>
+        <value eval="{'name': 'Business Partners', 'active': False}"/>
     </function>
 </odoo>
