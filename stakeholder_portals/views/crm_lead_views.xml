@@ -28,13 +28,13 @@
                         <group string="Linked Registration Records">
                             <field name="registration_id_ref"/>
                             <field name="assoc_registration_id" invisible="user_category != 'association'"/>
-                            <field name="org_registration_id" invisible="user_category not in ('organisation', 'school_college', 'school', 'college', 'academy', 'partner', 'honna_staff', 'others')"/>
+                            <field name="org_registration_id" invisible="user_category not in ('school', 'academy', 'partner')"/>
                         </group>
                     </group>
                 </page>
 
                 <page name="association_portal"
-                      string="Association Portal Registration"
+                      string="Organisation Portal Registration"
                       invisible="portal_type != 'association'">
                     <group>
                         <group string="Identity &amp; Branding">

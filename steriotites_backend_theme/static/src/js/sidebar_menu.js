@@ -98,7 +98,7 @@ patch(WebClient.prototype, {
             return;
         }
 
-        // Only Eco System Partners uses sidebar expand/collapse.
+        // Only Business Partners uses sidebar expand/collapse.
         if (this.isSidebarTreeApp(app)) {
             const sections = this.getAppSections(app);
             if (sections.length) {

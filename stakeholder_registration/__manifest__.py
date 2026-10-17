@@ -16,7 +16,7 @@ Provides custom tables for storing registration submissions:
 Security
 --------
 - Association User: Association and School menus only
-- User: full Eco System Partners access including Student and Parent
+- User: full Business Partners access including Student and Parent
     """,
     'author': 'leapai.ai',
     'website': 'https://leapai.ai',

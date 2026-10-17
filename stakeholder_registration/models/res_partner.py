@@ -121,15 +121,11 @@ class ResPartner(models.Model):
         is_admin = user.has_group('base.group_system') or self.env.is_superuser()
 
         is_honna_staff = not is_admin and (
-            getattr(user, 'is_honna_staff', False) or
-            user.user_category == 'honna_staff' or
             user.has_group('stakeholder_registration.group_stakeholder_user')
         )
         if is_honna_staff:
             if 'user_id' in fields_list and not defaults.get('user_id'):
                 defaults['user_id'] = user.id
-            if 'user_category' in fields_list and not defaults.get('user_category'):
-                defaults['user_category'] = 'honna_staff'
 
         is_restricted = not is_admin and (getattr(user, 'is_school', False) or getattr(user, 'is_association', False)) and not (
             user.has_group('stakeholder_registration.group_stakeholder_user')
@@ -147,16 +143,12 @@ class ResPartner(models.Model):
         is_admin = user.has_group('base.group_system') or self.env.is_superuser()
 
         is_honna_staff = not is_admin and (
-            getattr(user, 'is_honna_staff', False) or
-            user.user_category == 'honna_staff' or
             user.has_group('stakeholder_registration.group_stakeholder_user')
         )
         for vals in vals_list:
             if is_honna_staff:
                 if not vals.get('user_id'):
                     vals['user_id'] = user.id
-                if not vals.get('user_category'):
-                    vals['user_category'] = 'honna_staff'
 
         is_restricted = not is_admin and (getattr(user, 'is_school', False) or getattr(user, 'is_association', False)) and not (
             user.has_group('stakeholder_registration.group_stakeholder_user')
@@ -211,32 +203,36 @@ class ResPartner(models.Model):
     @api.model
     def _init_partner_user_category(self):
         """Initialize user_category for existing contacts on module upgrade."""
-        # 1. Honna Staff users and organisations
-        honna_group = self.env.ref('stakeholder_registration.group_stakeholder_user', raise_if_not_found=False)
-        honna_users = self.env['res.users'].sudo().search([
-            '|', ('user_category', '=', 'honna_staff'),
-            ('group_ids', 'in', [honna_group.id] if honna_group else [])
-        ])
-        for u in honna_users:
-            if u.partner_id and u.partner_id.user_category != 'honna_staff':
-                u.partner_id.sudo().write({'user_category': 'honna_staff'})
+        # Clear obsolete categories (such as honna_staff, college, others)
+        valid_cats = ['association', 'school', 'parent', 'academy', 'student', 'partner']
+        invalid_partners = self.sudo().search([('user_category', 'not in', valid_cats), ('user_category', '!=', False)])
+        if invalid_partners:
+            invalid_partners.write({'user_category': False})
 
-        honna_orgs = self.env['stakeholder.organisation'].sudo().search([('category', '=', 'honna_staff')])
-        for org in honna_orgs:
-            if org.partner_id and org.partner_id.user_category != 'honna_staff':
-                org.partner_id.sudo().write({'user_category': 'honna_staff'})
+        invalid_users = self.env['res.users'].sudo().search([('user_category', 'not in', valid_cats), ('user_category', '!=', False)])
+        if invalid_users:
+            invalid_users.write({'user_category': False})
 
-        # 2. Associations
+        # 1. Associations / Organisations
         associations = self.env['stakeholder.association'].sudo().search([])
         for assoc in associations:
-            if assoc.partner_id and assoc.partner_id.user_category != 'association':
-                assoc.partner_id.sudo().write({'user_category': 'association'})
+            if assoc.partner_id:
+                if assoc.partner_id.user_category != 'association':
+                    assoc.partner_id.sudo().write({'user_category': 'association'})
+                for u in assoc.partner_id.user_ids:
+                    if u.user_category != 'association':
+                        u.sudo().write({'user_category': 'association'})
 
-        # 3. Organisations of other categories (school, college, academy, etc.)
-        other_orgs = self.env['stakeholder.organisation'].sudo().search([('category', '!=', 'honna_staff')])
+        # 2. Organisations of valid categories (school, academy, vendor/partner)
+        allowed_org_cats = ['school', 'academy', 'partner']
+        other_orgs = self.env['stakeholder.organisation'].sudo().search([('category', 'in', allowed_org_cats)])
         for org in other_orgs:
-            if org.partner_id and org.category and org.partner_id.user_category != org.category:
-                org.partner_id.sudo().write({'user_category': org.category})
+            if org.partner_id and org.category:
+                if org.partner_id.user_category != org.category:
+                    org.partner_id.sudo().write({'user_category': org.category})
+                for u in org.partner_id.user_ids:
+                    if u.user_category != org.category:
+                        u.sudo().write({'user_category': org.category})
 
         # 4. Students
         students = self.env['stakeholder.student'].sudo().search([])
