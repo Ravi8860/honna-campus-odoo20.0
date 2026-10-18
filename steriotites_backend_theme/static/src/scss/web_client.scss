@@ -22,7 +22,16 @@
     flex-direction: column;
     transition: all 0.3s ease;
     z-index: 1050;
+}
 
+html.o_in_portal_iframe {
+    .custom-sidebar {
+        display: none !important;
+    }
+    .custom-main {
+        width: 100% !important;
+        flex: 1 !important;
+    }
 }
 
 /* Mini sidebar */

@@ -6,7 +6,7 @@
             <div class="container-fluid px-lg-4">
                 <!-- Brand Logo matching Figma -->
                 <a class="navbar-brand me-4 d-flex align-items-center" href="/">
-                    <img src="/honna_campus_website/static/src/img/logo_honna_campus.svg" alt="Honna Campus" class="img-fluid" style="height: 38px; width: auto;"/>
+                    <img src="/honna_campus_website/static/src/img/logo_honna_campus.svg" alt="Honna Campus" class="img-fluid" style="height: 42px; width: auto;"/>
                 </a>
 
                 <!-- Mobile Hamburger Toggle -->
