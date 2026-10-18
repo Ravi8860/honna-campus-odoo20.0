@@ -1036,4 +1036,646 @@
             </li>
         </xpath>
     </template>
+
+    <!-- 1. Remove Unwanted Dashboard Boxes: Your Invoices, Addresses, Connection & Security -->
+    <template id="portal_my_home_remove_unwanted_boxes" inherit_id="portal.portal_my_home" priority="99" name="Remove Invoices, Addresses, Connection &amp; Security Boxes">
+        <xpath expr="//t[@t-foreach='portal_cards']" position="attributes">
+            <attribute name="t-foreach">portal_cards.filtered(lambda c: c.url not in ('/my/invoices?filterby=invoices', '/my/invoices?filterby=bills', '/my/addresses', '/my/security') and c.name not in ('Your Invoices', 'Our Invoices', 'Addresses', 'Connection &amp; Security'))</attribute>
+        </xpath>
+        <xpath expr="//div[@id='portal_alert_category']" position="replace">
+            <div t-if="portal_entries.get('alert', [])"
+                class="o_portal_category d-flex flex-wrap gap-2 mt-3 o_not_editable" id="portal_alert_category">
+                <t t-foreach="portal_entries.get('alert', []).filtered(lambda c: c.url not in ('/my/invoices?filterby=invoices', '/my/invoices?filterby=overdue_invoices') and 'invoice' not in (c.name or '').lower())" t-as="entry">
+                    <t t-call="portal.portal_docs_entry"
+                        bg_color.f="alert alert-primary align-items-center"
+                        show_count="True"
+                        placeholder_count="entry.placeholder_count"/>
+                </t>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- 2. Custom Portal Sidebar Template Matching Reference Screenshot Exactly -->
+    <template id="custom_portal_sidebar" name="Custom Portal Sidebar">
+        <aside class="portal-custom-sidebar custom-sidebar" id="portalCustomSidebar">
+            <div class="logo">
+                <span class="company-name" t-out="res_company.name or 'My Company'"/>
+            </div>
+            <ul class="custom-menu">
+                <li t-attf-class="app-item #{'active' if page_name == 'profile' or active_menu == 'profile' else ''}">
+                    <a href="/portal/profile" class="sidebar-item-link" title="Profile">
+                        <span class="menu-icon" style="background-image:url('/web/static/img/default_icon_app.png')"/>
+                        <span class="menu-label">Profile</span>
+                    </a>
+                </li>
+                <li t-attf-class="app-item #{'active' if page_name == 'discuss' or active_menu == 'discuss' else ''}">
+                    <a href="/my/conversations" class="sidebar-item-link" title="Discuss">
+                        <span class="menu-icon" style="background-image:url('/mail/static/description/icon.png')"/>
+                        <span class="menu-label">Discuss</span>
+                    </a>
+                </li>
+                <li t-attf-class="app-item #{'active' if page_name == 'calendar' or active_menu == 'calendar' else ''}">
+                    <a href="/odoo/calendar" class="sidebar-item-link" title="Calendar">
+                        <span class="menu-icon" style="background-image:url('/calendar/static/description/icon.png')"/>
+                        <span class="menu-label">Calendar</span>
+                    </a>
+                </li>
+                <li t-attf-class="app-item #{'active' if page_name == 'school' or active_menu == 'school' else ''}">
+                    <a href="/school/profile" class="sidebar-item-link" title="School">
+                        <span class="menu-icon" style="background-image:url('/stakeholder_registration/static/description/icon.png')"/>
+                        <span class="menu-label">School</span>
+                    </a>
+                </li>
+                <li t-attf-class="app-item #{'active' if page_name in ('home', 'contacts', 'my_details') or active_menu == 'contacts' or (not active_menu and page_name not in ('profile', 'discuss', 'calendar', 'school')) else ''}">
+                    <a href="/my" class="sidebar-item-link" title="Contacts">
+                        <span class="menu-icon" style="background-image:url('/contacts/static/description/icon.png')"/>
+                        <span class="menu-label">Contacts</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+    </template>
+
+    <!-- 3. Portal Layout Integration with Custom Sidebar -->
+    <template id="portal_layout_sidebar" inherit_id="portal.portal_layout" priority="16" name="Portal Layout with Sidebar">
+        <xpath expr="//div[@id='wrap']" position="attributes">
+            <attribute name="class" add="portal-page-wrapper d-flex flex-row" separator=" "/>
+        </xpath>
+        <xpath expr="//div[@id='wrap']/div[hasclass('container')]" position="before">
+            <div class="portal-sidebar-backdrop" id="portalBackdrop" onclick="document.getElementById('portalCustomSidebar').classList.remove('open'); this.classList.remove('show');"/>
+            <t t-call="stakeholder_portals.custom_portal_sidebar"/>
+        </xpath>
+        <xpath expr="//div[@id='wrap']/div[hasclass('container')]" position="attributes">
+            <attribute name="class" add="portal-main-content-container flex-grow-1" separator=" "/>
+        </xpath>
+        <xpath expr="//div[@id='wrap']/div[hasclass('container')]" position="inside">
+            <div class="d-md-none mb-3 pt-2">
+                <button class="btn btn-dark btn-sm d-flex align-items-center gap-2" type="button" onclick="document.getElementById('portalCustomSidebar').classList.toggle('open'); document.getElementById('portalBackdrop').classList.toggle('show');">
+                    <i class="oi oi-menu"/> Menu
+                </button>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- 4. Portal Calendar Page (Shows Backend Calendar Views Same-to-Same) -->
+    <template id="portal_calendar_page" name="Portal Calendar">
+        <t t-call="portal.portal_layout">
+            <t t-set="additional_title">Calendar &amp; Meetings</t>
+            <t t-set="page_name" t-value="'calendar'"/>
+            <t t-set="active_menu" t-value="'calendar'"/>
+
+            <!-- Load Odoo's bundled FullCalendar library -->
+            <t t-call-assets="web.fullcalendar_lib"/>
+
+            <div class="portal-backend-calendar-container w-100">
+                <!-- 1. Top Control Bar matching Odoo Backend Calendar Controls -->
+                <div class="portal-calendar-header-bar">
+                    <!-- Left: New button & Navigation -->
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <button class="btn btn-primary d-flex align-items-center gap-2 fw-semibold shadow-sm" id="btnNewCalendarEvent">
+                            <i class="oi oi-plus"/> New Meeting
+                        </button>
+                        <div class="btn-group portal-calendar-nav-group shadow-sm">
+                            <button class="btn btn-outline-secondary" id="btnCalPrev" title="Previous">
+                                <i class="oi oi-chevron-left"/>
+                            </button>
+                            <button class="btn btn-outline-secondary" id="btnCalNext" title="Next">
+                                <i class="oi oi-chevron-right"/>
+                            </button>
+                            <button class="btn btn-outline-secondary" id="btnCalToday">Today</button>
+                        </div>
+                        <h4 class="mb-0 fw-bold text-dark ps-2" id="calCurrentPeriodTitle">Calendar</h4>
+                    </div>
+
+                    <!-- Right: Scale Switcher & Tools -->
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <div class="input-group input-group-sm shadow-sm" style="max-width: 200px;">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="oi oi-search"/></span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="calSearchInput" placeholder="Filter meetings..."/>
+                        </div>
+                        <div class="btn-group portal-calendar-scale-group shadow-sm" role="group">
+                            <button type="button" class="btn btn-cal-scale active" data-view="dayGridMonth">Month</button>
+                            <button type="button" class="btn btn-cal-scale" data-view="timeGridWeek">Week</button>
+                            <button type="button" class="btn btn-cal-scale" data-view="timeGridDay">Day</button>
+                            <button type="button" class="btn btn-cal-scale" data-view="listWeek">List</button>
+                        </div>
+                        <button class="btn btn-outline-secondary btn-sm shadow-sm" id="btnToggleSidePanel" title="Toggle Sidebar">
+                            <i class="oi oi-filter"/>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. Main Calendar Body with Right Side Panel -->
+                <div class="row g-0">
+                    <!-- Main Calendar View -->
+                    <div class="col-lg-9 col-12" id="portalCalMainCol">
+                        <div class="portal-calendar-main-grid" id="portalFullCalendar"></div>
+                    </div>
+
+                    <!-- Right Side Panel (Mini Calendar & Attendees & Upcoming) -->
+                    <div class="col-lg-3 col-12 portal-calendar-side-panel" id="portalCalSidePanel">
+                        <!-- Mini Calendar Datepicker -->
+                        <div class="card border shadow-sm mb-3">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0 fw-bold text-secondary" id="miniCalTitle">Month</h6>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-secondary btn-sm p-1" id="btnMiniPrev" style="line-height: 1;"><i class="oi oi-chevron-left"/></button>
+                                        <button class="btn btn-outline-secondary btn-sm p-1" id="btnMiniNext" style="line-height: 1;"><i class="oi oi-chevron-right"/></button>
+                                    </div>
+                                </div>
+                                <div id="portalMiniCalendarBody"></div>
+                            </div>
+                        </div>
+
+                        <!-- Attendees Filter -->
+                        <div class="card border shadow-sm mb-3">
+                            <div class="card-body p-3">
+                                <h6 class="fw-bold mb-2 text-secondary small text-uppercase">Calendars &amp; Filters</h6>
+                                <div class="form-check form-switch mb-1">
+                                    <input class="form-check-input" type="checkbox" id="filterMyEvents" checked="checked"/>
+                                    <label class="form-check-label small fw-semibold" for="filterMyEvents">
+                                        <span class="d-inline-block rounded-circle me-1" style="width: 10px; height: 10px; background: #2563eb;"></span>
+                                        My Meetings
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="filterOrgEvents" checked="checked"/>
+                                    <label class="form-check-label small fw-semibold" for="filterOrgEvents">
+                                        <span class="d-inline-block rounded-circle me-1" style="width: 10px; height: 10px; background: #059669;"></span>
+                                        Campus / Association
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upcoming Meetings Card -->
+                        <div class="card border shadow-sm">
+                            <div class="card-body p-3">
+                                <h6 class="fw-bold mb-2 text-secondary small text-uppercase">Upcoming Meetings</h6>
+                                <t t-if="upcoming_events">
+                                    <div class="portal-upcoming-list">
+                                        <t t-foreach="upcoming_events" t-as="evt">
+                                            <div class="portal-upcoming-item">
+                                                <div class="fw-bold text-dark small text-truncate"><t t-out="evt.name"/></div>
+                                                <div class="text-muted small mt-1">
+                                                    <i class="oi oi-clock me-1"/>
+                                                    <span t-out="evt.start.strftime('%d %b, %H:%M') if evt.start else ''"/>
+                                                </div>
+                                                <t t-if="evt.videocall_location">
+                                                    <a t-att-href="evt.videocall_location" target="_blank" class="btn btn-sm btn-outline-primary mt-2 py-0 px-2" style="font-size: 11px;">
+                                                        <i class="oi oi-camera me-1"/> Join Call
+                                                    </a>
+                                                </t>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="text-muted small text-center py-3">No upcoming meetings scheduled.</div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal 1: Event Details Popover/Modal -->
+            <div class="modal fade" id="calendarEventDetailModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content shadow border-0 rounded-3">
+                        <div class="modal-header bg-light border-bottom py-2 px-3">
+                            <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="detailModalTitle">
+                                Meeting Details
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-3">
+                            <div class="mb-3 d-flex align-items-center gap-2 text-primary fw-semibold" id="detailModalTime">
+                                <i class="oi oi-clock"/>
+                            </div>
+
+                            <div class="mb-3" id="detailModalLocationWrap" style="display: none;">
+                                <div class="text-muted small fw-semibold">Location:</div>
+                                <div class="text-dark" id="detailModalLocation"></div>
+                            </div>
+
+                            <div class="mb-3" id="detailModalVideoWrap" style="display: none;">
+                                <a href="#" target="_blank" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2" id="detailModalVideoBtn">
+                                    <i class="oi oi-camera"/> Join Video Meeting
+                                </a>
+                            </div>
+
+                            <div class="mb-3" id="detailModalAttendeesWrap" style="display: none;">
+                                <div class="text-muted small fw-semibold mb-1">Attendees:</div>
+                                <div class="d-flex flex-wrap gap-1" id="detailModalAttendeesList"></div>
+                            </div>
+
+                            <div class="mb-3" id="detailModalDescWrap" style="display: none;">
+                                <div class="text-muted small fw-semibold mb-1">Description / Notes:</div>
+                                <div class="p-2 bg-light border rounded small text-secondary" id="detailModalDesc"></div>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light border-top py-2 px-3 justify-content-between">
+                            <button type="button" class="btn btn-outline-danger btn-sm" id="detailModalDeleteBtn">
+                                Cancel Meeting
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal 2: Schedule New Meeting Modal -->
+            <div class="modal fade" id="calendarNewEventModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content shadow border-0 rounded-3">
+                        <div class="modal-header bg-light border-bottom py-2 px-3">
+                            <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                                <i class="oi oi-plus text-primary"/> Schedule Meeting
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-3">
+                            <form id="calendarNewEventForm" action="/portal/calendar" method="POST">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="action" value="create_meeting"/>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-dark">Meeting Title / Subject <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" name="name" id="newEventTitle" placeholder="e.g. Stakeholders Review Meeting" required="required"/>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold text-dark">Start Date &amp; Time</label>
+                                        <input type="datetime-local" class="form-control form-control-sm" name="start" id="newEventStart" required="required"/>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold text-dark">End Date &amp; Time</label>
+                                        <input type="datetime-local" class="form-control form-control-sm" name="stop" id="newEventEnd"/>
+                                    </div>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" name="allday" id="newEventAllDay"/>
+                                    <label class="form-check-label small text-muted" for="newEventAllDay">All Day Event</label>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-dark">Location</label>
+                                    <input type="text" class="form-control form-control-sm" name="location" id="newEventLocation" placeholder="e.g. Conference Room A / Online"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-dark">Video Call Link</label>
+                                    <input type="url" class="form-control form-control-sm" name="videocall_location" id="newEventVideoUrl" placeholder="https://meet.google.com/..."/>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-dark">Description</label>
+                                    <textarea class="form-control form-control-sm" name="description" id="newEventDesc" rows="2" placeholder="Brief agenda or discussion notes..."></textarea>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer bg-light border-top py-2 px-3">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary btn-sm px-3 fw-semibold" id="btnSaveNewEvent">
+                                Save Meeting
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Embedded Initial Events Data -->
+            <script id="portalInitialCalendarEvents" type="application/json">
+            [
+                <t t-foreach="events or []" t-as="ev">
+                    {
+                        "id": <t t-out="ev.id"/>,
+                        "title": <t t-out="json.dumps(ev.name or 'Meeting')"/>,
+                        "start": <t t-out="json.dumps(ev.start.strftime('%Y-%m-%dT%H:%M:%S') if ev.start else '')"/>,
+                        "end": <t t-out="json.dumps(ev.stop.strftime('%Y-%m-%dT%H:%M:%S') if ev.stop else '')"/>,
+                        "allDay": <t t-out="'true' if ev.allday else 'false'"/>,
+                        "backgroundColor": "#2563eb",
+                        "borderColor": "#1d4ed8",
+                        "textColor": "#ffffff",
+                        "extendedProps": {
+                            "location": <t t-out="json.dumps(ev.location or '')"/>,
+                            "videocall_location": <t t-out="json.dumps(ev.videocall_location or '')"/>,
+                            "description": <t t-out="json.dumps(ev.description or '')"/>,
+                            "attendees": <t t-out="json.dumps(ev.partner_ids.mapped('name'))"/>
+                        }
+                    }<t t-if="not ev_last">,</t>
+                </t>
+            ]
+            </script>
+
+            <!-- JavaScript Controller initialization -->
+            <script type="text/javascript">
+            //<![CDATA[
+            document.addEventListener("DOMContentLoaded", function () {
+                const calendarEl = document.getElementById("portalFullCalendar");
+                if (!calendarEl || typeof FullCalendar === "undefined") {
+                    return;
+                }
+
+                const currentPeriodTitle = document.getElementById("calCurrentPeriodTitle");
+
+                let initialEvents = [];
+                try {
+                    const rawEvents = document.getElementById("portalInitialCalendarEvents")?.textContent;
+                    if (rawEvents) {
+                        initialEvents = JSON.parse(rawEvents);
+                    }
+                } catch (e) {
+                    console.error("Error parsing initial events:", e);
+                }
+
+                const calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: "dayGridMonth",
+                    headerToolbar: false,
+                    height: "auto",
+                    aspectRatio: 1.5,
+                    nowIndicator: true,
+                    editable: false,
+                    selectable: true,
+                    dayMaxEvents: 3,
+                    events: function (fetchInfo, successCallback, failureCallback) {
+                        fetch("/portal/calendar/events?start=" + encodeURIComponent(fetchInfo.startStr) + "&end=" + encodeURIComponent(fetchInfo.endStr))
+                            .then(res => {
+                                if (!res.ok) throw new Error("API not available");
+                                return res.json();
+                            })
+                            .then(data => successCallback(data))
+                            .catch(err => {
+                                successCallback(initialEvents);
+                            });
+                    },
+                    datesSet: function (info) {
+                        if (currentPeriodTitle) {
+                            currentPeriodTitle.textContent = info.view.title;
+                        }
+                        renderMiniCalendar(calendar.getDate());
+                    },
+                    eventClick: function (info) {
+                        info.jsEvent.preventDefault();
+                        showEventDetails(info.event);
+                    },
+                    select: function (info) {
+                        openNewEventModal(info.startStr, info.endStr, info.allDay);
+                    }
+                });
+
+                calendar.render();
+
+                // Navigation controls
+                document.getElementById("btnCalPrev")?.addEventListener("click", () => calendar.prev());
+                document.getElementById("btnCalNext")?.addEventListener("click", () => calendar.next());
+                document.getElementById("btnCalToday")?.addEventListener("click", () => calendar.today());
+
+                // Scale Selector Buttons
+                document.querySelectorAll(".btn-cal-scale").forEach(function (btn) {
+                    btn.addEventListener("click", function () {
+                        document.querySelectorAll(".btn-cal-scale").forEach(b => b.classList.remove("active"));
+                        this.classList.add("active");
+                        const view = this.getAttribute("data-view");
+                        if (view) {
+                            calendar.changeView(view);
+                        }
+                    });
+                });
+
+                // Side panel toggle
+                const toggleBtn = document.getElementById("btnToggleSidePanel");
+                const sidePanel = document.getElementById("portalCalSidePanel");
+                const mainCol = document.getElementById("portalCalMainCol");
+                toggleBtn?.addEventListener("click", function () {
+                    if (sidePanel) {
+                        if (sidePanel.classList.contains("d-none")) {
+                            sidePanel.classList.remove("d-none");
+                            mainCol.className = "col-lg-9 col-12";
+                        } else {
+                            sidePanel.classList.add("d-none");
+                            mainCol.className = "col-12";
+                        }
+                        calendar.updateSize();
+                    }
+                });
+
+                // Search & Filter
+                const searchInput = document.getElementById("calSearchInput");
+                searchInput?.addEventListener("input", function (e) {
+                    const query = e.target.value.toLowerCase().trim();
+                    document.querySelectorAll(".fc-event").forEach(function (el) {
+                        const text = el.textContent.toLowerCase();
+                        el.style.display = (!query || text.includes(query)) ? "" : "none";
+                    });
+                });
+
+                // Detail Modal
+                const detailModalEl = document.getElementById("calendarEventDetailModal");
+                const bsDetailModal = detailModalEl && window.bootstrap ? new window.bootstrap.Modal(detailModalEl) : null;
+
+                function showEventDetails(ev) {
+                    if (!detailModalEl) return;
+                    document.getElementById("detailModalTitle").textContent = ev.title;
+
+                    const props = ev.extendedProps || {};
+                    const startStr = ev.start ? ev.start.toLocaleString() : "";
+                    const endStr = ev.end ? ev.end.toLocaleString() : "";
+                    document.getElementById("detailModalTime").textContent = startStr + (endStr ? " - " + endStr : "");
+
+                    const locWrap = document.getElementById("detailModalLocationWrap");
+                    const locEl = document.getElementById("detailModalLocation");
+                    if (props.location) {
+                        locWrap.style.display = "block";
+                        locEl.textContent = props.location;
+                    } else {
+                        locWrap.style.display = "none";
+                    }
+
+                    const videoWrap = document.getElementById("detailModalVideoWrap");
+                    const videoBtn = document.getElementById("detailModalVideoBtn");
+                    if (props.videocall_location) {
+                        videoWrap.style.display = "block";
+                        videoBtn.href = props.videocall_location;
+                    } else {
+                        videoWrap.style.display = "none";
+                    }
+
+                    const attWrap = document.getElementById("detailModalAttendeesWrap");
+                    const attList = document.getElementById("detailModalAttendeesList");
+                    attList.innerHTML = "";
+                    if (props.attendees && props.attendees.length > 0) {
+                        attWrap.style.display = "block";
+                        props.attendees.forEach(name => {
+                            const badge = document.createElement("span");
+                            badge.className = "badge bg-light text-dark border me-1 mb-1 p-2";
+                            badge.textContent = name;
+                            attList.appendChild(badge);
+                        });
+                    } else {
+                        attWrap.style.display = "none";
+                    }
+
+                    const descWrap = document.getElementById("detailModalDescWrap");
+                    const descEl = document.getElementById("detailModalDesc");
+                    if (props.description) {
+                        descWrap.style.display = "block";
+                        descEl.textContent = props.description;
+                    } else {
+                        descWrap.style.display = "none";
+                    }
+
+                    const delBtn = document.getElementById("detailModalDeleteBtn");
+                    if (delBtn) {
+                        delBtn.onclick = function () {
+                            if (confirm("Are you sure you want to cancel this meeting?")) {
+                                fetch("/portal/calendar/event/delete", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ params: { event_id: ev.id } })
+                                }).then(r => r.json()).then(res => {
+                                    if (res.result && res.result.success) {
+                                        bsDetailModal?.hide();
+                                        calendar.refetchEvents();
+                                    } else {
+                                        alert(res.result?.error || "Error deleting event");
+                                    }
+                                });
+                            }
+                        };
+                    }
+
+                    bsDetailModal?.show();
+                }
+
+                // New Event Modal
+                const newModalEl = document.getElementById("calendarNewEventModal");
+                const bsNewModal = newModalEl && window.bootstrap ? new window.bootstrap.Modal(newModalEl) : null;
+
+                function openNewEventModal(startStr, endStr, allDay) {
+                    if (!newModalEl) return;
+                    document.getElementById("calendarNewEventForm")?.reset();
+
+                    const startInput = document.getElementById("newEventStart");
+                    const endInput = document.getElementById("newEventEnd");
+                    const allDayInput = document.getElementById("newEventAllDay");
+
+                    if (startInput && startStr) {
+                        startInput.value = startStr.substring(0, 16);
+                    }
+                    if (endInput && endStr) {
+                        endInput.value = endStr.substring(0, 16);
+                    }
+                    if (allDayInput) {
+                        allDayInput.checked = Boolean(allDay);
+                    }
+                    bsNewModal?.show();
+                }
+
+                document.getElementById("btnNewCalendarEvent")?.addEventListener("click", function () {
+                    const todayStr = new Date().toISOString().substring(0, 10);
+                    openNewEventModal(todayStr + "T10:00", todayStr + "T11:00", false);
+                });
+
+                document.getElementById("btnSaveNewEvent")?.addEventListener("click", function () {
+                    const name = document.getElementById("newEventTitle")?.value;
+                    const start = document.getElementById("newEventStart")?.value;
+                    const stop = document.getElementById("newEventEnd")?.value;
+                    const allday = document.getElementById("newEventAllDay")?.checked;
+                    const location = document.getElementById("newEventLocation")?.value;
+                    const videocall_location = document.getElementById("newEventVideoUrl")?.value;
+                    const description = document.getElementById("newEventDesc")?.value;
+
+                    if (!name || !start) {
+                        alert("Please enter meeting title and start time.");
+                        return;
+                    }
+
+                    fetch("/portal/calendar/event/create", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            params: {
+                                name: name,
+                                start: start,
+                                stop: stop,
+                                allday: allday,
+                                location: location,
+                                videocall_location: videocall_location,
+                                description: description
+                            }
+                        })
+                    }).then(r => r.json()).then(res => {
+                        if (res.result && res.result.success) {
+                            bsNewModal?.hide();
+                            calendar.refetchEvents();
+                        } else {
+                            alert(res.result?.error || "Error scheduling meeting");
+                        }
+                    });
+                });
+
+                // Mini Calendar Datepicker
+                let miniCalDate = new Date();
+                function renderMiniCalendar(targetDate) {
+                    const miniContainer = document.getElementById("portalMiniCalendarBody");
+                    const miniTitle = document.getElementById("miniCalTitle");
+                    if (!miniContainer || !miniTitle) return;
+
+                    if (targetDate) {
+                        miniCalDate = new Date(targetDate);
+                    }
+
+                    const year = miniCalDate.getFullYear();
+                    const month = miniCalDate.getMonth();
+                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    miniTitle.textContent = monthNames[month] + " " + year;
+
+                    const firstDay = new Date(year, month, 1).getDay();
+                    const daysInMonth = new Date(year, month + 1, 0).getDate();
+                    const today = new Date();
+
+                    let html = '<table class="mini-cal-table"><thead><tr>';
+                    ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => html += '<th>' + d + '</th>');
+                    html += '</tr></thead><tbody><tr>';
+
+                    for (let i = 0; i < firstDay; i++) {
+                        html += '<td class="other-month"></td>';
+                    }
+
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const isToday = (today.getFullYear() === year && today.getMonth() === month && today.getDate() === day);
+                        const dateStr = year + "-" + String(month + 1).padStart(2, '0') + "-" + String(day).padStart(2, '0');
+                        html += '<td class="' + (isToday ? 'today' : '') + '" data-date="' + dateStr + '">' + day + '</td>';
+                        if ((firstDay + day) % 7 === 0 && day !== daysInMonth) {
+                            html += '</tr><tr>';
+                        }
+                    }
+                    html += '</tr></tbody></table>';
+                    miniContainer.innerHTML = html;
+
+                    miniContainer.querySelectorAll("td[data-date]").forEach(td => {
+                        td.addEventListener("click", function () {
+                            const d = this.getAttribute("data-date");
+                            if (d) {
+                                calendar.gotoDate(d);
+                            }
+                        });
+                    });
+                }
+
+                document.getElementById("btnMiniPrev")?.addEventListener("click", function () {
+                    miniCalDate.setMonth(miniCalDate.getMonth() - 1);
+                    renderMiniCalendar();
+                });
+                document.getElementById("btnMiniNext")?.addEventListener("click", function () {
+                    miniCalDate.setMonth(miniCalDate.getMonth() + 1);
+                    renderMiniCalendar();
+                });
+
+                renderMiniCalendar(calendar.getDate());
+            });
+            //]]>
+            </script>
+        </t>
+    </template>
 </odoo>
+

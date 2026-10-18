@@ -18,6 +18,10 @@ patch(WebClient.prototype, {
         this.ui = proxy(useService("ui"));
         this.user = user;
 
+        if (window.self !== window.top) {
+            document.documentElement.classList.add("o_in_portal_iframe");
+        }
+
         this.state.sidebarOpen = false;
         this.state.sidebarMini = false;
         this.state.allAppsOpen = true;

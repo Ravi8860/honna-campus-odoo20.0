@@ -5,8 +5,13 @@ import logging
 import re
 from urllib.parse import urlencode
 
-from odoo import http, _
+from odoo import http, fields, _
 from odoo.http import request
+from odoo.addons.web.controllers.home import Home
+from odoo.addons.web.controllers.utils import ensure_db, is_user_internal
+from odoo.http.session import check, touch
+from odoo.tools import hmac
+from odoo.exceptions import AccessError
 
 _logger = logging.getLogger(__name__)
 
@@ -391,6 +396,8 @@ class StakeholderPortalController(http.Controller):
         states = sudo_env['res.country.state'].search([('country_id.code', '=', 'IN')])
 
         return request.render('stakeholder_portals.association_profile_page', {
+            'page_name': 'profile',
+            'active_menu': 'profile',
             'association': assoc,
             'countries': countries,
             'states': states,
@@ -585,6 +592,8 @@ class StakeholderPortalController(http.Controller):
             step = 1
 
         return request.render('stakeholder_portals.school_profile_page', {
+            'page_name': 'school',
+            'active_menu': 'school',
             'school': school,
             'countries': countries,
             'states': states,
@@ -831,3 +840,180 @@ class StakeholderPortalController(http.Controller):
     def portals_success(self, **kw):
         """ Direct redirect to login page """
         return request.redirect('/web/login')
+
+    @http.route(['/portal/profile', '/my/profile'], type='http', auth='user', website=True)
+    def portal_profile_route(self, **kw):
+        """ Redirect to the appropriate profile based on user role """
+        user = request.env.user
+        if user.has_group('stakeholder_registration.group_school_user') or getattr(user, 'user_category', '') in ('school', 'school_college', 'college', 'academy') or getattr(user, 'organisation_id', None):
+            return request.redirect('/school/profile')
+        elif getattr(user, 'association_id', None) or user.has_group('stakeholder_registration.group_association_user'):
+            return request.redirect('/association/profile')
+
+        assoc = request.env['stakeholder.association'].sudo().search([
+            '|', ('partner_id', '=', user.partner_id.id), ('email', '=', user.email)
+        ], limit=1)
+        if assoc:
+            return request.redirect(f'/association/profile?id={assoc.id}')
+
+        school = request.env['stakeholder.organisation'].sudo().search([
+            '|', ('partner_id', '=', user.partner_id.id), ('email', '=', user.email)
+        ], limit=1)
+        if school:
+            return request.redirect(f'/school/profile?id={school.id}')
+
+        return request.redirect('/association/profile')
+
+    @http.route(['/portal/contacts', '/my/contacts'], type='http', auth='user', website=True)
+    def portal_contacts_route(self, **kw):
+        """ Navigates to the portal contact dashboard """
+        return request.redirect('/my')
+
+    @http.route(['/portal/calendar', '/my/calendar'], type='http', auth='user', website=True)
+    def portal_calendar_route(self, **kw):
+        """ Redirects directly to the Odoo backend calendar view """
+        return request.redirect('/odoo/calendar')
+
+    @http.route('/portal/calendar/events', type='http', auth='user', website=True, methods=['GET'])
+    def portal_calendar_events_data(self, start=None, end=None, **kw):
+        """ Returns calendar events formatted for FullCalendar """
+        user = request.env.user
+        partner = user.partner_id
+        domain = [('partner_ids', 'in', [partner.id])]
+        if start:
+            domain.append(('stop', '>=', start.split('T')[0] + ' 00:00:00'))
+        if end:
+            domain.append(('start', '<=', end.split('T')[0] + ' 23:59:59'))
+
+        events = request.env['calendar.event'].sudo().search(domain, order='start asc')
+
+        palette = [
+            {'bg': '#2563eb', 'border': '#1d4ed8'},
+            {'bg': '#059669', 'border': '#047857'},
+            {'bg': '#d97706', 'border': '#b45309'},
+            {'bg': '#7c3aed', 'border': '#6d28d9'},
+            {'bg': '#dc2626', 'border': '#b91c1c'},
+            {'bg': '#0891b2', 'border': '#0e7490'},
+        ]
+
+        events_data = []
+        for i, ev in enumerate(events):
+            color = palette[i % len(palette)]
+            start_str = ev.start.strftime('%Y-%m-%dT%H:%M:%S') if ev.start else ''
+            stop_str = ev.stop.strftime('%Y-%m-%dT%H:%M:%S') if ev.stop else start_str
+            events_data.append({
+                'id': ev.id,
+                'title': ev.name or 'Untitled Meeting',
+                'start': start_str,
+                'end': stop_str,
+                'allDay': bool(ev.allday),
+                'backgroundColor': color['bg'],
+                'borderColor': color['border'],
+                'textColor': '#ffffff',
+                'extendedProps': {
+                    'description': ev.description or '',
+                    'location': ev.location or '',
+                    'videocall_location': ev.videocall_location or '',
+                    'attendees': [p.name for p in ev.partner_ids],
+                    'duration': f"{ev.duration:.1f} hrs" if hasattr(ev, 'duration') and ev.duration else '',
+                    'is_owner': ev.user_id.id == user.id or partner.id in ev.partner_ids.ids,
+                }
+            })
+        return request.make_json_response(events_data)
+
+    @http.route('/portal/calendar/event/create', type='jsonrpc', auth='user', website=True, methods=['POST'])
+    def portal_calendar_event_create(self, **post):
+        """ Creates a new meeting from the portal calendar """
+        user = request.env.user
+        partner = user.partner_id
+        name = (post.get('name') or '').strip()
+        start = (post.get('start') or '').strip()
+        stop = (post.get('stop') or '').strip()
+        allday = bool(post.get('allday'))
+        location = (post.get('location') or '').strip()
+        videocall_location = (post.get('videocall_location') or '').strip()
+        description = (post.get('description') or '').strip()
+
+        if not name:
+            return {'error': 'Meeting title is required.'}
+        if not start:
+            return {'error': 'Start date/time is required.'}
+        if not stop:
+            stop = start
+
+        start_dt = start.replace('T', ' ')[:19]
+        stop_dt = stop.replace('T', ' ')[:19]
+        if len(start_dt) == 10:
+            start_dt += ' 09:00:00'
+        if len(stop_dt) == 10:
+            stop_dt += ' 10:00:00'
+
+        try:
+            ev = request.env['calendar.event'].sudo().create({
+                'name': name,
+                'start': start_dt,
+                'stop': stop_dt,
+                'allday': allday,
+                'location': location,
+                'videocall_location': videocall_location,
+                'description': description,
+                'user_id': user.id,
+                'partner_ids': [(4, partner.id)],
+            })
+            return {'success': True, 'id': ev.id, 'name': ev.name}
+        except Exception as e:
+            _logger.exception("Failed to create portal calendar event: %s", e)
+            return {'error': str(e)}
+
+    @http.route('/portal/calendar/event/delete', type='jsonrpc', auth='user', website=True, methods=['POST'])
+    def portal_calendar_event_delete(self, event_id=None, **post):
+        """ Cancels/removes an event """
+        if not event_id:
+            return {'error': 'Event ID is required.'}
+        user = request.env.user
+        event = request.env['calendar.event'].sudo().browse(int(event_id))
+        if not event.exists():
+            return {'error': 'Event not found.'}
+        if user.partner_id.id not in event.partner_ids.ids and event.user_id.id != user.id:
+            return {'error': 'Permission denied.'}
+        event.unlink()
+        return {'success': True}
+
+
+class StakeholderWebHome(Home):
+
+    @http.route(['/web', '/odoo', '/odoo/<path:subpath>', '/scoped_app/<path:subpath>'], type='http', auth="none", readonly=Home._web_client_readonly)
+    def web_client(self, s_action=None, **kw):
+        """ Allows users accessing /odoo/calendar to load backend calendar view directly """
+        ensure_db()
+        if not request.session.uid:
+            return request.redirect_query('/web/login', query={'redirect': request.httprequest.full_path}, code=303)
+        if kw.get('redirect'):
+            return request.redirect(kw.get('redirect'), 303)
+        check(request.session, request)
+
+        subpath = kw.get('subpath') or ''
+        is_calendar = (subpath == 'calendar') or request.httprequest.path.startswith('/odoo/calendar') or (s_action and 'calendar' in str(s_action))
+
+        if not is_user_internal(request.session.uid) and not is_calendar:
+            return request.redirect('/web/login_successful', 303)
+
+        touch(request.session)
+        request.update_env(user=request.session.uid)
+        try:
+            if request.env.user:
+                request.env.user._on_webclient_bootstrap()
+            context = request.env['ir.http'].webclient_rendering_context()
+
+            hmac_payload = request.env.user._session_token_get_values()
+            session_info = context.get("session_info")
+            session_info['browser_cache_secret'] = hmac(request.env(su=True), "browser_cache_key", hmac_payload)
+
+            response = request.render('web.webclient_bootstrap', qcontext=context)
+            response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+            response.headers['Cache-Control'] = 'no-store'
+            return response
+        except AccessError:
+            return request.redirect('/web/login?error=access')
+
+
