@@ -55,22 +55,6 @@
                                         <div class="small fw-bold text-dark"><t t-out="request.env.user.name"/></div>
                                         <div class="text-muted small text-truncate" style="font-size: 0.75rem;"><t t-out="request.env.user.email or request.env.user.login"/></div>
                                     </li>
-                                    <li t-if="request.env.user.has_group('base.group_user')">
-                                        <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-primary fw-semibold" href="/odoo">
-                                            <i class="oi oi-view-apps"></i> Apps / Backend
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="/stakeholder-portals">
-                                            <i class="oi oi-user"></i> Stakeholder Portals
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="/my">
-                                            <i class="oi oi-settings"></i> My Account
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider my-1"/></li>
                                     <li>
                                         <form method="POST" action="/web/session/logout?redirect=/" class="p-0 m-0">
                                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>

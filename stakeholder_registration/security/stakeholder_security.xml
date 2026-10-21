@@ -73,11 +73,11 @@
     </record>
 
     <record id="rule_stakeholder_association_school_user" model="ir.access">
-        <field name="name">School User: Read Associations</field>
+        <field name="name">School User: Own / Associated Associations</field>
         <field name="model_id" ref="model_stakeholder_association"/>
         <field name="group_id" ref="group_school_user"/>
-        <field name="domain">[(1, '=', 1)]</field>
-        <field name="operation">r</field>
+        <field name="domain">['|', '|', '|', '|', '|', '|', ('partner_id', '=', user.partner_id.id), ('user_id', '=', user.id), ('partner_id.user_ids', 'in', [user.id]), ('create_uid', '=', user.id), ('id', '=', user.association_id.id), ('school_ids.user_id', '=', user.id), ('school_ids.create_uid', '=', user.id)]</field>
+        <field name="operation">crud</field>
     </record>
 
     <!-- School / Organisation Record Rules -->
@@ -94,7 +94,7 @@
         <field name="model_id" ref="model_stakeholder_organisation"/>
         <field name="group_id" ref="group_school_user"/>
         <field name="domain">['|', '|', '|', '|', '|', '|', '|', ('partner_id', '=', user.partner_id.id), ('user_id', '=', user.id), ('partner_id.user_ids', 'in', [user.id]), ('create_uid', '=', user.id), ('id', '=', user.organisation_id.id), ('email', '=', user.login), ('parent_school_id', '=', user.organisation_id.id), ('parent_school_id.user_id', '=', user.id)]</field>
-        <field name="operation">cru</field>
+        <field name="operation">crud</field>
     </record>
 
     <record id="rule_stakeholder_organisation_full" model="ir.access">
@@ -123,11 +123,54 @@
     </record>
 
     <record id="rule_stakeholder_association_member_school_user" model="ir.access">
-        <field name="name">School User: Read Association Members</field>
+        <field name="name">School User: Own / Associated Association Members</field>
         <field name="model_id" ref="model_stakeholder_association_member"/>
         <field name="group_id" ref="group_school_user"/>
+        <field name="domain">['|', '|', '|', ('association_id.partner_id', '=', user.partner_id.id), ('association_id.user_id', '=', user.id), ('association_id.partner_id.user_ids', 'in', [user.id]), ('association_id.create_uid', '=', user.id)]</field>
+        <field name="operation">crud</field>
+    </record>
+
+    <!-- Parent Record Rules -->
+    <record id="rule_stakeholder_parent_school_user" model="ir.access">
+        <field name="name">School User: Own / Associated Parents</field>
+        <field name="model_id" ref="model_stakeholder_parent"/>
+        <field name="group_id" ref="group_school_user"/>
+        <field name="domain">['|', '|', '|', ('create_uid', '=', user.id), ('partner_id', '=', user.partner_id.id), ('partner_id.user_ids', 'in', [user.id]), ('student_ids.school_partner_id', '=', user.organisation_id.partner_id.id)]</field>
+        <field name="operation">crud</field>
+    </record>
+
+    <record id="rule_stakeholder_parent_full" model="ir.access">
+        <field name="name">Stakeholder Full Access: All Parents</field>
+        <field name="model_id" ref="model_stakeholder_parent"/>
+        <field name="group_id" ref="group_stakeholder_user"/>
         <field name="domain">[(1, '=', 1)]</field>
-        <field name="operation">r</field>
+        <field name="operation">crud</field>
+    </record>
+
+    <!-- Student Record Rules -->
+    <record id="rule_stakeholder_student_school_user" model="ir.access">
+        <field name="name">School User: Own / Associated Students</field>
+        <field name="model_id" ref="model_stakeholder_student"/>
+        <field name="group_id" ref="group_school_user"/>
+        <field name="domain">['|', '|', '|', '|', ('create_uid', '=', user.id), ('partner_id', '=', user.partner_id.id), ('partner_id.user_ids', 'in', [user.id]), ('school_id', '=', user.organisation_id.partner_id.id), ('student_profile_id.school_partner_id', '=', user.organisation_id.partner_id.id)]</field>
+        <field name="operation">crud</field>
+    </record>
+
+    <record id="rule_stakeholder_student_full" model="ir.access">
+        <field name="name">Stakeholder Full Access: All Students</field>
+        <field name="model_id" ref="model_stakeholder_student"/>
+        <field name="group_id" ref="group_stakeholder_user"/>
+        <field name="domain">[(1, '=', 1)]</field>
+        <field name="operation">crud</field>
+    </record>
+
+    <!-- Student Profile Record Rules -->
+    <record id="rule_student_profile_school_user" model="ir.access">
+        <field name="name">School User: Own / Associated Student Profiles</field>
+        <field name="model_id" ref="model_student_profile"/>
+        <field name="group_id" ref="group_school_user"/>
+        <field name="domain">['|', '|', '|', ('create_uid', '=', user.id), ('partner_id', '=', user.partner_id.id), ('partner_id.user_ids', 'in', [user.id]), ('school_partner_id', '=', user.organisation_id.partner_id.id)]</field>
+        <field name="operation">crud</field>
     </record>
 
     <!-- Partner / Contacts Record Rules -->

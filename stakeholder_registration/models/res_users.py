@@ -285,8 +285,11 @@ class ResUsers(models.Model):
             if vals.get('user_category') == 'honna_staff' and honna_group:
                 existing = vals.get('group_ids', [])
                 vals['group_ids'] = existing + [Command.link(honna_group.id)]
-            elif vals.get('user_category') in ('school_college', 'school', 'college', 'academy', 'partner', 'others') and school_group:
+            elif vals.get('user_category') in ('school_college', 'school', 'college', 'academy', 'partner', 'others', 'parent', 'student') and school_group:
                 existing = vals.get('group_ids', [])
+                if honna_group:
+                    existing = [cmd for cmd in existing if not (isinstance(cmd, (tuple, list)) and len(cmd) >= 2 and cmd[1] == honna_group.id)]
+                    existing.append(Command.unlink(honna_group.id))
                 vals['group_ids'] = existing + [Command.link(school_group.id)]
             elif vals.get('user_category') == 'association' and assoc_group:
                 existing = vals.get('group_ids', [])
@@ -317,7 +320,7 @@ class ResUsers(models.Model):
                         unlink_cmds.append(Command.unlink(assoc_group.id))
                     if honna_group not in user.group_ids or unlink_cmds:
                         user.sudo().write({'group_ids': [Command.link(honna_group.id)] + unlink_cmds})
-                elif user.user_category in ('school_college', 'school', 'college', 'academy', 'partner', 'others') and school_group:
+                elif user.user_category in ('school_college', 'school', 'college', 'academy', 'partner', 'others', 'parent', 'student') and school_group:
                     unlink_cmds = []
                     if honna_group and honna_group in user.group_ids:
                         unlink_cmds.append(Command.unlink(honna_group.id))
@@ -368,6 +371,24 @@ class ResUsers(models.Model):
         school_users = self.sudo().search([
             ('group_ids', 'in', [school_group.id]),
         ]) if school_group else self.browse()
+
+        # Ensure non-staff users (e.g. academy, school, partner) do not have full access group
+        if honna_group and school_group:
+            non_staff_users = self.sudo().search([
+                ('user_category', 'in', ('school_college', 'school', 'college', 'academy', 'partner', 'others', 'parent', 'student')),
+            ])
+            admin_user = self.env.ref('base.user_admin', raise_if_not_found=False)
+            for non_staff in non_staff_users:
+                if admin_user and non_staff.id == admin_user.id:
+                    continue
+                cmds = []
+                if honna_group in non_staff.group_ids:
+                    cmds.append(Command.unlink(honna_group.id))
+                if school_group not in non_staff.group_ids:
+                    cmds.append(Command.link(school_group.id))
+                if cmds:
+                    non_staff.sudo().write({'group_ids': cmds})
+
         (users | school_users)._ensure_main_company_access()
         users._sync_association_profile()
 
@@ -378,6 +399,8 @@ class ResUsers(models.Model):
             'stakeholder_registration.access_stakeholder_association_member_association_user',
             'stakeholder_registration.access_stakeholder_organisation_school_user',
             'stakeholder_registration.rule_res_partner_association_user_write',
+            'stakeholder_registration.access_stakeholder_association_school_user',
+            'stakeholder_registration.access_stakeholder_association_member_school_user',
         ]
         for xml_id in obsolete_xml_ids:
             rec = self.env.ref(xml_id, raise_if_not_found=False)
