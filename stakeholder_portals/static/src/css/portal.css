@@ -799,6 +799,12 @@
     align-self: flex-start;
 }
 
+.honna-profile-page .portal-custom-sidebar.custom-sidebar {
+    top: 60px !important;
+    min-height: calc(100vh - 60px) !important;
+    z-index: 1010 !important;
+}
+
 .portal-custom-sidebar .logo {
     height: 56px;
     padding: 0 14px;
