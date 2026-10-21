@@ -12,6 +12,7 @@ class StudentProfile(models.Model):
     name = fields.Char(string='Student Name', required=True, tracking=True)
     code = fields.Char(string='Student ID', readonly=True, copy=False, default='New')
     partner_id = fields.Many2one('res.partner', string='Contact')
+    school_partner_id = fields.Many2one('res.partner', string='School/Institution')
     date_of_birth = fields.Date(string='Date of Birth')
     age = fields.Integer(string='Age', compute='_compute_age', store=False)
     gender = fields.Selection([

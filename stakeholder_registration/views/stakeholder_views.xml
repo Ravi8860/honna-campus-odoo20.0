@@ -1442,7 +1442,7 @@ else:
               name="Parent"
               parent="menu_stakeholder_registration_root"
               action="action_stakeholder_parent"
-              groups="stakeholder_registration.group_stakeholder_user"
+              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
               sequence="30"/>
 
     <menuitem id="menu_stakeholder_registration_academy"
@@ -1456,7 +1456,7 @@ else:
               name="Student"
               parent="menu_stakeholder_registration_root"
               action="action_stakeholder_student"
-              groups="stakeholder_registration.group_stakeholder_user"
+              groups="stakeholder_registration.group_stakeholder_user,stakeholder_registration.group_school_user"
               sequence="50"/>
 
     <menuitem id="menu_stakeholder_registration_partner"
@@ -1516,19 +1516,19 @@ else:
     </function>
     <function model="ir.ui.menu" name="write">
         <value eval="[ref('menu_stakeholder_registration_parent')]"/>
-        <value eval="{'name': 'Parent', 'sequence': 30, 'active': True}"/>
+        <value eval="{'name': 'Parent', 'sequence': 30, 'active': True, 'group_ids': [(6, 0, [ref('stakeholder_registration.group_stakeholder_user'), ref('stakeholder_registration.group_school_user')])]}"/>
     </function>
     <function model="ir.ui.menu" name="write">
         <value eval="[ref('menu_stakeholder_registration_academy')]"/>
-        <value eval="{'name': 'Academy', 'sequence': 40, 'active': True}"/>
+        <value eval="{'name': 'Academy', 'sequence': 40, 'active': True, 'group_ids': [(6, 0, [ref('stakeholder_registration.group_stakeholder_user'), ref('stakeholder_registration.group_school_user')])]}"/>
     </function>
     <function model="ir.ui.menu" name="write">
         <value eval="[ref('menu_stakeholder_registration_student')]"/>
-        <value eval="{'name': 'Student', 'sequence': 50, 'active': True}"/>
+        <value eval="{'name': 'Student', 'sequence': 50, 'active': True, 'group_ids': [(6, 0, [ref('stakeholder_registration.group_stakeholder_user'), ref('stakeholder_registration.group_school_user')])]}"/>
     </function>
     <function model="ir.ui.menu" name="write">
         <value eval="[ref('menu_stakeholder_registration_partner')]"/>
-        <value eval="{'name': 'Vendor', 'sequence': 60, 'active': True}"/>
+        <value eval="{'name': 'Vendor', 'sequence': 60, 'active': True, 'group_ids': [(6, 0, [ref('stakeholder_registration.group_stakeholder_user'), ref('stakeholder_registration.group_school_user')])]}"/>
     </function>
     <function model="ir.ui.menu" name="write">
         <value eval="[ref('menu_stakeholder_registration_honna_staff')]"/>

@@ -135,14 +135,17 @@ class StakeholderPortalController(http.Controller):
 
             # 2. Determine groups for res.users
             group_user = sudo_env.ref('base.group_user', raise_if_not_found=False)
-            honna_group = sudo_env.ref('stakeholder_registration.group_stakeholder_user', raise_if_not_found=False)
-            group_ids = [g.id for g in [group_user, honna_group] if g]
+            group_ids = [g.id for g in [group_user] if g]
 
-            if portal_type == 'association':
+            if portal_type == 'honna_staff':
+                honna_group = sudo_env.ref('stakeholder_registration.group_stakeholder_user', raise_if_not_found=False)
+                if honna_group:
+                    group_ids.append(honna_group.id)
+            elif portal_type == 'association':
                 assoc_group = sudo_env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
                 if assoc_group:
                     group_ids.append(assoc_group.id)
-            elif portal_type in ('school', 'college', 'academy', 'organisation', 'school_college'):
+            elif portal_type in ('school', 'college', 'academy', 'organisation', 'school_college', 'partner', 'vendor', 'parent', 'student'):
                 school_group = sudo_env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
                 if school_group:
                     group_ids.append(school_group.id)
