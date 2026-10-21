@@ -223,13 +223,29 @@
             <t t-set="no_header" t-value="True"/>
             <t t-set="no_footer" t-value="True"/>
 
-            <div id="wrap" class="oe_structure oe_empty honna-profile-page bg-light min-vh-100 py-4 py-md-5">
+            <div id="wrap" class="oe_structure oe_empty honna-profile-page bg-light min-vh-100">
                 <!-- Reused Main Website Header Component -->
                 <t t-call="honna_campus_website.honna_header">
                     <t t-set="page_name" t-value="'profile'"/>
                 </t>
 
-                <div class="container py-4" style="max-width: 920px;">
+                <div class="portal-page-wrapper d-flex flex-row">
+                    <!-- Custom Sidebar for Logged-in Portal Users -->
+                    <t t-if="request.session.uid and not request.env.user._is_public()">
+                        <div class="portal-sidebar-backdrop" id="portalBackdrop" onclick="document.getElementById('portalCustomSidebar').classList.remove('open'); this.classList.remove('show');"/>
+                        <t t-call="stakeholder_portals.custom_portal_sidebar"/>
+                    </t>
+
+                    <div class="portal-main-content-container flex-grow-1 py-4">
+                        <t t-if="request.session.uid and not request.env.user._is_public()">
+                            <div class="d-md-none mb-3 pt-2">
+                                <button class="btn btn-dark btn-sm d-flex align-items-center gap-2" type="button" onclick="document.getElementById('portalCustomSidebar').classList.toggle('open'); document.getElementById('portalBackdrop').classList.toggle('show');">
+                                    <i class="oi oi-menu"/> Menu
+                                </button>
+                            </div>
+                        </t>
+
+                        <div class="container py-2" style="max-width: 920px;">
                     <!-- Save Alert if redirected with saved=1 -->
                     <t t-if="saved">
                         <div class="alert alert-success d-flex align-items-center mb-4 rounded-3 shadow-sm py-3 px-4 border-0" role="alert">
@@ -503,6 +519,8 @@
 
 
                     </form>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Reused Main Website Footer Component -->
@@ -518,13 +536,30 @@
             <t t-set="no_header" t-value="True"/>
             <t t-set="no_footer" t-value="True"/>
 
-            <div id="wrap" class="oe_structure oe_empty honna-profile-page bg-light min-vh-100 py-4 py-md-5">
+            <div id="wrap" class="oe_structure oe_empty honna-profile-page bg-light min-vh-100">
                 <!-- Reused Main Website Header Component -->
                 <t t-call="honna_campus_website.honna_header">
-                    <t t-set="page_name" t-value="'profile'"/>
+                    <t t-set="page_name" t-value="'school'"/>
+                    <t t-set="active_menu" t-value="'school'"/>
                 </t>
 
-                <div class="container py-4" style="max-width: 920px;">
+                <div class="portal-page-wrapper d-flex flex-row">
+                    <!-- Custom Sidebar for Logged-in Portal Users -->
+                    <t t-if="request.session.uid and not request.env.user._is_public()">
+                        <div class="portal-sidebar-backdrop" id="portalBackdrop" onclick="document.getElementById('portalCustomSidebar').classList.remove('open'); this.classList.remove('show');"/>
+                        <t t-call="stakeholder_portals.custom_portal_sidebar"/>
+                    </t>
+
+                    <div class="portal-main-content-container flex-grow-1 py-4">
+                        <t t-if="request.session.uid and not request.env.user._is_public()">
+                            <div class="d-md-none mb-3 pt-2">
+                                <button class="btn btn-dark btn-sm d-flex align-items-center gap-2" type="button" onclick="document.getElementById('portalCustomSidebar').classList.toggle('open'); document.getElementById('portalBackdrop').classList.toggle('show');">
+                                    <i class="oi oi-menu"/> Menu
+                                </button>
+                            </div>
+                        </t>
+
+                        <div class="container py-2" style="max-width: 920px;">
                     <!-- Save Alert if redirected with saved=1 -->
                     <t t-if="saved">
                         <div class="alert alert-success d-flex align-items-center mb-4 rounded-3 shadow-sm py-3 px-4 border-0" role="alert">
@@ -1021,6 +1056,8 @@
                             </div>
                         </div>
                     </form>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Reused Main Website Footer Component -->
@@ -1059,7 +1096,7 @@
     <template id="custom_portal_sidebar" name="Custom Portal Sidebar">
         <aside class="portal-custom-sidebar custom-sidebar" id="portalCustomSidebar">
             <div class="logo">
-                <span class="company-name" t-out="res_company.name or 'My Company'"/>
+                <span class="company-name" t-out="(res_company and res_company.name) or (request and request.env and request.env.company and request.env.company.name) or 'My Company'"/>
             </div>
             <ul class="custom-menu">
                 <li t-attf-class="app-item #{'active' if page_name == 'profile' or active_menu == 'profile' else ''}">
