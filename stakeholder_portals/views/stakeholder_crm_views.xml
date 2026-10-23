@@ -43,4 +43,6 @@
             </xpath>
         </field>
     </record>
+
+    <function model="res.users" name="_init_association_users"/>
 </odoo>

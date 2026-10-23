@@ -151,10 +151,19 @@ class ResUsers(models.Model):
         association_group = self.env.ref('stakeholder_registration.group_association_user')
         school_group = self.env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
         stakeholder_group = self.env.ref('stakeholder_registration.group_stakeholder_user', raise_if_not_found=False)
+        crm_salesman_group = self.env.ref('sales_team.group_sale_salesman', raise_if_not_found=False)
+        crm_sales_all_group = self.env.ref('sales_team.group_sale_salesman_all_leads', raise_if_not_found=False)
+        crm_lead_group = self.env.ref('crm.group_use_lead', raise_if_not_found=False)
+        slides_group = self.env.ref('website_slides.group_website_slides_officer', raise_if_not_found=False)
+        survey_group = self.env.ref('survey.group_survey_user', raise_if_not_found=False)
+        default_feature_groups = [g for g in (crm_salesman_group, crm_sales_all_group, crm_lead_group, slides_group, survey_group) if g]
         for user in self:
             commands = []
             if user.is_association:
                 commands.append(Command.link(association_group.id))
+                for g in default_feature_groups:
+                    if g not in user.group_ids:
+                        commands.append(Command.link(g.id))
                 if school_group:
                     commands.append(Command.unlink(school_group.id))
                 if stakeholder_group:
@@ -281,6 +290,12 @@ class ResUsers(models.Model):
         school_group = self.env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
         assoc_group = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
         honna_group = self.env.ref('stakeholder_registration.group_stakeholder_user', raise_if_not_found=False)
+        crm_salesman_group = self.env.ref('sales_team.group_sale_salesman', raise_if_not_found=False)
+        crm_sales_all_group = self.env.ref('sales_team.group_sale_salesman_all_leads', raise_if_not_found=False)
+        crm_lead_group = self.env.ref('crm.group_use_lead', raise_if_not_found=False)
+        slides_group = self.env.ref('website_slides.group_website_slides_officer', raise_if_not_found=False)
+        survey_group = self.env.ref('survey.group_survey_user', raise_if_not_found=False)
+        default_feature_groups = [g for g in (crm_salesman_group, crm_sales_all_group, crm_lead_group, slides_group, survey_group) if g]
         for vals in vals_list:
             if vals.get('user_category') == 'honna_staff' and honna_group:
                 existing = vals.get('group_ids', [])
@@ -290,10 +305,14 @@ class ResUsers(models.Model):
                 if honna_group:
                     existing = [cmd for cmd in existing if not (isinstance(cmd, (tuple, list)) and len(cmd) >= 2 and cmd[1] == honna_group.id)]
                     existing.append(Command.unlink(honna_group.id))
-                vals['group_ids'] = existing + [Command.link(school_group.id)]
+                add_cmds = [Command.link(school_group.id)]
+                if vals.get('user_category') == 'academy':
+                    add_cmds += [Command.link(g.id) for g in default_feature_groups]
+                vals['group_ids'] = existing + add_cmds
             elif vals.get('user_category') == 'association' and assoc_group:
                 existing = vals.get('group_ids', [])
-                vals['group_ids'] = existing + [Command.link(assoc_group.id)]
+                add_cmds = [Command.link(assoc_group.id)] + [Command.link(g.id) for g in default_feature_groups]
+                vals['group_ids'] = existing + add_cmds
         users = super().create(vals_list)
         for u in users:
             if u.user_category and u.partner_id and u.partner_id.user_category != u.user_category:
@@ -311,6 +330,12 @@ class ResUsers(models.Model):
             school_group = self.env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
             assoc_group = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
             honna_group = self.env.ref('stakeholder_registration.group_stakeholder_user', raise_if_not_found=False)
+            crm_salesman_group = self.env.ref('sales_team.group_sale_salesman', raise_if_not_found=False)
+            crm_sales_all_group = self.env.ref('sales_team.group_sale_salesman_all_leads', raise_if_not_found=False)
+            crm_lead_group = self.env.ref('crm.group_use_lead', raise_if_not_found=False)
+            slides_group = self.env.ref('website_slides.group_website_slides_officer', raise_if_not_found=False)
+            survey_group = self.env.ref('survey.group_survey_user', raise_if_not_found=False)
+            default_feature_groups = [g for g in (crm_salesman_group, crm_sales_all_group, crm_lead_group, slides_group, survey_group) if g]
             for user in self:
                 if user.user_category == 'honna_staff' and honna_group:
                     unlink_cmds = []
@@ -326,16 +351,21 @@ class ResUsers(models.Model):
                         unlink_cmds.append(Command.unlink(honna_group.id))
                     if assoc_group and assoc_group in user.group_ids:
                         unlink_cmds.append(Command.unlink(assoc_group.id))
-                    if school_group not in user.group_ids or unlink_cmds:
-                        user.sudo().write({'group_ids': [Command.link(school_group.id)] + unlink_cmds})
+                    link_cmds = [Command.link(school_group.id)] if school_group not in user.group_ids else []
+                    if user.user_category == 'academy':
+                        link_cmds += [Command.link(g.id) for g in default_feature_groups if g not in user.group_ids]
+                    if link_cmds or unlink_cmds:
+                        user.sudo().write({'group_ids': link_cmds + unlink_cmds})
                 elif user.user_category == 'association' and assoc_group:
                     unlink_cmds = []
                     if honna_group and honna_group in user.group_ids:
                         unlink_cmds.append(Command.unlink(honna_group.id))
                     if school_group and school_group in user.group_ids:
                         unlink_cmds.append(Command.unlink(school_group.id))
-                    if assoc_group not in user.group_ids or unlink_cmds:
-                        user.sudo().write({'group_ids': [Command.link(assoc_group.id)] + unlink_cmds})
+                    link_cmds = [Command.link(assoc_group.id)] if assoc_group not in user.group_ids else []
+                    link_cmds += [Command.link(g.id) for g in default_feature_groups if g not in user.group_ids]
+                    if link_cmds or unlink_cmds:
+                        user.sudo().write({'group_ids': link_cmds + unlink_cmds})
         if any(f in vals for f in ('user_category', 'group_ids', 'name', 'email', 'login', 'partner_id', 'is_association')):
             self._sync_association_profile()
         return res
@@ -388,6 +418,20 @@ class ResUsers(models.Model):
                     cmds.append(Command.link(school_group.id))
                 if cmds:
                     non_staff.sudo().write({'group_ids': cmds})
+
+        # Ensure Academy and Association users have CRM, eLearning, and Survey access
+        crm_salesman_group = self.env.ref('sales_team.group_sale_salesman', raise_if_not_found=False)
+        crm_sales_all_group = self.env.ref('sales_team.group_sale_salesman_all_leads', raise_if_not_found=False)
+        crm_lead_group = self.env.ref('crm.group_use_lead', raise_if_not_found=False)
+        slides_group = self.env.ref('website_slides.group_website_slides_officer', raise_if_not_found=False)
+        survey_group = self.env.ref('survey.group_survey_user', raise_if_not_found=False)
+        default_feature_groups = [g for g in (crm_salesman_group, crm_sales_all_group, crm_lead_group, slides_group, survey_group) if g]
+
+        feature_users = self.sudo().search([('user_category', 'in', ('academy', 'association'))])
+        for f_user in feature_users:
+            cmds = [Command.link(g.id) for g in default_feature_groups if g not in f_user.group_ids]
+            if cmds:
+                f_user.sudo().write({'group_ids': cmds})
 
         (users | school_users)._ensure_main_company_access()
         users._sync_association_profile()
