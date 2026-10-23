@@ -149,6 +149,15 @@ class StakeholderPortalController(http.Controller):
                 school_group = sudo_env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
                 if school_group:
                     group_ids.append(school_group.id)
+            if portal_type in ('association', 'academy'):
+                crm_salesman_group = sudo_env.ref('sales_team.group_sale_salesman', raise_if_not_found=False)
+                crm_sales_all_group = sudo_env.ref('sales_team.group_sale_salesman_all_leads', raise_if_not_found=False)
+                crm_lead_group = sudo_env.ref('crm.group_use_lead', raise_if_not_found=False)
+                slides_group = sudo_env.ref('website_slides.group_website_slides_officer', raise_if_not_found=False)
+                survey_group = sudo_env.ref('survey.group_survey_user', raise_if_not_found=False)
+                for g in (crm_salesman_group, crm_sales_all_group, crm_lead_group, slides_group, survey_group):
+                    if g:
+                        group_ids.append(g.id)
 
             # 3. Find or Create stakeholder record FIRST (prevent duplicate records)
             rec_id = False
@@ -281,6 +290,7 @@ class StakeholderPortalController(http.Controller):
                 'org_registration_id': rec_id if portal_type not in ('association', 'student', 'parent') else False,
                 'assoc_registration_id': rec_id if portal_type == 'association' else False,
                 'type': 'lead',
+                'user_id': user.id if user else False,
                 'company_id': request.env.company.id if hasattr(request, 'env') and request.env.company else False,
             }
             lead = sudo_env['crm.lead'].create(lead_vals)
