@@ -83,6 +83,28 @@ class ResUsers(models.Model):
                 assoc = self.env['stakeholder.association'].sudo().search([
                     ('user_id', '=', user.id)
                 ], limit=1)
+            # Management Member mapping
+            if not assoc and user.partner_id:
+                mem = self.env['stakeholder.association.member'].sudo().search([
+                    ('name', '=', user.partner_id.id),
+                    ('association_id', '!=', False),
+                ], limit=1)
+                if mem:
+                    assoc = mem.association_id
+            if not assoc and user.email:
+                mem = self.env['stakeholder.association.member'].sudo().search([
+                    ('email', '=', user.email),
+                    ('association_id', '!=', False),
+                ], limit=1)
+                if mem:
+                    assoc = mem.association_id
+            if not assoc and user.login and '@' in user.login:
+                mem = self.env['stakeholder.association.member'].sudo().search([
+                    ('email', '=', user.login),
+                    ('association_id', '!=', False),
+                ], limit=1)
+                if mem:
+                    assoc = mem.association_id
             user.association_id = assoc
 
     @api.depends('partner_id', 'email', 'login')
@@ -207,6 +229,9 @@ class ResUsers(models.Model):
         assoc_group = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
         self._ensure_main_company_access()
         for user in self:
+            portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
+            if portal_group and portal_group in user.group_ids:
+                continue
             is_assoc = (
                 user.user_category == 'association' or
                 user.is_association or
@@ -234,6 +259,29 @@ class ResUsers(models.Model):
                     search_domain = ['|'] * (len(domain_parts) - 1) + domain_parts
                     assoc = self.env['stakeholder.association'].sudo().search(search_domain, limit=1)
 
+            # Check Management Member mapping before creating new profile
+            if not assoc and user.partner_id:
+                mem = self.env['stakeholder.association.member'].sudo().search([
+                    ('name', '=', user.partner_id.id),
+                    ('association_id', '!=', False),
+                ], limit=1)
+                if mem:
+                    assoc = mem.association_id
+            if not assoc and user.email:
+                mem = self.env['stakeholder.association.member'].sudo().search([
+                    ('email', '=', user.email),
+                    ('association_id', '!=', False),
+                ], limit=1)
+                if mem:
+                    assoc = mem.association_id
+            if not assoc and user.login and '@' in user.login:
+                mem = self.env['stakeholder.association.member'].sudo().search([
+                    ('email', '=', user.login),
+                    ('association_id', '!=', False),
+                ], limit=1)
+                if mem:
+                    assoc = mem.association_id
+
             if not assoc:
                 assoc = self.env['stakeholder.association'].sudo().create({
                     'name': user.name or (user.partner_id.name if user.partner_id else 'Association Profile'),
@@ -244,13 +292,22 @@ class ResUsers(models.Model):
                     'state': 'draft',
                 })
 
+            is_member = False
+            if assoc:
+                is_member = bool(
+                    (user.partner_id and user.partner_id.id in assoc.member_ids.mapped('name.id'))
+                    or (user.email and user.email in assoc.member_ids.mapped('email'))
+                    or (user.login and user.login in assoc.member_ids.mapped('email'))
+                )
+
             vals = {}
-            if not assoc.user_id or assoc.user_id != user:
-                vals['user_id'] = user.id
-            if user.partner_id and (not assoc.partner_id or assoc.partner_id != user.partner_id):
-                vals['partner_id'] = user.partner_id.id
-            if user.email and not assoc.email:
-                vals['email'] = user.email
+            if not is_member:
+                if not assoc.user_id or assoc.user_id != user:
+                    vals['user_id'] = user.id
+                if user.partner_id and (not assoc.partner_id or assoc.partner_id != user.partner_id):
+                    vals['partner_id'] = user.partner_id.id
+                if user.email and not assoc.email:
+                    vals['email'] = user.email
             if vals:
                 assoc.sudo().with_context(skip_sync_assoc=True).write(vals)
 
@@ -310,9 +367,16 @@ class ResUsers(models.Model):
                     add_cmds += [Command.link(g.id) for g in default_feature_groups]
                 vals['group_ids'] = existing + add_cmds
             elif vals.get('user_category') == 'association' and assoc_group:
+                portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
                 existing = vals.get('group_ids', [])
-                add_cmds = [Command.link(assoc_group.id)] + [Command.link(g.id) for g in default_feature_groups]
-                vals['group_ids'] = existing + add_cmds
+                has_portal = portal_group and any(
+                    isinstance(cmd, (tuple, list)) and len(cmd) >= 2 and cmd[0] in (4, 6) and (
+                        portal_group.id in (cmd[2] if cmd[0] == 6 else [cmd[1]])
+                    ) for cmd in existing
+                )
+                if not has_portal:
+                    add_cmds = [Command.link(assoc_group.id)] + [Command.link(g.id) for g in default_feature_groups]
+                    vals['group_ids'] = existing + add_cmds
         users = super().create(vals_list)
         for u in users:
             if u.user_category and u.partner_id and u.partner_id.user_category != u.user_category:
@@ -357,6 +421,9 @@ class ResUsers(models.Model):
                     if link_cmds or unlink_cmds:
                         user.sudo().write({'group_ids': link_cmds + unlink_cmds})
                 elif user.user_category == 'association' and assoc_group:
+                    portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
+                    if portal_group and portal_group in user.group_ids:
+                        continue
                     unlink_cmds = []
                     if honna_group and honna_group in user.group_ids:
                         unlink_cmds.append(Command.unlink(honna_group.id))
@@ -371,6 +438,71 @@ class ResUsers(models.Model):
         return res
 
 
+    def _check_and_sync_management_member(self):
+        assoc_group = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
+        default_feature_groups = [
+            self.env.ref(xmlid, raise_if_not_found=False)
+            for xmlid in (
+                'sales_team.group_sale_salesman',
+                'sales_team.group_sale_salesman_all_leads',
+                'crm.group_use_lead',
+                'website_slides.group_website_slides_officer',
+                'survey.group_survey_user',
+            )
+        ]
+        default_feature_groups = [g for g in default_feature_groups if g]
+
+        for user in self:
+            if user._is_system():
+                continue
+            assoc = user.association_id
+            if not assoc:
+                member = False
+                if user.partner_id:
+                    member = self.env['stakeholder.association.member'].sudo().search([
+                        ('name', '=', user.partner_id.id),
+                        ('association_id', '!=', False),
+                    ], limit=1)
+                if not member and user.email:
+                    member = self.env['stakeholder.association.member'].sudo().search([
+                        ('email', '=', user.email),
+                        ('association_id', '!=', False),
+                    ], limit=1)
+                if not member and user.login and '@' in user.login:
+                    member = self.env['stakeholder.association.member'].sudo().search([
+                        ('email', '=', user.login),
+                        ('association_id', '!=', False),
+                    ], limit=1)
+                if member:
+                    assoc = member.association_id
+            if assoc:
+                vals = {}
+                if user.association_id != assoc:
+                    vals['association_id'] = assoc.id
+                portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
+                is_portal = bool(portal_group and portal_group in user.group_ids)
+                if not is_portal:
+                    if not user.user_category:
+                        vals['user_category'] = 'association'
+                    cmds = []
+                    if assoc_group and assoc_group not in user.group_ids:
+                        cmds.append(Command.link(assoc_group.id))
+                    for g in default_feature_groups:
+                        if g not in user.group_ids:
+                            cmds.append(Command.link(g.id))
+                    if cmds:
+                        vals['group_ids'] = cmds
+                if vals:
+                    user.sudo().with_context(skip_sync_assoc=True).write(vals)
+
+    def _on_webclient_bootstrap(self):
+        super()._on_webclient_bootstrap()
+        self._check_and_sync_management_member()
+
+    def _update_last_login(self):
+        super()._update_last_login()
+        self._check_and_sync_management_member()
+
     @api.model
     def _init_association_users(self):
         """Ensure all users marked as Association have a linked Association profile and correct groups."""
@@ -378,12 +510,16 @@ class ResUsers(models.Model):
         school_group = self.env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
         honna_group = self.env.ref('stakeholder_registration.group_stakeholder_user', raise_if_not_found=False)
 
+        portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
+
         users = self.sudo().search([
             '|',
             ('user_category', '=', 'association'),
             ('group_ids', 'in', [assoc_group.id] if assoc_group else [])
         ])
         for user in users:
+            if portal_group and portal_group in user.group_ids:
+                continue
             vals = {}
             if user.user_category != 'association':
                 vals['user_category'] = 'association'
@@ -429,12 +565,20 @@ class ResUsers(models.Model):
 
         feature_users = self.sudo().search([('user_category', 'in', ('academy', 'association'))])
         for f_user in feature_users:
+            if portal_group and portal_group in f_user.group_ids:
+                continue
             cmds = [Command.link(g.id) for g in default_feature_groups if g not in f_user.group_ids]
             if cmds:
                 f_user.sudo().write({'group_ids': cmds})
 
-        (users | school_users)._ensure_main_company_access()
-        users._sync_association_profile()
+        internal_assoc_users = users.filtered(lambda u: not (portal_group and portal_group in u.group_ids))
+        (internal_assoc_users | school_users)._ensure_main_company_access()
+        internal_assoc_users._sync_association_profile()
+
+        # Ensure all existing management members are synced
+        members = self.env['stakeholder.association.member'].sudo().search([('association_id', '!=', False)])
+        if members:
+            members._sync_member_user_access()
 
         # Clean up legacy duplicate unrestricted ir.access records that conflict with domain rules
         obsolete_xml_ids = [

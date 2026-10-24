@@ -33,12 +33,19 @@ class ResPartner(models.Model):
                 assoc = self.env['stakeholder.association'].sudo().search([('partner_id', '=', partner.id)], limit=1)
                 if not assoc and partner.association_member_ids:
                     assoc = partner.association_member_ids[0].association_id
+                if not assoc and partner.email:
+                    mem = self.env['stakeholder.association.member'].sudo().search([
+                        ('email', '=', partner.email),
+                        ('association_id', '!=', False),
+                    ], limit=1)
+                    if mem:
+                        assoc = mem.association_id
             partner.association_id = assoc
 
     def _inverse_association_id(self):
         for partner in self:
             if partner.id and not isinstance(partner.id, models.NewId):
-                if partner.association_id and partner.association_id.partner_id != partner:
+                if partner.association_id and not partner.association_id.partner_id:
                     partner.association_id.sudo().write({'partner_id': partner.id})
 
     def _is_association_or_school_user(self):

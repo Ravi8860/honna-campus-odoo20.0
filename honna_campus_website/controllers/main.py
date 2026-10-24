@@ -41,6 +41,20 @@ class HonnaWebsiteLogin(Home):
         })
         return request.render('honna_campus_website.login_page_template', values)
 
+    def _login_redirect(self, uid, redirect=None):
+        if not redirect:
+            user = request.env['res.users'].sudo().browse(uid)
+            if not user.has_group('base.group_user'):
+                if user.association_id or user.user_category == 'association':
+                    return '/association/profile'
+                mem = request.env['stakeholder.association.member'].sudo().search([
+                    ('association_id', '!=', False),
+                    '|', ('name', '=', user.partner_id.id), ('email', '=', user.email)
+                ], limit=1)
+                if mem:
+                    return '/association/profile'
+        return super()._login_redirect(uid, redirect=redirect)
+
 
 class HonnaCampusWebsiteController(http.Controller):
 

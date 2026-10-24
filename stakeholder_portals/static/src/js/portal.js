@@ -235,18 +235,15 @@
 
     window.toggleMemberAddSection = function() {
         const inlineRow = document.getElementById('inline_add_member_row');
-        const detailsSection = document.getElementById('add_member_details_section');
         if (inlineRow) {
             if (inlineRow.classList.contains('d-none')) {
                 inlineRow.classList.remove('d-none');
                 const nameInput = document.getElementById('inline_name');
                 if (nameInput) nameInput.focus();
+                inlineRow.scrollIntoView({ behavior: 'smooth' });
             } else {
                 inlineRow.classList.add('d-none');
             }
-        }
-        if (detailsSection) {
-            detailsSection.scrollIntoView({ behavior: 'smooth' });
         }
     };
 
@@ -254,9 +251,10 @@
         const name = (document.getElementById('inline_name')?.value || '').trim();
         const desig = (document.getElementById('inline_desig')?.value || '').trim();
         const email = (document.getElementById('inline_email')?.value || '').trim();
+        const phone = (document.getElementById('inline_phone')?.value || '').trim();
 
-        if (!name && !email) {
-            alert('Please enter at least a name or email for the member.');
+        if (!name && !email && !phone) {
+            alert('Please enter at least a name, email or phone for the member.');
             return;
         }
 
@@ -264,12 +262,14 @@
         const lnameInput = document.getElementById('new_mem_lname');
         const roleInput = document.getElementById('new_mem_role');
         const emailInput = document.getElementById('new_mem_email');
+        const phoneInput = document.getElementById('new_mem_phone');
 
         const parts = name.split(' ');
         if (fnameInput) fnameInput.value = parts[0] || '';
         if (lnameInput) lnameInput.value = parts.slice(1).join(' ') || '';
         if (roleInput) roleInput.value = desig || 'Member';
         if (emailInput) emailInput.value = email || '';
+        if (phoneInput) phoneInput.value = phone || '';
 
         window.submitProfileForm('save');
     };
@@ -298,13 +298,19 @@
         const name = cells[0].textContent.trim();
         const desig = cells[1].textContent.trim();
         const email = cells[2].textContent.trim();
+        const phone = cells[3] && cells.length >= 5 ? cells[3].textContent.trim() : '';
 
         const inlineRow = document.getElementById('inline_add_member_row');
         if (inlineRow) {
             inlineRow.classList.remove('d-none');
-            document.getElementById('inline_name').value = name;
-            document.getElementById('inline_desig').value = desig;
-            document.getElementById('inline_email').value = email;
+            const nameEl = document.getElementById('inline_name');
+            const desigEl = document.getElementById('inline_desig');
+            const emailEl = document.getElementById('inline_email');
+            const phoneEl = document.getElementById('inline_phone');
+            if (nameEl) nameEl.value = name;
+            if (desigEl) desigEl.value = desig;
+            if (emailEl) emailEl.value = email;
+            if (phoneEl) phoneEl.value = phone;
             inlineRow.scrollIntoView({ behavior: 'smooth' });
         }
     };
@@ -328,10 +334,12 @@
         const s1 = document.getElementById('school_step_1_content');
         const s2 = document.getElementById('school_step_2_content');
         const s3 = document.getElementById('school_step_3_content');
+        const s4 = document.getElementById('school_step_4_content');
 
         const tab1 = document.getElementById('school_nav_step_1');
         const tab2 = document.getElementById('school_nav_step_2');
         const tab3 = document.getElementById('school_nav_step_3');
+        const tab4 = document.getElementById('school_nav_step_4');
 
         const barFill = document.getElementById('school_progress_fill');
         const barText = document.getElementById('school_progress_text');
@@ -343,6 +351,7 @@
         if (s1) s1.classList.toggle('d-none', step !== 1);
         if (s2) s2.classList.toggle('d-none', step !== 2);
         if (s3) s3.classList.toggle('d-none', step !== 3);
+        if (s4) s4.classList.toggle('d-none', step !== 4);
 
         // Update nav items
         if (tab1) {
@@ -350,36 +359,26 @@
             tab1.innerHTML = step === 1 ? 'School Details' : 'School Details <i class="oi oi-check text-success"></i>';
         }
         if (tab2) {
-            if (step === 1) {
-                tab2.className = 'honna-step-item';
-                tab2.innerHTML = 'Member Details';
-            } else if (step === 2) {
-                tab2.className = 'honna-step-item active';
-                tab2.innerHTML = 'Member Details';
-            } else {
-                tab2.className = 'honna-step-item completed';
-                tab2.innerHTML = 'Member Details <i class="oi oi-check text-success"></i>';
-            }
+            tab2.className = 'honna-step-item ' + (step === 2 ? 'active' : (step > 2 ? 'completed' : ''));
+            tab2.innerHTML = step > 2 ? 'Member Details <i class="oi oi-check text-success"></i>' : 'Member Details';
         }
         if (tab3) {
-            tab3.className = 'honna-step-item ' + (step === 3 ? 'active' : '');
-            tab3.innerHTML = 'Primary Contact';
+            tab3.className = 'honna-step-item ' + (step === 3 ? 'active' : (step > 3 ? 'completed' : ''));
+            tab3.innerHTML = step > 3 ? 'Primary Contact <i class="oi oi-check text-success"></i>' : 'Primary Contact';
+        }
+        if (tab4) {
+            tab4.className = 'honna-step-item ' + (step === 4 ? 'active' : '');
+            tab4.innerHTML = 'Other Details';
         }
 
         // Progress percentage
         if (barFill && barText) {
-            if (step === 1) {
-                barFill.style.width = '20%';
-                barText.textContent = '20% complete';
-                if (subtitle) subtitle.textContent = 'Add your school details below to get started.';
-            } else if (step === 2) {
-                barFill.style.width = '60%';
-                barText.textContent = '60% complete';
-                if (subtitle) subtitle.textContent = 'Add your organisation details below to get started.';
-            } else if (step === 3) {
-                barFill.style.width = '90%';
-                barText.textContent = '90% complete';
-                if (subtitle) subtitle.textContent = 'Add your organisation details below to get started.';
+            const pctMap = {1: '25%', 2: '50%', 3: '75%', 4: '100%'};
+            const pct = pctMap[step] || '25%';
+            barFill.style.width = pct;
+            barText.textContent = pct + ' complete';
+            if (subtitle) {
+                subtitle.textContent = step === 1 ? 'Add your school details below to get started.' : 'Add your organisation details below to get started.';
             }
         }
 
@@ -391,7 +390,7 @@
     };
 
     window.switchSchoolMemberTab = function(tabName) {
-        const tabs = ['executive', 'academic', 'operations'];
+        const tabs = ['executive', 'academic', 'operations', 'association_partners'];
         tabs.forEach(function(t) {
             const tableEl = document.getElementById('school_table_' + t);
             const btnEl = document.getElementById('school_tab_btn_' + t);
@@ -399,7 +398,15 @@
                 tableEl.classList.toggle('d-none', t !== tabName);
             }
             if (btnEl) {
-                btnEl.classList.toggle('active', t === tabName);
+                const isActive = (t === tabName);
+                btnEl.classList.toggle('active', isActive);
+                if (isActive) {
+                    btnEl.classList.remove('text-secondary');
+                    btnEl.classList.add('text-dark', 'fw-semibold');
+                } else {
+                    btnEl.classList.remove('text-dark', 'fw-semibold');
+                    btnEl.classList.add('text-secondary');
+                }
             }
         });
 
@@ -407,6 +414,115 @@
         if (catInput) {
             catInput.value = tabName;
         }
+    };
+
+    window.showSchoolInlineAdd = function(tab) {
+        let rowId = 'inline_add_' + tab + '_row';
+        let btnRowId = 'school_add_line_btn_row_' + tab;
+        if (tab === 'association_partners') {
+            rowId = 'inline_add_assoc_row';
+        }
+        const row = document.getElementById(rowId);
+        const btnRow = document.getElementById(btnRowId);
+        if (row) {
+            row.classList.remove('d-none');
+            const firstInput = row.querySelector('input:not([type="file"]), select');
+            if (firstInput) firstInput.focus();
+        }
+        if (btnRow) {
+            btnRow.classList.add('d-none');
+        }
+    };
+
+    window.hideSchoolInlineAdd = function(tab) {
+        let rowId = 'inline_add_' + tab + '_row';
+        let btnRowId = 'school_add_line_btn_row_' + tab;
+        if (tab === 'association_partners') {
+            rowId = 'inline_add_assoc_row';
+        }
+        const row = document.getElementById(rowId);
+        const btnRow = document.getElementById(btnRowId);
+        if (row) row.classList.add('d-none');
+        if (btnRow) btnRow.classList.remove('d-none');
+    };
+
+    window.previewInlineAvatar = function(input, imgId) {
+        if (input && input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById(imgId);
+                if (img) img.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+
+            const targetInput = document.getElementById('school_new_mem_file_input');
+            if (targetInput && input.files) {
+                try {
+                    const dt = new DataTransfer();
+                    dt.items.add(input.files[0]);
+                    targetInput.files = dt.files;
+                } catch (e) {}
+            }
+        }
+    };
+
+    window.saveSchoolInlineMember = function(tab) {
+        let prefix = 'exec';
+        if (tab === 'academic') prefix = 'acad';
+        else if (tab === 'operations') prefix = 'oper';
+
+        const fname = (document.getElementById('inline_' + prefix + '_fname') || {}).value || '';
+        const lname = (document.getElementById('inline_' + prefix + '_lname') || {}).value || '';
+        const role = (document.getElementById('inline_' + prefix + '_role') || {}).value || '';
+        const email = (document.getElementById('inline_' + prefix + '_email') || {}).value || '';
+        const phone = (document.getElementById('inline_' + prefix + '_phone') || {}).value || '';
+        const primaryEl = document.getElementById('inline_' + prefix + '_primary');
+
+        if (!fname && !email) {
+            alert('Please enter at least First Name or Email.');
+            return;
+        }
+
+        const fEl = document.getElementById('school_new_mem_fname');
+        const lEl = document.getElementById('school_new_mem_lname');
+        const rEl = document.getElementById('school_new_mem_role');
+        const eEl = document.getElementById('school_new_mem_email');
+        const pEl = document.getElementById('school_new_mem_phone');
+        const priEl = document.getElementById('school_new_mem_primary');
+        const catEl = document.getElementById('school_new_member_category_input');
+
+        if (fEl) fEl.value = fname;
+        if (lEl) lEl.value = lname;
+        if (rEl) rEl.value = role;
+        if (eEl) eEl.value = email;
+        if (pEl) pEl.value = phone;
+        if (priEl) priEl.value = (primaryEl && primaryEl.checked) ? '1' : '';
+        if (catEl) catEl.value = tab;
+
+        window.submitSchoolProfileForm('save', 2);
+    };
+
+    window.saveSchoolInlineAssoc = function() {
+        const assocId = (document.getElementById('inline_assoc_id_select') || {}).value || '';
+        const assocNum = (document.getElementById('inline_assoc_num') || {}).value || '';
+        const assocExp = (document.getElementById('inline_assoc_exp') || {}).value || '';
+
+        if (!assocId) {
+            alert('Please select an Association.');
+            return;
+        }
+
+        const idEl = document.getElementById('school_new_assoc_id');
+        const numEl = document.getElementById('school_new_assoc_number');
+        const expEl = document.getElementById('school_new_assoc_expiry');
+        const catEl = document.getElementById('school_new_member_category_input');
+
+        if (idEl) idEl.value = assocId;
+        if (numEl) numEl.value = assocNum;
+        if (expEl) expEl.value = assocExp;
+        if (catEl) catEl.value = 'association_partners';
+
+        window.submitSchoolProfileForm('save', 2);
     };
 
     window.submitSchoolProfileForm = function(action, nextStep) {
@@ -423,7 +539,7 @@
     };
 
     window.deleteSchoolMemberRow = function(memberId, memberType) {
-        if (confirm('Are you sure you want to remove this member?')) {
+        if (confirm('Are you sure you want to remove this record?')) {
             const idInput = document.getElementById('school_delete_member_id_input');
             const typeInput = document.getElementById('school_delete_member_type_input');
             if (idInput && typeInput) {
@@ -431,40 +547,6 @@
                 typeInput.value = memberType;
                 window.submitSchoolProfileForm('save', 2);
             }
-        }
-    };
-
-    window.editSchoolMemberRow = function(memberId, memberType, fname, lname, role, email, phone, isPrimary) {
-        const fnameEl = document.getElementById('school_new_mem_fname');
-        const lnameEl = document.getElementById('school_new_mem_lname');
-        const roleEl = document.getElementById('school_new_mem_role');
-        const emailEl = document.getElementById('school_new_mem_email');
-        const phoneEl = document.getElementById('school_new_mem_phone');
-        const primaryEl = document.getElementById('school_new_mem_primary');
-        const catInput = document.getElementById('school_new_member_category_input');
-        const editIdInput = document.getElementById('school_edit_member_id_input');
-
-        if (fnameEl) fnameEl.value = fname || '';
-        if (lnameEl) lnameEl.value = lname || '';
-        if (roleEl) roleEl.value = role || '';
-        if (emailEl) emailEl.value = email || '';
-        if (phoneEl) phoneEl.value = phone || '';
-        if (primaryEl) primaryEl.checked = !!isPrimary;
-        if (catInput && memberType) catInput.value = memberType;
-        if (editIdInput) editIdInput.value = memberId || '';
-
-        const section = document.getElementById('school_add_member_details_section');
-        if (section) {
-            section.scrollIntoView({ behavior: 'smooth' });
-        }
-    };
-
-    window.toggleSchoolMemberAddSection = function() {
-        const section = document.getElementById('school_add_member_details_section');
-        if (section) {
-            section.scrollIntoView({ behavior: 'smooth' });
-            const fnameInput = document.getElementById('school_new_mem_fname');
-            if (fnameInput) fnameInput.focus();
         }
     };
 })();
