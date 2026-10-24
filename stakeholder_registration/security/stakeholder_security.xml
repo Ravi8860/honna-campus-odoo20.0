@@ -60,7 +60,7 @@
         <field name="name">Association User: Own Association Only</field>
         <field name="model_id" ref="model_stakeholder_association"/>
         <field name="group_id" ref="group_association_user"/>
-        <field name="domain">['|', '|', ('partner_id', '=', user.partner_id.id), ('user_id', '=', user.id), ('partner_id.user_ids', 'in', [user.id])]</field>
+        <field name="domain">['|', '|', '|', '|', '|', ('partner_id', '=', user.partner_id.id), ('user_id', '=', user.id), ('partner_id.user_ids', 'in', [user.id]), ('member_ids.name', '=', user.partner_id.id), ('member_ids.name.user_ids', 'in', [user.id]), ('id', '=', user.association_id.id)]</field>
         <field name="operation">cru</field>
     </record>
 
@@ -110,7 +110,7 @@
         <field name="name">Association User: Own Association Members Only</field>
         <field name="model_id" ref="model_stakeholder_association_member"/>
         <field name="group_id" ref="group_association_user"/>
-        <field name="domain">['|', '|', ('association_id.partner_id', '=', user.partner_id.id), ('association_id.user_id', '=', user.id), ('association_id.partner_id.user_ids', 'in', [user.id])]</field>
+        <field name="domain">['|', '|', '|', '|', ('association_id.partner_id', '=', user.partner_id.id), ('association_id.user_id', '=', user.id), ('association_id.partner_id.user_ids', 'in', [user.id]), ('association_id', '=', user.association_id.id), ('association_id.member_ids.name', '=', user.partner_id.id)]</field>
         <field name="operation">crud</field>
     </record>
 

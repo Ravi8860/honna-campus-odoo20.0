@@ -383,23 +383,54 @@ class StakeholderPortalController(http.Controller):
         """ Renders the Association / Organisation Profile page matching Figma Screenshots 2 & 3 """
         sudo_env = request.env(su=True)
         assoc = None
-        assoc_id = kw.get('id')
-        if assoc_id:
-            try:
-                assoc = sudo_env['stakeholder.association'].browse(int(assoc_id))
-                if not assoc.exists():
-                    assoc = None
-            except Exception:
-                assoc = None
-
         user = request.env.user
-        if not assoc and user and user.id != request.env.ref('base.public_user').id:
+        is_internal_or_staff = user and (user.has_group('base.group_system') or user.has_group('stakeholder_registration.group_stakeholder_user'))
+
+        if not is_internal_or_staff and user and user.id != request.env.ref('base.public_user').id:
             if hasattr(user, 'association_id') and user.association_id:
                 assoc = user.association_id.sudo()
             elif user.partner_id:
                 assoc = sudo_env['stakeholder.association'].search([('partner_id', '=', user.partner_id.id)], limit=1)
+                if not assoc:
+                    mem = sudo_env['stakeholder.association.member'].search([
+                        ('name', '=', user.partner_id.id),
+                        ('association_id', '!=', False)
+                    ], limit=1)
+                    if mem:
+                        assoc = mem.association_id
             if not assoc and user.email:
                 assoc = sudo_env['stakeholder.association'].search([('email', '=', user.email)], limit=1)
+                if not assoc:
+                    mem = sudo_env['stakeholder.association.member'].search([
+                        ('email', '=', user.email),
+                        ('association_id', '!=', False)
+                    ], limit=1)
+                    if mem:
+                        assoc = mem.association_id
+            if not assoc and user.login and '@' in user.login:
+                mem = sudo_env['stakeholder.association.member'].search([
+                    ('email', '=', user.login),
+                    ('association_id', '!=', False)
+                ], limit=1)
+                if mem:
+                    assoc = mem.association_id
+        else:
+            assoc_id = kw.get('id')
+            if assoc_id:
+                try:
+                    assoc = sudo_env['stakeholder.association'].browse(int(assoc_id))
+                    if not assoc.exists():
+                        assoc = None
+                except Exception:
+                    assoc = None
+
+            if not assoc and user and user.id != request.env.ref('base.public_user').id:
+                if hasattr(user, 'association_id') and user.association_id:
+                    assoc = user.association_id.sudo()
+                elif user.partner_id:
+                    assoc = sudo_env['stakeholder.association'].search([('partner_id', '=', user.partner_id.id)], limit=1)
+                if not assoc and user.email:
+                    assoc = sudo_env['stakeholder.association'].search([('email', '=', user.email)], limit=1)
 
         # Fallback for preview / demo
         if not assoc:
@@ -484,6 +515,8 @@ class StakeholderPortalController(http.Controller):
             vals['vat'] = post.get('vat').strip()
         if post.get('trust_details'):
             vals['trust_details'] = post.get('trust_details').strip()
+        if 'geolocation' in post:
+            vals['geolocation'] = (post.get('geolocation') or '').strip()
 
         # Primary contact
         if post.get('primary_contact_first_name'):
@@ -522,20 +555,23 @@ class StakeholderPortalController(http.Controller):
         mem_last = (post.get('new_member_last_name') or '').strip()
         mem_role = (post.get('new_member_role') or '').strip()
         mem_email = (post.get('new_member_email') or '').strip()
+        mem_phone = (post.get('new_member_phone') or '').strip()
         mem_desig = (post.get('new_member_designation') or mem_role).strip()
 
-        if mem_first or mem_last or mem_email:
-            full_name = f"{mem_first} {mem_last}".strip() or mem_email
+        if mem_first or mem_last or mem_email or mem_phone:
+            full_name = f"{mem_first} {mem_last}".strip() or mem_email or mem_phone
             partner = sudo_env['res.partner'].create({
                 'name': full_name,
                 'designation': mem_desig or mem_role or 'Member',
                 'email': mem_email,
+                'phone': mem_phone,
             })
             sudo_env['stakeholder.association.member'].create({
                 'association_id': assoc.id,
                 'name': partner.id,
                 'designation': mem_desig or mem_role or 'Member',
                 'email': mem_email,
+                'phone': mem_phone,
             })
 
         # Member deletion if requested
@@ -557,13 +593,108 @@ class StakeholderPortalController(http.Controller):
 
         return request.redirect(f'/association/profile?id={assoc.id}&saved=1&action_type={action_type}')
 
+    @http.route(['/schools', '/school', '/school/list', '/my/schools'], type='http', auth='public', website=True)
+    def schools_list(self, **kw):
+        """ Renders the School List View for Portal Users """
+        sudo_env = request.env(su=True)
+        user = request.env.user
+        is_admin_or_staff = user and (user.has_group('base.group_system') or user.has_group('stakeholder_registration.group_stakeholder_user'))
+
+        domain = [('category', '=', 'school')]
+        if not is_admin_or_staff and user and not user._is_public():
+            user_domains = []
+            if user.partner_id:
+                user_domains.append(('partner_id', '=', user.partner_id.id))
+            user_domains.append(('user_id', '=', user.id))
+            user_domains.append(('create_uid', '=', user.id))
+            if hasattr(user, 'association_id') and user.association_id:
+                user_domains.append(('parent_organisation_id', '=', user.association_id.id))
+                user_domains.append(('association_ids', 'in', [user.association_id.id]))
+                if user.association_id.school_ids:
+                    user_domains.append(('id', 'in', user.association_id.school_ids.ids))
+            if hasattr(user, 'organisation_id') and user.organisation_id:
+                user_domains.append(('id', '=', user.organisation_id.id))
+                user_domains.append(('parent_school_id', '=', user.organisation_id.id))
+
+            if user_domains:
+                domain = domain + (['|'] * (len(user_domains) - 1)) + user_domains
+
+        schools = sudo_env['stakeholder.organisation'].search(domain, order='create_date desc, id desc')
+        if not schools and (user._is_public() or is_admin_or_staff):
+            schools = sudo_env['stakeholder.organisation'].search([('category', '=', 'school')], order='id desc', limit=10)
+
+        return request.render('stakeholder_portals.school_list_page', {
+            'page_name': 'school',
+            'active_menu': 'school',
+            'schools': schools,
+            'saved': kw.get('saved') == '1',
+            'deleted': kw.get('deleted') == '1',
+        })
+
+    @http.route(['/school/new', '/school/create'], type='http', auth='public', website=True)
+    def school_new(self, **kw):
+        """ Opens a blank School creation wizard """
+        return self._render_school_form(school=None, step=1, is_new=True, **kw)
+
+    @http.route(['/school/delete'], type='http', auth='public', website=True, methods=['POST', 'GET'], csrf=False)
+    def school_delete(self, **kw):
+        """ Deletes a school record """
+        sudo_env = request.env(su=True)
+        school_id = kw.get('id')
+        if school_id and str(school_id).isdigit():
+            try:
+                school = sudo_env['stakeholder.organisation'].browse(int(school_id))
+                if school.exists() and school.category == 'school':
+                    school.unlink()
+            except Exception:
+                pass
+        return request.redirect('/schools?deleted=1')
+
+    def _render_school_form(self, school=None, step=1, is_new=False, **kw):
+        sudo_env = request.env(su=True)
+        user = request.env.user
+        countries = sudo_env['res.country'].search([('code', '=', 'IN')]) or sudo_env['res.country'].search([], limit=10)
+        states = sudo_env['res.country.state'].search([('country_id.code', '=', 'IN')])
+        associations = sudo_env['stakeholder.association'].search([], order='name asc')
+        parent_schools = sudo_env['stakeholder.organisation'].search([
+            ('category', '=', 'school'),
+            ('id', '!=', school.id if school else 0)
+        ], order='name asc')
+
+        user_assoc = getattr(user, 'association_id', None) if user and not user._is_public() else None
+
+        try:
+            step = int(step)
+        except (ValueError, TypeError):
+            step = 1
+
+        return request.render('stakeholder_portals.school_profile_page', {
+            'page_name': 'school',
+            'active_menu': 'school',
+            'school': school,
+            'is_new': is_new,
+            'user_association': user_assoc,
+            'countries': countries,
+            'states': states,
+            'associations': associations,
+            'parent_schools': parent_schools,
+            'saved': kw.get('saved') == '1',
+            'action_type': kw.get('action_type', 'save'),
+            'current_step': step,
+        })
+
     @http.route(['/school/profile', '/my/school', '/stakeholder-portals/school'], type='http', auth='public', website=True)
     def school_profile(self, **kw):
         """ Renders the School Profile multi-step wizard matching Screenshots 1, 2, 3 """
         sudo_env = request.env(su=True)
         school = None
         school_id = kw.get('id')
-        if school_id:
+        is_new = kw.get('new') == '1' or school_id == 'new'
+
+        if is_new:
+            return self._render_school_form(school=None, step=kw.get('step', 1), is_new=True, **kw)
+
+        if school_id and str(school_id).isdigit():
             try:
                 school = sudo_env['stakeholder.organisation'].browse(int(school_id))
                 if not school.exists() or (school.category and school.category != 'school'):
@@ -572,7 +703,7 @@ class StakeholderPortalController(http.Controller):
                 school = None
 
         user = request.env.user
-        if not school and user and user.id != request.env.ref('base.public_user').id:
+        if not school and user and not user._is_public():
             if hasattr(user, 'organisation_id') and user.organisation_id:
                 school = user.organisation_id.sudo()
             elif user.partner_id:
@@ -586,61 +717,25 @@ class StakeholderPortalController(http.Controller):
                     ('category', '=', 'school')
                 ], limit=1)
 
-        # Fallback for preview / demo
         if not school:
-            school = sudo_env['stakeholder.organisation'].search([('category', '=', 'school')], order='id desc', limit=1)
+            return request.redirect('/schools')
 
-        countries = sudo_env['res.country'].search([('code', '=', 'IN')]) or sudo_env['res.country'].search([], limit=10)
-        states = sudo_env['res.country.state'].search([('country_id.code', '=', 'IN')])
-        associations = sudo_env['stakeholder.association'].search([], order='name asc')
-        parent_schools = sudo_env['stakeholder.organisation'].search([
-            ('category', '=', 'school'),
-            ('id', '!=', school.id if school else 0)
-        ], order='name asc')
-
-        step = 1
-        try:
-            step = int(kw.get('step', 1))
-        except (ValueError, TypeError):
-            step = 1
-
-        return request.render('stakeholder_portals.school_profile_page', {
-            'page_name': 'school',
-            'active_menu': 'school',
-            'school': school,
-            'countries': countries,
-            'states': states,
-            'associations': associations,
-            'parent_schools': parent_schools,
-            'saved': kw.get('saved') == '1',
-            'action_type': kw.get('action_type', 'save'),
-            'current_step': step,
-        })
+        return self._render_school_form(school=school, step=kw.get('step', 1), is_new=False, **kw)
 
     @http.route(['/school/profile/save'], type='http', auth='public', website=True, methods=['POST'], csrf=True)
     def school_profile_save(self, **post):
-        """ Handles school profile updates and multi-step submissions matching Screenshots """
+        """ Handles school profile creation, updates and multi-step submissions """
         sudo_env = request.env(su=True)
+        user = request.env.user
         school_id = post.get('school_id')
         school = None
-        if school_id:
+        if school_id and str(school_id).isdigit() and int(school_id) > 0:
             try:
                 school = sudo_env['stakeholder.organisation'].browse(int(school_id))
+                if not school.exists() or (school.category and school.category != 'school'):
+                    school = None
             except Exception:
-                pass
-
-        if not school or not school.exists():
-            user = request.env.user
-            if user and user.id != request.env.ref('base.public_user').id and user.partner_id:
-                school = sudo_env['stakeholder.organisation'].search([
-                    ('partner_id', '=', user.partner_id.id),
-                    ('category', '=', 'school')
-                ], limit=1)
-            if not school:
-                school = sudo_env['stakeholder.organisation'].search([('category', '=', 'school')], order='id desc', limit=1)
-
-        if not school:
-            return request.redirect('/school/profile')
+                school = None
 
         vals = {}
         if post.get('name'):
@@ -656,33 +751,23 @@ class StakeholderPortalController(http.Controller):
         if post.get('residential'):
             vals['residential'] = post.get('residential')
 
-        # Parent Organisation
+        # Parent Organisation (Many2one to stakeholder.association)
         if post.get('parent_organisation_id'):
             try:
                 vals['parent_organisation_id'] = int(post.get('parent_organisation_id'))
             except (ValueError, TypeError):
-                pass
-        elif post.get('parent_org_name'):
-            p_name = post.get('parent_org_name').strip()
-            p_org = sudo_env['stakeholder.association'].search([('name', 'ilike', p_name)], limit=1)
-            if not p_org and p_name:
-                p_org = sudo_env['stakeholder.association'].create({'name': p_name})
-            if p_org:
-                vals['parent_organisation_id'] = p_org.id
+                vals['parent_organisation_id'] = False
+        elif 'parent_organisation_id' in post:
+            vals['parent_organisation_id'] = False
 
-        # Parent School / Head Office
+        # Parent School / Head Office (Many2one to stakeholder.organisation)
         if post.get('parent_school_id'):
             try:
                 vals['parent_school_id'] = int(post.get('parent_school_id'))
             except (ValueError, TypeError):
-                pass
-        elif post.get('parent_school_name'):
-            ps_name = post.get('parent_school_name').strip()
-            p_sch = sudo_env['stakeholder.organisation'].search([('name', 'ilike', ps_name), ('category', '=', 'school')], limit=1)
-            if not p_sch and ps_name:
-                p_sch = sudo_env['stakeholder.organisation'].create({'name': ps_name, 'category': 'school'})
-            if p_sch:
-                vals['parent_school_id'] = p_sch.id
+                vals['parent_school_id'] = False
+        elif 'parent_school_id' in post:
+            vals['parent_school_id'] = False
 
         # Primary Address
         if post.get('street'):
@@ -704,11 +789,19 @@ class StakeholderPortalController(http.Controller):
         if post.get('zip'):
             vals['zip'] = post.get('zip').strip()
 
-        # School Contacts
+        # Primary Address geolocation
+        if 'geolocation' in post:
+            vals['geolocation'] = (post.get('geolocation') or '').strip()
+
+        # School Contacts & Registration Details
         if post.get('phone'):
             vals['phone'] = post.get('phone').strip()
         if post.get('email'):
             vals['email'] = post.get('email').strip()
+        if post.get('vat'):
+            vals['vat'] = post.get('vat').strip()
+        if post.get('trust_details'):
+            vals['trust_details'] = post.get('trust_details').strip()
 
         # Step 3: Primary Contacts
         if post.get('principal_name'):
@@ -740,11 +833,72 @@ class StakeholderPortalController(http.Controller):
         if post.get('contact_method'):
             vals['contact_method'] = post.get('contact_method')
 
+        # Step 4: Other Details
+        if post.get('affiliation_number'):
+            vals['affiliation_number'] = post.get('affiliation_number').strip()
+        if post.get('accreditation'):
+            vals['accreditation'] = post.get('accreditation').strip()
+        if post.get('capacity'):
+            try:
+                vals['capacity'] = int(post.get('capacity'))
+            except (ValueError, TypeError):
+                pass
+        if post.get('branch_code'):
+            vals['branch_code'] = post.get('branch_code').strip()
+        if post.get('area'):
+            vals['area'] = post.get('area').strip()
+
+        # Billing Address
+        vals['billing_same_as_primary'] = bool(post.get('billing_same_as_primary'))
+        if post.get('billing_street'):
+            vals['billing_street'] = post.get('billing_street').strip()
+        if post.get('billing_street2'):
+            vals['billing_street2'] = post.get('billing_street2').strip()
+        if post.get('billing_city'):
+            vals['billing_city'] = post.get('billing_city').strip()
+        if post.get('billing_district'):
+            vals['billing_district'] = post.get('billing_district').strip()
+        if post.get('billing_zip'):
+            vals['billing_zip'] = post.get('billing_zip').strip()
+        if post.get('billing_country_id'):
+            try:
+                vals['billing_country_id'] = int(post.get('billing_country_id'))
+            except (ValueError, TypeError):
+                pass
+        if post.get('billing_state_id'):
+            try:
+                vals['billing_state_id'] = int(post.get('billing_state_id'))
+            except (ValueError, TypeError):
+                pass
+
+        # Shipping Address
+        vals['shipping_same_as_primary'] = bool(post.get('shipping_same_as_primary'))
+        if post.get('shipping_street'):
+            vals['shipping_street'] = post.get('shipping_street').strip()
+        if post.get('shipping_street2'):
+            vals['shipping_street2'] = post.get('shipping_street2').strip()
+        if post.get('shipping_city'):
+            vals['shipping_city'] = post.get('shipping_city').strip()
+        if post.get('shipping_district'):
+            vals['shipping_district'] = post.get('shipping_district').strip()
+        if post.get('shipping_zip'):
+            vals['shipping_zip'] = post.get('shipping_zip').strip()
+        if post.get('shipping_country_id'):
+            try:
+                vals['shipping_country_id'] = int(post.get('shipping_country_id'))
+            except (ValueError, TypeError):
+                pass
+        if post.get('shipping_state_id'):
+            try:
+                vals['shipping_state_id'] = int(post.get('shipping_state_id'))
+            except (ValueError, TypeError):
+                pass
+
         # Action: Draft vs Save
         action_type = post.get('action') or 'save'
         if action_type == 'draft':
             vals['state'] = 'draft'
-        elif action_type == 'save' and school.state == 'draft':
+        elif action_type == 'save':
             vals['state'] = 'approved'
 
         # File uploads
@@ -769,8 +923,25 @@ class StakeholderPortalController(http.Controller):
             except Exception:
                 pass
 
-        if vals:
-            school.sudo().write(vals)
+        # CREATE OR UPDATE RECORD IN BACKEND
+        if not school:
+            vals['category'] = 'school'
+            if not vals.get('name'):
+                vals['name'] = post.get('name') or _('New School')
+            if user and not user._is_public():
+                if user.partner_id:
+                    vals['partner_id'] = user.partner_id.id
+                vals['user_id'] = user.id
+                if hasattr(user, 'association_id') and user.association_id:
+                    if not vals.get('parent_organisation_id'):
+                        vals['parent_organisation_id'] = user.association_id.id
+                    vals['association_ids'] = [(4, user.association_id.id)]
+            school = sudo_env['stakeholder.organisation'].create(vals)
+            if user and not user._is_public() and hasattr(user, 'association_id') and user.association_id:
+                user.association_id.sudo().write({'school_ids': [(4, school.id)]})
+        else:
+            if vals:
+                school.sudo().write(vals)
 
         # Handle Member Add or Edit
         mem_cat = (post.get('member_category') or 'executive').strip().lower()
@@ -779,6 +950,16 @@ class StakeholderPortalController(http.Controller):
             mem_model_name = 'stakeholder.organisation.dept.head'
         elif mem_cat == 'operations':
             mem_model_name = 'stakeholder.organisation.operation.member'
+
+        # Handle Association Partner addition
+        new_assoc_id = post.get('new_assoc_id')
+        if new_assoc_id and str(new_assoc_id).isdigit():
+            sudo_env['stakeholder.organisation.association.membership'].create({
+                'organisation_id': school.id,
+                'association_id': int(new_assoc_id),
+                'membership_number': (post.get('new_assoc_membership_number') or '').strip(),
+                'expiry_date': post.get('new_assoc_expiry_date') or False,
+            })
 
         edit_member_id = post.get('edit_member_id')
         mem_first = (post.get('new_member_first_name') or '').strip()
@@ -802,12 +983,27 @@ class StakeholderPortalController(http.Controller):
                 'first_name': mem_first,
                 'last_name': mem_last,
                 'name': f"{mem_first} {mem_last}".strip() or mem_email,
-                'role': mem_role or 'Member',
-                'designation': mem_role or 'Member',
+                'designation': mem_role or '',
                 'email': mem_email,
                 'phone': mem_phone,
                 'is_primary': mem_primary,
             }
+
+            # Safely validate role against the model's Selection field
+            role_key = False
+            if mem_role and mem_model_name in sudo_env:
+                clean_r = mem_role.strip().lower().replace(' ', '_').replace('-', '_')
+                field_role = sudo_env[mem_model_name]._fields.get('role')
+                if field_role and hasattr(field_role, 'selection'):
+                    sel = field_role.selection or []
+                    for k, label in sel:
+                        if clean_r == k or clean_r == label.lower():
+                            role_key = k
+                            break
+                        elif clean_r in k or k in clean_r or clean_r in label.lower():
+                            role_key = k
+            mem_vals['role'] = role_key
+
             if mem_img_bytes:
                 mem_vals['image'] = mem_img_bytes
 
@@ -830,6 +1026,8 @@ class StakeholderPortalController(http.Controller):
                 del_model = 'stakeholder.organisation.dept.head'
             elif delete_member_type == 'operations':
                 del_model = 'stakeholder.organisation.operation.member'
+            elif delete_member_type == 'association_partners':
+                del_model = 'stakeholder.organisation.association.membership'
             try:
                 del_rec = sudo_env[del_model].browse(int(delete_member_id))
                 if del_rec.exists() and del_rec.organisation_id.id == school.id:
@@ -837,17 +1035,21 @@ class StakeholderPortalController(http.Controller):
             except Exception:
                 pass
 
-        step = post.get('current_step') or '1'
+        step = str(post.get('current_step') or '1')
 
         if request.httprequest.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.httprequest.headers.get('Accept', ''):
             return request.make_json_response({
                 'status': 'success',
-                'message': _("School profile updated successfully!"),
+                'message': _("School record saved successfully!"),
+                'school_id': school.id,
                 'action_type': action_type,
                 'step': step,
             })
 
-        return request.redirect(f'/school/profile?id={school.id}&saved=1&step={step}&action_type={action_type}')
+        if post.get('delete_member_id') or (step == '2' and (post.get('new_member_first_name') or post.get('new_member_email')) and not post.get('finalize')):
+            return request.redirect(f'/school/profile?id={school.id}&saved=1&step=2&action_type={action_type}')
+
+        return request.redirect('/schools?saved=1')
 
     @http.route(['/stakeholder-portals/success', '/registration/success'], type='http', auth='public', website=True)
     def portals_success(self, **kw):
@@ -866,6 +1068,13 @@ class StakeholderPortalController(http.Controller):
         assoc = request.env['stakeholder.association'].sudo().search([
             '|', ('partner_id', '=', user.partner_id.id), ('email', '=', user.email)
         ], limit=1)
+        if not assoc:
+            mem = request.env['stakeholder.association.member'].sudo().search([
+                ('association_id', '!=', False),
+                '|', ('name', '=', user.partner_id.id), ('email', '=', user.email)
+            ], limit=1)
+            if mem:
+                assoc = mem.association_id
         if assoc:
             return request.redirect(f'/association/profile?id={assoc.id}')
 

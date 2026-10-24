@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
+from odoo import models, fields, api, Command
 from odoo.exceptions import UserError
 from odoo.tools import sql
 
@@ -159,6 +159,29 @@ class StakeholderAssociation(models.Model):
             search_domain = ['|'] * (len(domain_parts) - 1) + domain_parts
             assoc = self.env['stakeholder.association'].sudo().search(search_domain, limit=1)
 
+        # Check if user is configured under Management Members of an Organisation
+        if not assoc and user.partner_id:
+            mem = self.env['stakeholder.association.member'].sudo().search([
+                ('name', '=', user.partner_id.id),
+                ('association_id', '!=', False),
+            ], limit=1)
+            if mem:
+                assoc = mem.association_id
+        if not assoc and user.email:
+            mem = self.env['stakeholder.association.member'].sudo().search([
+                ('email', '=', user.email),
+                ('association_id', '!=', False),
+            ], limit=1)
+            if mem:
+                assoc = mem.association_id
+        if not assoc and user.login and '@' in user.login:
+            mem = self.env['stakeholder.association.member'].sudo().search([
+                ('email', '=', user.login),
+                ('association_id', '!=', False),
+            ], limit=1)
+            if mem:
+                assoc = mem.association_id
+
         if not assoc and user.has_group('stakeholder_registration.group_association_user'):
             assoc = self.env['stakeholder.association'].sudo().create({
                 'name': user.name or (user.partner_id.name if user.partner_id else 'Association Profile'),
@@ -170,15 +193,21 @@ class StakeholderAssociation(models.Model):
             })
 
         if assoc:
-            vals = {}
-            if not assoc.user_id or assoc.user_id != user:
-                vals['user_id'] = user.id
-            if user.partner_id and (not assoc.partner_id or assoc.partner_id != user.partner_id):
-                vals['partner_id'] = user.partner_id.id
-            if user.email and not assoc.email:
-                vals['email'] = user.email
-            if vals:
-                assoc.sudo().write(vals)
+            is_member = bool(
+                (user.partner_id and user.partner_id.id in assoc.member_ids.mapped('name.id'))
+                or (user.email and user.email in assoc.member_ids.mapped('email'))
+                or (user.login and user.login in assoc.member_ids.mapped('email'))
+            )
+            if not is_member:
+                vals = {}
+                if not assoc.user_id or assoc.user_id != user:
+                    vals['user_id'] = user.id
+                if user.partner_id and (not assoc.partner_id or assoc.partner_id != user.partner_id):
+                    vals['partner_id'] = user.partner_id.id
+                if user.email and not assoc.email:
+                    vals['email'] = user.email
+                if vals:
+                    assoc.sudo().write(vals)
             if user.association_id != assoc:
                 user.sudo().write({'association_id': assoc.id})
 
@@ -498,14 +527,63 @@ class StakeholderAssociationMember(models.Model):
             self.email = self.name.email or ''
             self.phone = self.name.phone or ''
 
+    def _sync_member_user_access(self):
+        assoc_group = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
+        portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
+        default_feature_groups = [
+            self.env.ref(xmlid, raise_if_not_found=False)
+            for xmlid in (
+                'sales_team.group_sale_salesman',
+                'sales_team.group_sale_salesman_all_leads',
+                'crm.group_use_lead',
+                'website_slides.group_website_slides_officer',
+                'survey.group_survey_user',
+            )
+        ]
+        default_feature_groups = [g for g in default_feature_groups if g]
+
+        for member in self:
+            if not member.association_id:
+                continue
+            users = self.env['res.users']
+            if member.name:
+                users |= member.name.user_ids
+            if member.email:
+                users |= self.env['res.users'].sudo().search([
+                    '|', ('login', '=', member.email), ('email', '=', member.email)
+                ])
+            for user in users:
+                user_vals = {}
+                if user.association_id != member.association_id:
+                    user_vals['association_id'] = member.association_id.id
+                is_portal = bool(portal_group and portal_group in user.group_ids)
+                if not is_portal:
+                    if not user.user_category:
+                        user_vals['user_category'] = 'association'
+                    cmds = []
+                    if assoc_group and assoc_group not in user.group_ids:
+                        cmds.append(Command.link(assoc_group.id))
+                    for g in default_feature_groups:
+                        if g not in user.group_ids:
+                            cmds.append(Command.link(g.id))
+                    if cmds:
+                        user_vals['group_ids'] = cmds
+                if user_vals:
+                    user.sudo().with_context(skip_sync_assoc=True).write(user_vals)
+            if member.name and not member.name.user_category:
+                member.name.sudo().write({'user_category': 'association'})
+
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
+        records._sync_member_user_access()
         self.env['ir.access']._clear_caches()
         return records
 
     def write(self, vals):
         res = super().write(vals)
+        if any(f in vals for f in ('association_id', 'name', 'email')):
+            self._sync_member_user_access()
         self.env['ir.access']._clear_caches()
         return res
 

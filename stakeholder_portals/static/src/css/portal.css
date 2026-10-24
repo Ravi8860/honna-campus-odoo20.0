@@ -1095,3 +1095,161 @@
 .portal-upcoming-item:hover {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
+
+/* School Management Members Notebook Tabs Matching Backend Screenshot 1 */
+#school_member_notebook_tabs {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+#school_member_notebook_tabs .nav-link {
+    border: 1px solid transparent;
+    border-bottom: none;
+    color: #64748b;
+    background: transparent;
+    font-size: 13px;
+    padding: 7px 16px;
+    border-radius: 6px 6px 0 0;
+    transition: all 0.15s ease;
+}
+
+#school_member_notebook_tabs .nav-link:hover:not(.active) {
+    color: #1e293b;
+    background: #f8fafc;
+}
+
+#school_member_notebook_tabs .nav-link.active {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 #e2e8f0 #ffffff #e2e8f0 !important;
+    color: #1e293b !important;
+    font-weight: 600 !important;
+    margin-bottom: -1px;
+}
+
+/* ==========================================================================
+   School Portal Form Inside View - Clean, Attractive, Modern Colors
+   Applies ONLY to school form view (#school_profile_form)
+   ========================================================================== */
+
+#school_profile_form .honna-profile-card,
+#school_profile_form .card {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+#school_profile_form h5,
+#school_profile_form h6 {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.01em;
+}
+
+/* Field Labels: Elegant slate charcoal, never washed-out orange */
+#school_profile_form label,
+#school_profile_form .form-label,
+#school_profile_form .text-secondary {
+    color: #334155 !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    margin-bottom: 5px !important;
+    display: inline-block;
+}
+
+/* Required Asterisk */
+#school_profile_form .text-danger {
+    color: #ef4444 !important;
+    font-weight: 700 !important;
+    margin-left: 2px;
+}
+
+/* Form Controls: Inputs, Selects, and Textareas */
+#school_profile_form .form-control,
+#school_profile_form .form-select,
+#school_profile_form .honna-input,
+#school_profile_form .honna-select {
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 7px !important;
+    font-size: 13.5px !important;
+    padding: 7px 12px !important;
+    line-height: 1.5 !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+#school_profile_form .form-control:hover,
+#school_profile_form .form-select:hover,
+#school_profile_form .honna-input:hover,
+#school_profile_form .honna-select:hover {
+    border-color: #94a3b8 !important;
+}
+
+#school_profile_form .form-control:focus,
+#school_profile_form .form-select:focus,
+#school_profile_form .honna-input:focus,
+#school_profile_form .honna-select:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14) !important;
+    outline: none !important;
+    background-color: #ffffff !important;
+}
+
+#school_profile_form .form-control::placeholder,
+#school_profile_form .honna-input::placeholder {
+    color: #94a3b8 !important;
+    font-weight: 400 !important;
+}
+
+/* Select Dropdowns */
+#school_profile_form select.form-select,
+#school_profile_form select.honna-select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23475569' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.75rem center !important;
+    background-size: 14px 10px !important;
+    padding-right: 2rem !important;
+}
+
+#school_profile_form .form-check-label {
+    color: #334155 !important;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+}
+
+#school_profile_form .form-check-input {
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#school_profile_form .form-check-input:checked {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+}
+
+#school_profile_form td {
+    color: #1e293b !important;
+}
+
+#school_profile_form th {
+    color: #475569 !important;
+    font-weight: 600 !important;
+}
+
+#school_member_notebook_tabs .nav-link {
+    color: #64748b !important;
+}
+
+#school_member_notebook_tabs .nav-link:hover {
+    color: #0f172a !important;
+    background-color: #f1f5f9 !important;
+}
+
+#school_member_notebook_tabs .nav-link.active {
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 #e2e8f0 #ffffff #e2e8f0 !important;
+    font-weight: 600 !important;
+}
