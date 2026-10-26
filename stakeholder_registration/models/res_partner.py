@@ -86,6 +86,10 @@ class ResPartner(models.Model):
         if admin:
             parts.append(Domain('id', '=', admin.id))
 
+        if operation == 'read':
+            # Allow reading internal user partners so relational fields (e.g. Survey responsible, chatter, activity user) do not fail access checks
+            parts.append(Domain('user_ids.share', '=', False))
+
         if user.has_group('stakeholder_registration.group_association_user'):
             assoc = user.association_id
             if assoc:
@@ -106,11 +110,32 @@ class ResPartner(models.Model):
 
     @api.model
     def _search(self, domain, offset=0, limit=None, order=None, *, active_test=True, bypass_access=False):
-        # Keep Administrator readable for chatter, but out of Contacts list.
+        # Keep Administrator and non-associated staff out of Contacts list view while keeping them readable in Many2one fields
         if not self.env.su and not bypass_access and self._is_association_or_school_user():
             admin = self.env.ref('base.partner_admin', raise_if_not_found=False)
             if admin:
                 domain = Domain(domain) & Domain('id', '!=', admin.id)
+            user = self.env.user
+            allowed_partner_ids = [user.partner_id.id]
+            if user.has_group('stakeholder_registration.group_association_user'):
+                assoc = user.association_id
+                if assoc:
+                    if assoc.partner_id:
+                        allowed_partner_ids.append(assoc.partner_id.id)
+                    allowed_partner_ids.extend(assoc.member_ids.name.ids)
+                    allowed_partner_ids.extend(assoc.school_ids.partner_id.ids)
+            elif user.has_group('stakeholder_registration.group_school_user'):
+                org = user.organisation_id
+                if org and org.partner_id:
+                    allowed_partner_ids.append(org.partner_id.id)
+            other_internal = self.env['res.users'].sudo().search([
+                ('share', '=', False),
+                ('partner_id', 'not in', allowed_partner_ids),
+                ('create_uid', '!=', user.id),
+                ('id', '!=', user.id),
+            ]).mapped('partner_id.id')
+            if other_internal:
+                domain = Domain(domain) & Domain('id', 'not in', other_internal)
         return super()._search(
             domain, offset=offset, limit=limit, order=order,
             active_test=active_test, bypass_access=bypass_access,

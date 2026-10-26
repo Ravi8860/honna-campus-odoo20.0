@@ -27,6 +27,7 @@ class ResUsers(models.Model):
         string='Is Organisation User',
         compute='_compute_is_association',
         inverse='_inverse_is_association',
+        search='_search_is_association',
         help='When enabled, the user belongs to Organisation Users and can access '
              'Organisation and School only (Student and Parent menus are hidden).',
     )
@@ -35,6 +36,7 @@ class ResUsers(models.Model):
         string='Is School User',
         compute='_compute_is_school',
         inverse='_inverse_is_school',
+        search='_search_is_school',
         help='When enabled, the user belongs to School Users and can access '
              'School and Profile only (Organisation, Student and Parent menus are hidden).',
     )
@@ -169,6 +171,16 @@ class ResUsers(models.Model):
         for user in self:
             user.is_association = bool(group and group in user.all_group_ids)
 
+    def _search_is_association(self, operator, value):
+        assoc_group = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
+        if not assoc_group:
+            return []
+        if (operator in ('=', '!=') and value) or (operator == 'in' and True in value):
+            pos_domain = [('all_group_ids', 'in', [assoc_group.id])]
+            return pos_domain if operator in ('=', 'in') else ['!'] + pos_domain
+        pos_domain = [('all_group_ids', 'not in', [assoc_group.id])]
+        return pos_domain if operator in ('=', 'in') else ['!'] + pos_domain
+
     def _inverse_is_association(self):
         association_group = self.env.ref('stakeholder_registration.group_association_user')
         school_group = self.env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
@@ -179,8 +191,16 @@ class ResUsers(models.Model):
         slides_group = self.env.ref('website_slides.group_website_slides_officer', raise_if_not_found=False)
         survey_group = self.env.ref('survey.group_survey_user', raise_if_not_found=False)
         default_feature_groups = [g for g in (crm_salesman_group, crm_sales_all_group, crm_lead_group, slides_group, survey_group) if g]
+        crm_root = self.env.ref('crm.crm_menu_root', raise_if_not_found=False)
+        survey_root = self.env.ref('survey.menu_surveys', raise_if_not_found=False)
+        slides_root = self.env.ref('website_slides.website_slides_menu_root', raise_if_not_found=False)
+        feature_menus = [m for m in (crm_root, survey_root, slides_root) if m]
+        portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
         for user in self:
+            if portal_group and portal_group in user.group_ids:
+                continue
             commands = []
+            vals = {}
             if user.is_association:
                 commands.append(Command.link(association_group.id))
                 for g in default_feature_groups:
@@ -192,10 +212,16 @@ class ResUsers(models.Model):
                     commands.append(Command.unlink(stakeholder_group.id))
                 if not user.user_category:
                     user.user_category = 'association'
+                if hasattr(user, 'hide_menu_ids') and feature_menus:
+                    unhide = [m for m in feature_menus if m in user.hide_menu_ids]
+                    if unhide:
+                        vals['hide_menu_ids'] = [Command.unlink(m.id) for m in unhide]
             else:
                 commands.append(Command.unlink(association_group.id))
             if commands:
-                user.sudo().write({'group_ids': commands})
+                vals['group_ids'] = commands
+            if vals:
+                user.sudo().write(vals)
         self._sync_association_profile()
 
     def _ensure_main_company_access(self):
@@ -323,11 +349,24 @@ class ResUsers(models.Model):
         for user in self:
             user.is_school = bool(group and group in user.all_group_ids)
 
+    def _search_is_school(self, operator, value):
+        school_group = self.env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
+        if not school_group:
+            return []
+        if (operator in ('=', '!=') and value) or (operator == 'in' and True in value):
+            pos_domain = [('all_group_ids', 'in', [school_group.id])]
+            return pos_domain if operator in ('=', 'in') else ['!'] + pos_domain
+        pos_domain = [('all_group_ids', 'not in', [school_group.id])]
+        return pos_domain if operator in ('=', 'in') else ['!'] + pos_domain
+
     def _inverse_is_school(self):
         school_group = self.env.ref('stakeholder_registration.group_school_user')
         association_group = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
         stakeholder_group = self.env.ref('stakeholder_registration.group_stakeholder_user', raise_if_not_found=False)
+        portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
         for user in self:
+            if portal_group and portal_group in user.group_ids:
+                continue
             commands = []
             if user.is_school:
                 commands.append(Command.link(school_group.id))
@@ -358,14 +397,21 @@ class ResUsers(models.Model):
                 existing = vals.get('group_ids', [])
                 vals['group_ids'] = existing + [Command.link(honna_group.id)]
             elif vals.get('user_category') in ('school_college', 'school', 'college', 'academy', 'partner', 'others', 'parent', 'student') and school_group:
+                portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
                 existing = vals.get('group_ids', [])
-                if honna_group:
-                    existing = [cmd for cmd in existing if not (isinstance(cmd, (tuple, list)) and len(cmd) >= 2 and cmd[1] == honna_group.id)]
-                    existing.append(Command.unlink(honna_group.id))
-                add_cmds = [Command.link(school_group.id)]
-                if vals.get('user_category') == 'academy':
-                    add_cmds += [Command.link(g.id) for g in default_feature_groups]
-                vals['group_ids'] = existing + add_cmds
+                has_portal = portal_group and any(
+                    isinstance(cmd, (tuple, list)) and len(cmd) >= 2 and cmd[0] in (4, 6) and (
+                        portal_group.id in (cmd[2] if cmd[0] == 6 else [cmd[1]])
+                    ) for cmd in existing
+                )
+                if not has_portal:
+                    if honna_group:
+                        existing = [cmd for cmd in existing if not (isinstance(cmd, (tuple, list)) and len(cmd) >= 2 and cmd[1] == honna_group.id)]
+                        existing.append(Command.unlink(honna_group.id))
+                    add_cmds = [Command.link(school_group.id)]
+                    if vals.get('user_category') == 'academy':
+                        add_cmds += [Command.link(g.id) for g in default_feature_groups]
+                    vals['group_ids'] = existing + add_cmds
             elif vals.get('user_category') == 'association' and assoc_group:
                 portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
                 existing = vals.get('group_ids', [])
@@ -410,6 +456,9 @@ class ResUsers(models.Model):
                     if honna_group not in user.group_ids or unlink_cmds:
                         user.sudo().write({'group_ids': [Command.link(honna_group.id)] + unlink_cmds})
                 elif user.user_category in ('school_college', 'school', 'college', 'academy', 'partner', 'others', 'parent', 'student') and school_group:
+                    portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
+                    if portal_group and portal_group in user.group_ids:
+                        continue
                     unlink_cmds = []
                     if honna_group and honna_group in user.group_ids:
                         unlink_cmds.append(Command.unlink(honna_group.id))
@@ -547,6 +596,8 @@ class ResUsers(models.Model):
             for non_staff in non_staff_users:
                 if admin_user and non_staff.id == admin_user.id:
                     continue
+                if portal_group and portal_group in non_staff.group_ids:
+                    continue
                 cmds = []
                 if honna_group in non_staff.group_ids:
                     cmds.append(Command.unlink(honna_group.id))
@@ -562,14 +613,28 @@ class ResUsers(models.Model):
         slides_group = self.env.ref('website_slides.group_website_slides_officer', raise_if_not_found=False)
         survey_group = self.env.ref('survey.group_survey_user', raise_if_not_found=False)
         default_feature_groups = [g for g in (crm_salesman_group, crm_sales_all_group, crm_lead_group, slides_group, survey_group) if g]
+        crm_root = self.env.ref('crm.crm_menu_root', raise_if_not_found=False)
+        survey_root = self.env.ref('survey.menu_surveys', raise_if_not_found=False)
+        slides_root = self.env.ref('website_slides.website_slides_menu_root', raise_if_not_found=False)
+        feature_menus = [m for m in (crm_root, survey_root, slides_root) if m]
 
-        feature_users = self.sudo().search([('user_category', 'in', ('academy', 'association'))])
+        feature_users = self.sudo().search([
+            '|', ('user_category', 'in', ('academy', 'association')),
+            ('group_ids', 'in', [assoc_group.id] if assoc_group else [])
+        ])
         for f_user in feature_users:
             if portal_group and portal_group in f_user.group_ids:
                 continue
             cmds = [Command.link(g.id) for g in default_feature_groups if g not in f_user.group_ids]
+            vals = {}
             if cmds:
-                f_user.sudo().write({'group_ids': cmds})
+                vals['group_ids'] = cmds
+            if hasattr(f_user, 'hide_menu_ids') and feature_menus:
+                unhide = [m for m in feature_menus if m in f_user.hide_menu_ids]
+                if unhide:
+                    vals['hide_menu_ids'] = [Command.unlink(m.id) for m in unhide]
+            if vals:
+                f_user.sudo().write(vals)
 
         internal_assoc_users = users.filtered(lambda u: not (portal_group and portal_group in u.group_ids))
         (internal_assoc_users | school_users)._ensure_main_company_access()

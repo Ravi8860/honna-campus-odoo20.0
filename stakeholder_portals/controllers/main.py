@@ -436,13 +436,16 @@ class StakeholderPortalController(http.Controller):
         if not assoc:
             assoc = sudo_env['stakeholder.association'].search([], order='id desc', limit=1)
 
+        assoc_sudo = assoc.sudo() if assoc else None
+        members = assoc_sudo.member_ids.sudo() if assoc_sudo else sudo_env['stakeholder.association.member'].browse([])
         countries = sudo_env['res.country'].search([('code', '=', 'IN')]) or sudo_env['res.country'].search([], limit=10)
         states = sudo_env['res.country.state'].search([('country_id.code', '=', 'IN')])
 
         return request.render('stakeholder_portals.association_profile_page', {
             'page_name': 'profile',
             'active_menu': 'profile',
-            'association': assoc,
+            'association': assoc_sudo,
+            'members': members,
             'countries': countries,
             'states': states,
             'saved': kw.get('saved') == '1',
@@ -628,29 +631,9 @@ class StakeholderPortalController(http.Controller):
             'active_menu': 'school',
             'schools': schools,
             'saved': kw.get('saved') == '1',
-            'deleted': kw.get('deleted') == '1',
         })
 
-    @http.route(['/school/new', '/school/create'], type='http', auth='public', website=True)
-    def school_new(self, **kw):
-        """ Opens a blank School creation wizard """
-        return self._render_school_form(school=None, step=1, is_new=True, **kw)
-
-    @http.route(['/school/delete'], type='http', auth='public', website=True, methods=['POST', 'GET'], csrf=False)
-    def school_delete(self, **kw):
-        """ Deletes a school record """
-        sudo_env = request.env(su=True)
-        school_id = kw.get('id')
-        if school_id and str(school_id).isdigit():
-            try:
-                school = sudo_env['stakeholder.organisation'].browse(int(school_id))
-                if school.exists() and school.category == 'school':
-                    school.unlink()
-            except Exception:
-                pass
-        return request.redirect('/schools?deleted=1')
-
-    def _render_school_form(self, school=None, step=1, is_new=False, **kw):
+    def _render_school_form(self, school=None, step=1, **kw):
         sudo_env = request.env(su=True)
         user = request.env.user
         countries = sudo_env['res.country'].search([('code', '=', 'IN')]) or sudo_env['res.country'].search([], limit=10)
@@ -672,7 +655,6 @@ class StakeholderPortalController(http.Controller):
             'page_name': 'school',
             'active_menu': 'school',
             'school': school,
-            'is_new': is_new,
             'user_association': user_assoc,
             'countries': countries,
             'states': states,
@@ -1095,111 +1077,6 @@ class StakeholderPortalController(http.Controller):
     def portal_calendar_route(self, **kw):
         """ Redirects directly to the Odoo backend calendar view """
         return request.redirect('/odoo/calendar')
-
-    @http.route('/portal/calendar/events', type='http', auth='user', website=True, methods=['GET'])
-    def portal_calendar_events_data(self, start=None, end=None, **kw):
-        """ Returns calendar events formatted for FullCalendar """
-        user = request.env.user
-        partner = user.partner_id
-        domain = [('partner_ids', 'in', [partner.id])]
-        if start:
-            domain.append(('stop', '>=', start.split('T')[0] + ' 00:00:00'))
-        if end:
-            domain.append(('start', '<=', end.split('T')[0] + ' 23:59:59'))
-
-        events = request.env['calendar.event'].sudo().search(domain, order='start asc')
-
-        palette = [
-            {'bg': '#2563eb', 'border': '#1d4ed8'},
-            {'bg': '#059669', 'border': '#047857'},
-            {'bg': '#d97706', 'border': '#b45309'},
-            {'bg': '#7c3aed', 'border': '#6d28d9'},
-            {'bg': '#dc2626', 'border': '#b91c1c'},
-            {'bg': '#0891b2', 'border': '#0e7490'},
-        ]
-
-        events_data = []
-        for i, ev in enumerate(events):
-            color = palette[i % len(palette)]
-            start_str = ev.start.strftime('%Y-%m-%dT%H:%M:%S') if ev.start else ''
-            stop_str = ev.stop.strftime('%Y-%m-%dT%H:%M:%S') if ev.stop else start_str
-            events_data.append({
-                'id': ev.id,
-                'title': ev.name or 'Untitled Meeting',
-                'start': start_str,
-                'end': stop_str,
-                'allDay': bool(ev.allday),
-                'backgroundColor': color['bg'],
-                'borderColor': color['border'],
-                'textColor': '#ffffff',
-                'extendedProps': {
-                    'description': ev.description or '',
-                    'location': ev.location or '',
-                    'videocall_location': ev.videocall_location or '',
-                    'attendees': [p.name for p in ev.partner_ids],
-                    'duration': f"{ev.duration:.1f} hrs" if hasattr(ev, 'duration') and ev.duration else '',
-                    'is_owner': ev.user_id.id == user.id or partner.id in ev.partner_ids.ids,
-                }
-            })
-        return request.make_json_response(events_data)
-
-    @http.route('/portal/calendar/event/create', type='jsonrpc', auth='user', website=True, methods=['POST'])
-    def portal_calendar_event_create(self, **post):
-        """ Creates a new meeting from the portal calendar """
-        user = request.env.user
-        partner = user.partner_id
-        name = (post.get('name') or '').strip()
-        start = (post.get('start') or '').strip()
-        stop = (post.get('stop') or '').strip()
-        allday = bool(post.get('allday'))
-        location = (post.get('location') or '').strip()
-        videocall_location = (post.get('videocall_location') or '').strip()
-        description = (post.get('description') or '').strip()
-
-        if not name:
-            return {'error': 'Meeting title is required.'}
-        if not start:
-            return {'error': 'Start date/time is required.'}
-        if not stop:
-            stop = start
-
-        start_dt = start.replace('T', ' ')[:19]
-        stop_dt = stop.replace('T', ' ')[:19]
-        if len(start_dt) == 10:
-            start_dt += ' 09:00:00'
-        if len(stop_dt) == 10:
-            stop_dt += ' 10:00:00'
-
-        try:
-            ev = request.env['calendar.event'].sudo().create({
-                'name': name,
-                'start': start_dt,
-                'stop': stop_dt,
-                'allday': allday,
-                'location': location,
-                'videocall_location': videocall_location,
-                'description': description,
-                'user_id': user.id,
-                'partner_ids': [(4, partner.id)],
-            })
-            return {'success': True, 'id': ev.id, 'name': ev.name}
-        except Exception as e:
-            _logger.exception("Failed to create portal calendar event: %s", e)
-            return {'error': str(e)}
-
-    @http.route('/portal/calendar/event/delete', type='jsonrpc', auth='user', website=True, methods=['POST'])
-    def portal_calendar_event_delete(self, event_id=None, **post):
-        """ Cancels/removes an event """
-        if not event_id:
-            return {'error': 'Event ID is required.'}
-        user = request.env.user
-        event = request.env['calendar.event'].sudo().browse(int(event_id))
-        if not event.exists():
-            return {'error': 'Event not found.'}
-        if user.partner_id.id not in event.partner_ids.ids and event.user_id.id != user.id:
-            return {'error': 'Permission denied.'}
-        event.unlink()
-        return {'success': True}
 
 
 class StakeholderWebHome(Home):

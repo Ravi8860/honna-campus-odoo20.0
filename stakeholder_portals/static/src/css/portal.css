@@ -933,169 +933,6 @@
     }
 }
 
-/* ==========================================================================
-   Backend-Identical Calendar View for Portal
-   ========================================================================== */
-
-.portal-backend-calendar-container {
-    background: #ffffff;
-    border-radius: 10px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-}
-
-.portal-calendar-header-bar {
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 12px 18px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.portal-calendar-nav-group .btn {
-    font-size: 13px;
-    font-weight: 500;
-    padding: 6px 12px;
-}
-
-.portal-calendar-scale-group .btn {
-    font-size: 13px;
-    font-weight: 500;
-    padding: 6px 14px;
-    border-color: #d1d5db;
-    color: #374151;
-}
-
-.portal-calendar-scale-group .btn.active,
-.portal-calendar-scale-group .btn:hover {
-    background-color: #2563eb !important;
-    border-color: #2563eb !important;
-    color: #ffffff !important;
-}
-
-.portal-calendar-main-grid {
-    min-height: 720px;
-    padding: 16px;
-    background: #ffffff;
-}
-
-/* FullCalendar styling overrides to match Odoo backend */
-.fc {
-    font-family: inherit !important;
-    --fc-border-color: #e5e7eb !important;
-    --fc-today-bg-color: #f0f7ff !important;
-}
-
-.fc .fc-col-header-cell {
-    background-color: #f8fafc !important;
-    padding: 8px 0 !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    text-transform: uppercase !important;
-    color: #64748b !important;
-    border-color: #e5e7eb !important;
-}
-
-.fc .fc-daygrid-day-number {
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    color: #334155 !important;
-    padding: 6px 8px !important;
-}
-
-.fc .fc-day-today .fc-daygrid-day-number {
-    background: #2563eb !important;
-    color: #ffffff !important;
-    border-radius: 50% !important;
-    width: 24px !important;
-    height: 24px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin: 4px !important;
-}
-
-.fc-daygrid-event {
-    margin: 2px 4px !important;
-    border-radius: 4px !important;
-    padding: 3px 6px !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
-    cursor: pointer !important;
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-
-.fc-daygrid-event:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12) !important;
-}
-
-.fc-timegrid-event {
-    border-radius: 4px !important;
-    padding: 4px 6px !important;
-    font-size: 12px !important;
-    cursor: pointer !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
-}
-
-/* Side Panel */
-.portal-calendar-side-panel {
-    background: #f8fafc;
-    border-left: 1px solid #e5e7eb;
-    padding: 16px;
-}
-
-.mini-cal-table {
-    width: 100%;
-    text-align: center;
-    font-size: 11px;
-}
-
-.mini-cal-table th {
-    color: #94a3b8;
-    font-weight: 600;
-    padding: 4px 0;
-}
-
-.mini-cal-table td {
-    padding: 4px 2px;
-    cursor: pointer;
-    border-radius: 4px;
-}
-
-.mini-cal-table td:hover {
-    background: #e2e8f0;
-}
-
-.mini-cal-table td.today {
-    background: #2563eb;
-    color: #ffffff;
-    font-weight: bold;
-}
-
-.mini-cal-table td.other-month {
-    color: #cbd5e1;
-}
-
-.portal-upcoming-item {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-left: 3.5px solid #2563eb;
-    border-radius: 6px;
-    padding: 10px 12px;
-    margin-bottom: 10px;
-    transition: box-shadow 0.15s ease;
-}
-
-.portal-upcoming-item:hover {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
 /* School Management Members Notebook Tabs Matching Backend Screenshot 1 */
 #school_member_notebook_tabs {
     border-bottom: 1px solid #e2e8f0;
@@ -1126,29 +963,43 @@
 }
 
 /* ==========================================================================
-   School Portal Form Inside View - Clean, Attractive, Modern Colors
-   Applies ONLY to school form view (#school_profile_form)
+   Portal Profile Forms (Organisation Profile & School Profile)
+   Clean, Attractive, Modern Colors for all fields
    ========================================================================== */
 
+#association_profile_form .honna-profile-card,
+#association_profile_form .card,
 #school_profile_form .honna-profile-card,
-#school_profile_form .card {
+#school_profile_form .card,
+.honna-profile-page .honna-profile-card,
+.honna-profile-page .card {
     background-color: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 10px !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 
+#association_profile_form h5,
+#association_profile_form h6,
 #school_profile_form h5,
-#school_profile_form h6 {
+#school_profile_form h6,
+.honna-profile-page h5,
+.honna-profile-page h6 {
     color: #0f172a !important;
     font-weight: 700 !important;
     letter-spacing: -0.01em;
 }
 
 /* Field Labels: Elegant slate charcoal, never washed-out orange */
+#association_profile_form label,
+#association_profile_form .form-label,
+#association_profile_form .text-secondary,
 #school_profile_form label,
 #school_profile_form .form-label,
-#school_profile_form .text-secondary {
+#school_profile_form .text-secondary,
+.honna-profile-page label,
+.honna-profile-page .form-label,
+.honna-profile-page .text-secondary {
     color: #334155 !important;
     font-weight: 600 !important;
     font-size: 13px !important;
@@ -1157,17 +1008,27 @@
 }
 
 /* Required Asterisk */
-#school_profile_form .text-danger {
+#association_profile_form .text-danger,
+#school_profile_form .text-danger,
+.honna-profile-page .text-danger {
     color: #ef4444 !important;
     font-weight: 700 !important;
     margin-left: 2px;
 }
 
 /* Form Controls: Inputs, Selects, and Textareas */
+#association_profile_form .form-control,
+#association_profile_form .form-select,
+#association_profile_form .honna-input,
+#association_profile_form .honna-select,
 #school_profile_form .form-control,
 #school_profile_form .form-select,
 #school_profile_form .honna-input,
-#school_profile_form .honna-select {
+#school_profile_form .honna-select,
+.honna-profile-page .form-control,
+.honna-profile-page .form-select,
+.honna-profile-page .honna-input,
+.honna-profile-page .honna-select {
     color: #0f172a !important;
     background-color: #ffffff !important;
     border: 1.5px solid #cbd5e1 !important;
@@ -1178,32 +1039,78 @@
     transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
 }
 
+#association_profile_form .input-group-text,
+#school_profile_form .input-group-text,
+.honna-profile-page .input-group-text {
+    background-color: #f8fafc !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+}
+
+#association_profile_form .input-group .form-control.border-start-0,
+#school_profile_form .input-group .form-control.border-start-0,
+.honna-profile-page .input-group .form-control.border-start-0 {
+    border-left: 0 !important;
+}
+
+#association_profile_form .input-group .input-group-text.border-end-0,
+#school_profile_form .input-group .input-group-text.border-end-0,
+.honna-profile-page .input-group .input-group-text.border-end-0 {
+    border-right: 0 !important;
+}
+
+#association_profile_form .form-control:hover,
+#association_profile_form .form-select:hover,
+#association_profile_form .honna-input:hover,
+#association_profile_form .honna-select:hover,
 #school_profile_form .form-control:hover,
 #school_profile_form .form-select:hover,
 #school_profile_form .honna-input:hover,
-#school_profile_form .honna-select:hover {
+#school_profile_form .honna-select:hover,
+.honna-profile-page .form-control:hover,
+.honna-profile-page .form-select:hover,
+.honna-profile-page .honna-input:hover,
+.honna-profile-page .honna-select:hover {
     border-color: #94a3b8 !important;
 }
 
+#association_profile_form .form-control:focus,
+#association_profile_form .form-select:focus,
+#association_profile_form .honna-input:focus,
+#association_profile_form .honna-select:focus,
 #school_profile_form .form-control:focus,
 #school_profile_form .form-select:focus,
 #school_profile_form .honna-input:focus,
-#school_profile_form .honna-select:focus {
+#school_profile_form .honna-select:focus,
+.honna-profile-page .form-control:focus,
+.honna-profile-page .form-select:focus,
+.honna-profile-page .honna-input:focus,
+.honna-profile-page .honna-select:focus {
     border-color: #2563eb !important;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14) !important;
     outline: none !important;
     background-color: #ffffff !important;
 }
 
+#association_profile_form .form-control::placeholder,
+#association_profile_form .honna-input::placeholder,
 #school_profile_form .form-control::placeholder,
-#school_profile_form .honna-input::placeholder {
+#school_profile_form .honna-input::placeholder,
+.honna-profile-page .form-control::placeholder,
+.honna-profile-page .honna-input::placeholder {
     color: #94a3b8 !important;
     font-weight: 400 !important;
 }
 
 /* Select Dropdowns */
+#association_profile_form select.form-select,
+#association_profile_form select.honna-select,
 #school_profile_form select.form-select,
-#school_profile_form select.honna-select {
+#school_profile_form select.honna-select,
+.honna-profile-page select.form-select,
+.honna-profile-page select.honna-select {
     cursor: pointer;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23475569' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
     background-repeat: no-repeat !important;
@@ -1212,30 +1119,41 @@
     padding-right: 2rem !important;
 }
 
-#school_profile_form .form-check-label {
+#association_profile_form .form-check-label,
+#school_profile_form .form-check-label,
+.honna-profile-page .form-check-label {
     color: #334155 !important;
     font-weight: 500 !important;
     font-size: 13px !important;
 }
 
-#school_profile_form .form-check-input {
+#association_profile_form .form-check-input,
+#school_profile_form .form-check-input,
+.honna-profile-page .form-check-input {
     border: 1.5px solid #cbd5e1 !important;
     border-radius: 4px;
     cursor: pointer;
 }
 
-#school_profile_form .form-check-input:checked {
+#association_profile_form .form-check-input:checked,
+#school_profile_form .form-check-input:checked,
+.honna-profile-page .form-check-input:checked {
     background-color: #2563eb !important;
     border-color: #2563eb !important;
 }
 
-#school_profile_form td {
+#association_profile_form td,
+#school_profile_form td,
+.honna-profile-page td {
     color: #1e293b !important;
 }
 
-#school_profile_form th {
+#association_profile_form th,
+#school_profile_form th,
+.honna-profile-page th {
     color: #475569 !important;
     font-weight: 600 !important;
+    background-color: #f8fafc !important;
 }
 
 #school_member_notebook_tabs .nav-link {
@@ -1252,4 +1170,96 @@
     background-color: #ffffff !important;
     border-color: #e2e8f0 #e2e8f0 #ffffff #e2e8f0 !important;
     font-weight: 600 !important;
+}
+
+#honna_members_table th:nth-child(4),
+#honna_members_table td:nth-child(4) {
+    white-space: nowrap !important;
+    min-width: 170px !important;
+}
+
+/* ==========================================================================
+   Attractive, Modern Typography System (Applied strictly to Profile views)
+   ========================================================================== */
+
+.honna-profile-page,
+#association_profile_form,
+#school_profile_form {
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.honna-profile-page input,
+.honna-profile-page select,
+.honna-profile-page textarea,
+.honna-profile-page button,
+.honna-profile-page label,
+.honna-profile-page table,
+.honna-profile-page th,
+.honna-profile-page td,
+.honna-profile-page h1,
+.honna-profile-page h2,
+.honna-profile-page h3,
+.honna-profile-page h4,
+.honna-profile-page h5,
+.honna-profile-page h6,
+.honna-profile-page p,
+.honna-profile-page span,
+.honna-profile-page a {
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+/* Titles and Headers */
+.honna-profile-page .honna-profile-title {
+    font-size: 26px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    letter-spacing: -0.025em !important;
+}
+
+.honna-profile-page h5,
+.honna-profile-page h6 {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    letter-spacing: -0.015em !important;
+}
+
+/* Field Labels */
+.honna-profile-page label,
+.honna-profile-page .form-label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    letter-spacing: -0.01em !important;
+}
+
+/* Form Inputs, Selects & Placeholders */
+.honna-profile-page .form-control,
+.honna-profile-page .form-select,
+.honna-profile-page .honna-input,
+.honna-profile-page .honna-select {
+    font-size: 13.5px !important;
+    font-weight: 450 !important;
+    letter-spacing: -0.005em !important;
+}
+
+.honna-profile-page .form-control::placeholder,
+.honna-profile-page .honna-input::placeholder {
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    letter-spacing: normal !important;
+}
+
+/* Table Headers and Data Cells */
+.honna-profile-page th {
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.015em !important;
+}
+
+.honna-profile-page td {
+    font-size: 13.5px !important;
+    letter-spacing: -0.005em !important;
 }
