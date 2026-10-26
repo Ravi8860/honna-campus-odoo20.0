@@ -228,6 +228,23 @@
         const form = document.getElementById('association_profile_form');
         const actionInput = document.getElementById('profile_form_action');
         if (form && actionInput) {
+            const inlineName = (document.getElementById('inline_name')?.value || '').trim();
+            const inlineDesig = (document.getElementById('inline_desig')?.value || '').trim();
+            const inlineEmail = (document.getElementById('inline_email')?.value || '').trim();
+            const inlinePhone = (document.getElementById('inline_phone')?.value || '').trim();
+            if (inlineName || inlineEmail || inlinePhone) {
+                const fnameInput = document.getElementById('new_mem_fname');
+                const lnameInput = document.getElementById('new_mem_lname');
+                const roleInput = document.getElementById('new_mem_role');
+                const emailInput = document.getElementById('new_mem_email');
+                const phoneInput = document.getElementById('new_mem_phone');
+                const parts = inlineName.split(' ');
+                if (fnameInput) fnameInput.value = parts[0] || '';
+                if (lnameInput) lnameInput.value = parts.slice(1).join(' ') || '';
+                if (roleInput) roleInput.value = inlineDesig || 'Member';
+                if (emailInput) emailInput.value = inlineEmail || '';
+                if (phoneInput) phoneInput.value = inlinePhone || '';
+            }
             actionInput.value = action || 'save';
             form.submit();
         }

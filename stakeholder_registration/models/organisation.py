@@ -687,8 +687,10 @@ class StakeholderOrganisation(models.Model):
                     pass
             else:
                 user = existing_user
+                portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
+                is_portal = bool(portal_group and portal_group in existing_user.group_ids)
                 user_write_vals = {'user_category': cat}
-                if target_group and target_group not in existing_user.group_ids:
+                if not is_portal and target_group and target_group not in existing_user.group_ids:
                     user_write_vals['group_ids'] = [(4, target_group.id)]
                 existing_user.write(user_write_vals)
 
