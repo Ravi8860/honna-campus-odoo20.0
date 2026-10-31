@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, Command
+from odoo.fields import Domain
 from odoo.exceptions import UserError
 from odoo.tools import sql
 
@@ -233,34 +234,34 @@ class StakeholderOrganisation(models.Model):
         self.ensure_one()
         current = int(self.form_step or 1)
         if current < 4:
-            self.write({'form_step': str(current + 1)})
+            self.sudo().write({'form_step': str(current + 1)})
         return True
 
     def action_prev_step(self):
         self.ensure_one()
         current = int(self.form_step or 1)
         if current > 1:
-            self.write({'form_step': str(current - 1)})
+            self.sudo().write({'form_step': str(current - 1)})
         return True
 
     def action_set_step_1(self):
         self.ensure_one()
-        self.write({'form_step': '1'})
+        self.sudo().write({'form_step': '1'})
         return True
 
     def action_set_step_2(self):
         self.ensure_one()
-        self.write({'form_step': '2'})
+        self.sudo().write({'form_step': '2'})
         return True
 
     def action_set_step_3(self):
         self.ensure_one()
-        self.write({'form_step': '3'})
+        self.sudo().write({'form_step': '3'})
         return True
 
     def action_set_step_4(self):
         self.ensure_one()
-        self.write({'form_step': '4'})
+        self.sudo().write({'form_step': '4'})
         return True
 
     def action_view_portal_profile(self):
@@ -488,8 +489,37 @@ class StakeholderOrganisation(models.Model):
             if rec.partner_id != partner:
                 rec.sudo().write({'partner_id': partner.id})
 
+    @api.model
+    def _access_domain(self, operation):
+        if not self.env.su and operation in ('create', 'write', 'unlink'):
+            user = self.env.user
+            if not user.has_group('base.group_system') and not user.has_group('stakeholder_registration.group_stakeholder_user'):
+                assoc = user.association_id
+                is_member = False
+                if assoc:
+                    is_member = bool(
+                        (user.partner_id and user.partner_id.id in assoc.member_ids.mapped('name.id'))
+                        or (user.email and user.email in assoc.member_ids.mapped('email'))
+                        or (user.login and user.login in assoc.member_ids.mapped('email'))
+                    )
+                if not is_member and (user.partner_id or user.email or user.login):
+                    domain = []
+                    if user.partner_id:
+                        domain.append(('name', '=', user.partner_id.id))
+                    if user.email:
+                        domain.append(('email', '=', user.email))
+                    if user.login and '@' in user.login:
+                        domain.append(('email', '=', user.login))
+                    if domain:
+                        search_domain = ['&', ('association_id', '!=', False)] + (['|'] * (len(domain) - 1) + domain if len(domain) > 1 else domain)
+                        is_member = bool(self.env['stakeholder.association.member'].sudo().search_count(search_domain, limit=1))
+                if is_member:
+                    return Domain.FALSE
+        return super()._access_domain(operation)
+
     @api.model_create_multi
     def create(self, vals_list):
+        self.check_access('create')
         india = self._default_country_id()
         assoc = self.env.user.association_id
         is_association_user = self.env.user.has_group('stakeholder_registration.group_association_user')
@@ -518,7 +548,9 @@ class StakeholderOrganisation(models.Model):
                     vals['user_id'] = self.env.user.id
         records = super(StakeholderOrganisation, self.sudo()).create(vals_list)
         for rec in records:
-            primary = next((m for m in rec.board_member_ids if m.is_primary), None) or                       next((m for m in rec.dept_head_ids if m.is_primary), None) or                       next((m for m in rec.operation_member_ids if m.is_primary), None)
+            primary = next((m for m in rec.board_member_ids if m.is_primary), None) or \
+                      next((m for m in rec.dept_head_ids if m.is_primary), None) or \
+                      next((m for m in rec.operation_member_ids if m.is_primary), None)
             if primary and not rec.primary_contact_first_name:
                 role_dict = dict(primary._fields['role'].selection) if hasattr(primary._fields.get('role'), 'selection') else {}
                 rec.sudo().write({
@@ -541,6 +573,8 @@ class StakeholderOrganisation(models.Model):
         return records
 
     def write(self, vals):
+        if not (set(vals.keys()) <= {'form_step'}):
+            self.check_access('write')
         res = super(StakeholderOrganisation, self.sudo()).write(vals)
         if any(f in vals for f in ('board_member_ids', 'dept_head_ids', 'operation_member_ids')):
             for rec in self:
@@ -579,6 +613,10 @@ class StakeholderOrganisation(models.Model):
                 if partner_vals:
                     rec.partner_id.sudo().write(partner_vals)
         return res
+
+    def unlink(self):
+        self.check_access('unlink')
+        return super().unlink()
 
     def init(self):
         super().init()
@@ -690,8 +728,16 @@ class StakeholderOrganisation(models.Model):
                 portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
                 is_portal = bool(portal_group and portal_group in existing_user.group_ids)
                 user_write_vals = {'user_category': cat}
-                if not is_portal and target_group and target_group not in existing_user.group_ids:
-                    user_write_vals['group_ids'] = [(4, target_group.id)]
+                cmds = []
+                if is_portal:
+                    cmds.append(Command.unlink(portal_group.id))
+                    if group_user and group_user not in existing_user.group_ids:
+                        cmds.append(Command.link(group_user.id))
+                    user_write_vals['share'] = False
+                if target_group and target_group not in existing_user.group_ids:
+                    cmds.append(Command.link(target_group.id))
+                if cmds:
+                    user_write_vals['group_ids'] = cmds
                 existing_user.write(user_write_vals)
 
         for bm in self.board_member_ids:

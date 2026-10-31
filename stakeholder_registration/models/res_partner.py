@@ -191,24 +191,58 @@ class ResPartner(models.Model):
                     vals['user_id'] = user.id
                 vals['company_id'] = False
         partners = super().create(vals_list)
-        # Association/School: create Portal login from contact name + email
+        # Association/School: create Internal login from contact name + email
         if is_restricted or self._is_association_or_school_user():
+            group_user = self.env.ref('base.group_user', raise_if_not_found=False)
+            group_assoc = self.env.ref('stakeholder_registration.group_association_user', raise_if_not_found=False)
+            group_school = self.env.ref('stakeholder_registration.group_school_user', raise_if_not_found=False)
             portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
             User = self.env['res.users'].sudo()
             creator = self.env.user
+            is_school_creator = bool(
+                group_school and creator.has_group('stakeholder_registration.group_school_user')
+                and not creator.has_group('stakeholder_registration.group_association_user')
+            )
+            target_group = group_school if is_school_creator else group_assoc
+            category = 'school' if is_school_creator else 'association'
+            groups = [g.id for g in [group_user, target_group] if g]
+
             for partner in partners:
                 email = (partner.email or '').strip()
-                if not email or not portal_group or partner.user_ids:
+                if not email:
                     continue
-                if User.search(['|', ('login', '=', email), ('partner_id', '=', partner.id)], limit=1):
+                existing_user = partner.user_ids[:1] or User.search([
+                    '|', ('login', '=', email), ('partner_id', '=', partner.id)
+                ], limit=1)
+                if existing_user:
+                    if portal_group and portal_group in existing_user.group_ids:
+                        upgrade_cmds = [Command.unlink(portal_group.id)]
+                        for gid in groups:
+                            if gid not in existing_user.group_ids.ids:
+                                upgrade_cmds.append(Command.link(gid))
+                        existing_user.with_context(skip_sync_assoc=True).write({
+                            'group_ids': upgrade_cmds,
+                            'share': False,
+                            'user_category': category,
+                        })
                     continue
                 user = User.with_context(no_reset_password=True, skip_sync_assoc=True).create({
                     'name': partner.name,
                     'login': email,
                     'email': email,
                     'partner_id': partner.id,
-                    'group_ids': [Command.set([portal_group.id])],
+                    'user_category': category,
+                    'share': False,
+                    'group_ids': [Command.set(groups)],
                 })
+                link_vals = {}
+                if is_school_creator and creator.organisation_id:
+                    link_vals['organisation_id'] = creator.organisation_id.id
+                elif creator.association_id:
+                    link_vals['association_id'] = creator.association_id.id
+                if link_vals:
+                    user.with_context(skip_sync_assoc=True).write(link_vals)
+
                 if creator.association_id and creator.has_group(
                     'stakeholder_registration.group_association_user'
                 ):
