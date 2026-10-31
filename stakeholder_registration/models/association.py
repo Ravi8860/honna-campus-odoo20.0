@@ -467,9 +467,19 @@ class StakeholderAssociation(models.Model):
                     pass
             else:
                 user = existing_user
+                portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
+                is_portal = bool(portal_group and portal_group in existing_user.group_ids)
                 user_write_vals = {'user_category': 'association'}
+                cmds = []
+                if is_portal:
+                    cmds.append(Command.unlink(portal_group.id))
+                    if group_user and group_user not in existing_user.group_ids:
+                        cmds.append(Command.link(group_user.id))
+                    user_write_vals['share'] = False
                 if assoc_group and assoc_group not in existing_user.group_ids:
-                    user_write_vals['group_ids'] = [(4, assoc_group.id)]
+                    cmds.append(Command.link(assoc_group.id))
+                if cmds:
+                    user_write_vals['group_ids'] = cmds
                 if not user.association_id or user.association_id != self:
                     user_write_vals['association_id'] = self.id
                 existing_user.with_context(skip_sync_assoc=True).write(user_write_vals)
@@ -556,18 +566,23 @@ class StakeholderAssociationMember(models.Model):
                 user_vals = {}
                 if user.association_id != member.association_id:
                     user_vals['association_id'] = member.association_id.id
+                group_user = self.env.ref('base.group_user', raise_if_not_found=False)
                 is_portal = bool(portal_group and portal_group in user.group_ids)
-                if not is_portal:
-                    if not user.user_category:
-                        user_vals['user_category'] = 'association'
-                    cmds = []
-                    if assoc_group and assoc_group not in user.group_ids:
-                        cmds.append(Command.link(assoc_group.id))
-                    for g in default_feature_groups:
-                        if g not in user.group_ids:
-                            cmds.append(Command.link(g.id))
-                    if cmds:
-                        user_vals['group_ids'] = cmds
+                cmds = []
+                if is_portal:
+                    cmds.append(Command.unlink(portal_group.id))
+                    if group_user and group_user not in user.group_ids:
+                        cmds.append(Command.link(group_user.id))
+                    user_vals['share'] = False
+                if not user.user_category:
+                    user_vals['user_category'] = 'association'
+                if assoc_group and assoc_group not in user.group_ids:
+                    cmds.append(Command.link(assoc_group.id))
+                for g in default_feature_groups:
+                    if g not in user.group_ids:
+                        cmds.append(Command.link(g.id))
+                if cmds:
+                    user_vals['group_ids'] = cmds
                 if user_vals:
                     user.sudo().with_context(skip_sync_assoc=True).write(user_vals)
             if member.name and not member.name.user_category:

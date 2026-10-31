@@ -196,12 +196,16 @@ class ResUsers(models.Model):
         slides_root = self.env.ref('website_slides.website_slides_menu_root', raise_if_not_found=False)
         feature_menus = [m for m in (crm_root, survey_root, slides_root) if m]
         portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
+        group_user = self.env.ref('base.group_user', raise_if_not_found=False)
         for user in self:
-            if portal_group and portal_group in user.group_ids:
-                continue
             commands = []
             vals = {}
             if user.is_association:
+                if portal_group and portal_group in user.group_ids:
+                    commands.append(Command.unlink(portal_group.id))
+                    if group_user and group_user not in user.group_ids:
+                        commands.append(Command.link(group_user.id))
+                    vals['share'] = False
                 commands.append(Command.link(association_group.id))
                 for g in default_feature_groups:
                     if g not in user.group_ids:
@@ -413,16 +417,16 @@ class ResUsers(models.Model):
                         add_cmds += [Command.link(g.id) for g in default_feature_groups]
                     vals['group_ids'] = existing + add_cmds
             elif vals.get('user_category') == 'association' and assoc_group:
+                group_user = self.env.ref('base.group_user', raise_if_not_found=False)
                 portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
                 existing = vals.get('group_ids', [])
-                has_portal = portal_group and any(
-                    isinstance(cmd, (tuple, list)) and len(cmd) >= 2 and cmd[0] in (4, 6) and (
-                        portal_group.id in (cmd[2] if cmd[0] == 6 else [cmd[1]])
-                    ) for cmd in existing
-                )
-                if not has_portal:
-                    add_cmds = [Command.link(assoc_group.id)] + [Command.link(g.id) for g in default_feature_groups]
-                    vals['group_ids'] = existing + add_cmds
+                if portal_group:
+                    existing = [cmd for cmd in existing if not (isinstance(cmd, (tuple, list)) and len(cmd) >= 2 and (portal_group.id in (cmd[2] if cmd[0] == 6 else [cmd[1]])))]
+                add_cmds = [Command.link(assoc_group.id)] + [Command.link(g.id) for g in default_feature_groups]
+                if group_user:
+                    add_cmds.append(Command.link(group_user.id))
+                vals['group_ids'] = existing + add_cmds
+                vals['share'] = False
         users = super().create(vals_list)
         for u in users:
             if u.user_category and u.partner_id and u.partner_id.user_category != u.user_category:
@@ -471,17 +475,26 @@ class ResUsers(models.Model):
                         user.sudo().write({'group_ids': link_cmds + unlink_cmds})
                 elif user.user_category == 'association' and assoc_group:
                     portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
-                    if portal_group and portal_group in user.group_ids:
-                        continue
+                    group_user = self.env.ref('base.group_user', raise_if_not_found=False)
                     unlink_cmds = []
+                    link_cmds = []
+                    user_write_vals = {}
+                    if portal_group and portal_group in user.group_ids:
+                        unlink_cmds.append(Command.unlink(portal_group.id))
+                        if group_user and group_user not in user.group_ids:
+                            link_cmds.append(Command.link(group_user.id))
+                        user_write_vals['share'] = False
                     if honna_group and honna_group in user.group_ids:
                         unlink_cmds.append(Command.unlink(honna_group.id))
                     if school_group and school_group in user.group_ids:
                         unlink_cmds.append(Command.unlink(school_group.id))
-                    link_cmds = [Command.link(assoc_group.id)] if assoc_group not in user.group_ids else []
+                    if assoc_group not in user.group_ids:
+                        link_cmds.append(Command.link(assoc_group.id))
                     link_cmds += [Command.link(g.id) for g in default_feature_groups if g not in user.group_ids]
                     if link_cmds or unlink_cmds:
-                        user.sudo().write({'group_ids': link_cmds + unlink_cmds})
+                        user_write_vals['group_ids'] = link_cmds + unlink_cmds
+                    if user_write_vals:
+                        user.sudo().write(user_write_vals)
         if any(f in vals for f in ('user_category', 'group_ids', 'name', 'email', 'login', 'partner_id', 'is_association')):
             self._sync_association_profile()
         return res
@@ -524,23 +537,28 @@ class ResUsers(models.Model):
                     ], limit=1)
                 if member:
                     assoc = member.association_id
-            if assoc:
+            if assoc or user.user_category == 'association' or getattr(user, 'is_association', False):
                 vals = {}
-                if user.association_id != assoc:
+                if assoc and user.association_id != assoc:
                     vals['association_id'] = assoc.id
                 portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
+                group_user = self.env.ref('base.group_user', raise_if_not_found=False)
                 is_portal = bool(portal_group and portal_group in user.group_ids)
-                if not is_portal:
-                    if not user.user_category:
-                        vals['user_category'] = 'association'
-                    cmds = []
-                    if assoc_group and assoc_group not in user.group_ids:
-                        cmds.append(Command.link(assoc_group.id))
-                    for g in default_feature_groups:
-                        if g not in user.group_ids:
-                            cmds.append(Command.link(g.id))
-                    if cmds:
-                        vals['group_ids'] = cmds
+                cmds = []
+                if is_portal:
+                    cmds.append(Command.unlink(portal_group.id))
+                    if group_user and group_user not in user.group_ids:
+                        cmds.append(Command.link(group_user.id))
+                    vals['share'] = False
+                if not user.user_category:
+                    vals['user_category'] = 'association'
+                if assoc_group and assoc_group not in user.group_ids:
+                    cmds.append(Command.link(assoc_group.id))
+                for g in default_feature_groups:
+                    if g not in user.group_ids:
+                        cmds.append(Command.link(g.id))
+                if cmds:
+                    vals['group_ids'] = cmds
                 if vals:
                     user.sudo().with_context(skip_sync_assoc=True).write(vals)
 
@@ -560,6 +578,7 @@ class ResUsers(models.Model):
         honna_group = self.env.ref('stakeholder_registration.group_stakeholder_user', raise_if_not_found=False)
 
         portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
+        group_user = self.env.ref('base.group_user', raise_if_not_found=False)
 
         users = self.sudo().search([
             '|',
@@ -567,12 +586,16 @@ class ResUsers(models.Model):
             ('group_ids', 'in', [assoc_group.id] if assoc_group else [])
         ])
         for user in users:
-            if portal_group and portal_group in user.group_ids:
-                continue
+            is_portal = bool(portal_group and portal_group in user.group_ids)
             vals = {}
+            cmds = []
+            if is_portal:
+                cmds.append(Command.unlink(portal_group.id))
+                if group_user and group_user not in user.group_ids:
+                    cmds.append(Command.link(group_user.id))
+                vals['share'] = False
             if user.user_category != 'association':
                 vals['user_category'] = 'association'
-            cmds = []
             if assoc_group and assoc_group not in user.group_ids:
                 cmds.append(Command.link(assoc_group.id))
             if school_group and school_group in user.group_ids:
