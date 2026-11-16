@@ -145,6 +145,45 @@
     font-weight: 600;
 }
 
+/* "Join Network" + "I am an" row (label beside dropdown) */
+.honna-selector-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.honna-selector-row .honna-role-selector-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 16px;
+}
+
+.honna-selector-row .honna-field-label {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #334155;
+    white-space: nowrap;
+}
+
+.honna-selector-row .honna-custom-dropdown {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.honna-selector-row .honna-role-selector-wrapper > .text-danger {
+    flex-basis: 100%;
+}
+
+@media (max-width: 768px) {
+    .honna-selector-row {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+}
+
 /* White Form Card */
 .honna-form-card {
     background-color: #ffffff;

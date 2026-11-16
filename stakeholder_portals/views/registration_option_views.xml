@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Join Network -->
+    <record id="view_stakeholder_join_network_list" model="ir.ui.view">
+        <field name="name">stakeholder.join.network.list</field>
+        <field name="model">stakeholder.join.network</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_join_network" model="ir.actions.act_window">
+        <field name="name">Join Networks</field>
+        <field name="res_model">stakeholder.join.network</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'active_test': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add a network shown in "Join Network" on the registration page</p>
+        </field>
+    </record>
+
+    <!-- I am an (Registration Role) -->
+    <record id="view_stakeholder_registration_role_list" model="ir.ui.view">
+        <field name="name">stakeholder.registration.role.list</field>
+        <field name="model">stakeholder.registration.role</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="portal_type"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_stakeholder_registration_role" model="ir.actions.act_window">
+        <field name="name">I am an (Roles)</field>
+        <field name="res_model">stakeholder.registration.role</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'active_test': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add a role shown in "I am an" on the registration page</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_stakeholder_registration_config"
+              name="Registration Page"
+              parent="crm.crm_menu_config"
+              groups="sales_team.group_sale_manager"
+              sequence="50"/>
+
+    <menuitem id="menu_stakeholder_join_network"
+              name="Join Networks"
+              parent="menu_stakeholder_registration_config"
+              action="action_stakeholder_join_network"
+              sequence="10"/>
+
+    <menuitem id="menu_stakeholder_registration_role"
+              name="I am an (Roles)"
+              parent="menu_stakeholder_registration_config"
+              action="action_stakeholder_registration_role"
+              sequence="20"/>
+</odoo>

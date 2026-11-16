@@ -43,12 +43,35 @@ class StakeholderPortalController(http.Controller):
             'values': kw,
             'success_message': kw.get('success_message'),
             'submitted': kw.get('submitted') == '1',
+            **self._get_registration_options(kw),
         })
+
+    def _get_registration_options(self, values):
+        """ Admin configured "Join Network" and "I am an" lists with the current selection """
+        networks = request.env['stakeholder.join.network'].sudo().search([])
+        roles = request.env['stakeholder.registration.role'].sudo().search([])
+        network_id = str(values.get('join_network_id') or '')
+        role_id = str(values.get('role_id') or '')
+        selected_role = roles.filtered(lambda r: str(r.id) == role_id)[:1]
+        if not selected_role and values.get('portal_type'):
+            selected_role = roles.filtered(lambda r: r.portal_type == values.get('portal_type'))[:1]
+        return {
+            'networks': networks,
+            'roles': roles,
+            'selected_network': networks.filtered(lambda n: str(n.id) == network_id)[:1] or networks[:1],
+            'selected_role': selected_role or roles[:1],
+        }
 
     @http.route(['/stakeholder-portals/submit', '/registration/submit'], type='http', auth='public', website=True, methods=['POST'], csrf=True)
     def portals_submit(self, **post):
         """ Handles the unified form submission for all stakeholder categories """
-        portal_type = (post.get('portal_type') or 'honna_staff').strip()
+        join_network_id = (post.get('join_network_id') or '').strip()
+        role_id = (post.get('role_id') or '').strip()
+        network = request.env['stakeholder.join.network'].sudo().search(
+            [('id', '=', int(join_network_id))], limit=1) if join_network_id.isdigit() else None
+        role = request.env['stakeholder.registration.role'].sudo().search(
+            [('id', '=', int(role_id))], limit=1) if role_id.isdigit() else None
+        portal_type = role.portal_type if role else (post.get('portal_type') or 'honna_staff').strip()
         salutation = (post.get('salutation') or '').strip()
         first_name = (post.get('first_name') or post.get('name') or '').strip()
         last_name = (post.get('last_name') or '').strip()
@@ -61,7 +84,9 @@ class StakeholderPortalController(http.Controller):
         values = post
 
         # 1. Validation
-        if not portal_type:
+        if not network and request.env['stakeholder.join.network'].sudo().search_count([], limit=1):
+            errors['join_network_id'] = _('Please select a network to join.')
+        if not portal_type or (not role and request.env['stakeholder.registration.role'].sudo().search_count([], limit=1)):
             errors['portal_type'] = _('Please select your role.')
         if not salutation:
             errors['salutation'] = _('Salutation is required.')
@@ -97,7 +122,7 @@ class StakeholderPortalController(http.Controller):
         full_name = f"{first_name} {last_name}".strip() if last_name else first_name
         display_name = f"{salutation} {full_name}".strip() if salutation else full_name
 
-        role_title = ROLE_TITLES.get(portal_type, portal_type.replace('_', ' ').title())
+        role_title = role.name if role else ROLE_TITLES.get(portal_type, portal_type.replace('_', ' ').title())
         sudo_env = request.env(su=True)
 
         try:
@@ -254,12 +279,15 @@ class StakeholderPortalController(http.Controller):
                     'group_ids': [(6, 0, list(set(group_ids)))],
                     'share': False,
                     'user_category': user_cat,
+                    'join_network_id': network.id if network else False,
                 }
                 if portal_type == 'association' and rec:
                     user_vals['association_id'] = rec.id
                 user = user_obj.with_context(skip_sync_assoc=True).create(user_vals)
             else:
                 user_write_vals = {'user_category': user_cat}
+                if network:
+                    user_write_vals['join_network_id'] = network.id
                 current_gids = user.group_ids.ids
                 new_gids = [gid for gid in group_ids if gid not in current_gids]
                 if new_gids:
@@ -283,6 +311,8 @@ class StakeholderPortalController(http.Controller):
                 'phone': phone,
                 'portal_type': portal_type,
                 'user_category': user_cat,
+                'join_network_id': network.id if network else False,
+                'registration_role_id': role.id if role else False,
                 'salutation': salutation,
                 'first_name': first_name,
                 'last_name': last_name,
@@ -320,7 +350,8 @@ class StakeholderPortalController(http.Controller):
     def _render_form_with_errors(self, errors, values):
         return request.render('stakeholder_portals.registration_page', {
             'errors': errors,
-            'values': values
+            'values': values,
+            **self._get_registration_options(values),
         })
 
     def _handle_student_submit(self, post, env):

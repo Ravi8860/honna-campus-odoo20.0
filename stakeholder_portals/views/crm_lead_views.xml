@@ -17,10 +17,12 @@
             </xpath>
             <page name="extra" position="after">
                 <page name="registration_details" string="Registration Details"
-                      invisible="not user_category and not salutation and not first_name and not registration_id_ref">
+                      invisible="not user_category and not join_network_id and not salutation and not first_name and not registration_id_ref">
                     <group>
                         <group string="Stakeholder Registration Details">
                             <field name="user_category"/>
+                            <field name="join_network_id"/>
+                            <field name="registration_role_id"/>
                             <field name="salutation"/>
                             <field name="first_name"/>
                             <field name="last_name"/>

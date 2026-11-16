@@ -2,18 +2,16 @@
     'use strict';
 
     function initHonnaRegistration() {
-        var dropdown = document.getElementById('honna_role_dropdown');
-        var roleBtn = document.getElementById('honna_role_btn');
-        var roleMenu = document.getElementById('honna_role_menu');
-        var hiddenInput = document.getElementById('hidden_portal_type');
-        var labelText = document.getElementById('honna_selected_role_label');
+        var dropdowns = document.querySelectorAll('#honna_registration_form .honna-custom-dropdown');
 
-        if (!dropdown || !roleBtn || !roleMenu || !hiddenInput) {
+        if (!dropdowns.length) {
             return; // Not on the registration page
         }
 
         // Toggle dropdown open/close
-        function toggleDropdown(show) {
+        function toggleDropdown(dropdown, show) {
+            var roleBtn = dropdown.querySelector('.honna-role-select-btn');
+            var roleMenu = dropdown.querySelector('.honna-role-options-menu');
             var isOpen = typeof show === 'boolean' ? show : roleMenu.classList.contains('d-none');
             if (isOpen) {
                 roleMenu.classList.remove('d-none');
@@ -26,59 +24,60 @@
             }
         }
 
-        roleBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            toggleDropdown();
-        });
+        dropdowns.forEach(function (dropdown) {
+            var roleBtn = dropdown.querySelector('.honna-role-select-btn');
+            var hiddenInput = document.getElementById(dropdown.getAttribute('data-input'));
+            var labelText = dropdown.querySelector('.honna-role-label-text');
 
-        // Handle role option selection
-        var options = roleMenu.querySelectorAll('.honna-role-option');
-        options.forEach(function (opt) {
-            opt.addEventListener('click', function (e) {
+            roleBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                var val = this.getAttribute('data-value');
-                var text = this.querySelector('span') ? this.querySelector('span').textContent.trim() : this.textContent.trim();
+                // Keep only one dropdown open at a time
+                dropdowns.forEach(function (d) {
+                    if (d !== dropdown) {
+                        toggleDropdown(d, false);
+                    }
+                });
+                toggleDropdown(dropdown);
+            });
 
-                hiddenInput.value = val;
-                if (labelText) {
-                    labelText.textContent = text;
-                }
+            // Handle option selection
+            var options = dropdown.querySelectorAll('.honna-role-option');
+            options.forEach(function (opt) {
+                opt.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var text = this.querySelector('span') ? this.querySelector('span').textContent.trim() : this.textContent.trim();
 
-                // Update active class
-                options.forEach(function (o) { o.classList.remove('active'); });
-                this.classList.add('active');
+                    if (hiddenInput) {
+                        hiddenInput.value = this.getAttribute('data-value');
+                    }
+                    if (labelText) {
+                        labelText.textContent = text;
+                    }
 
-                toggleDropdown(false);
+                    // Update active class
+                    options.forEach(function (o) { o.classList.remove('active'); });
+                    this.classList.add('active');
+
+                    toggleDropdown(dropdown, false);
+                });
             });
         });
 
         // Close on click outside
         document.addEventListener('click', function (e) {
-            if (!dropdown.contains(e.target)) {
-                toggleDropdown(false);
-            }
+            dropdowns.forEach(function (dropdown) {
+                if (!dropdown.contains(e.target)) {
+                    toggleDropdown(dropdown, false);
+                }
+            });
         });
 
         // Close on Escape key
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' || e.keyCode === 27) {
-                toggleDropdown(false);
+                dropdowns.forEach(function (dropdown) { toggleDropdown(dropdown, false); });
             }
         });
-
-        // Sync with existing value on load
-        if (hiddenInput.value) {
-            var currentVal = hiddenInput.value;
-            options.forEach(function (opt) {
-                if (opt.getAttribute('data-value') === currentVal) {
-                    options.forEach(function (o) { o.classList.remove('active'); });
-                    opt.classList.add('active');
-                    if (labelText) {
-                        labelText.textContent = opt.querySelector('span') ? opt.querySelector('span').textContent.trim() : opt.textContent.trim();
-                    }
-                }
-            });
-        }
 
         // --- Success Toast Notification & AJAX Form Submit ---
         var form = document.getElementById('honna_registration_form');
@@ -178,6 +177,15 @@
                                 emailInput.closest('.honna-form-group, .mb-3, div').appendChild(errSpan);
                             }
                         }
+                        ['join_network_id', 'portal_type'].forEach(function (key) {
+                            var wrapper = data.errors[key] && form.querySelector('[data-error-for="' + key + '"]');
+                            if (wrapper) {
+                                var selErr = document.createElement('div');
+                                selErr.className = 'text-danger small mt-1 honna-ajax-error';
+                                selErr.textContent = data.errors[key];
+                                wrapper.appendChild(selErr);
+                            }
+                        });
                         if (data.errors.global) {
                             var gErr = document.createElement('div');
                             gErr.className = 'alert alert-danger d-flex align-items-center mb-3 rounded-3 shadow-sm py-2 px-3 honna-ajax-global-error';
