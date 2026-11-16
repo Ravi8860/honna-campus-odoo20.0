@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Invitation mail sent to users registered from the Honna Campus registration page.
+             The network name comes from the "Join Network" option selected on the registration page. -->
+        <record id="mail_template_network_invitation" model="mail.template">
+            <field name="name">Honna Campus: Network Invitation</field>
+            <field name="model_id" ref="base.model_res_users"/>
+            <field name="subject">Invitation to join {{ object.join_network_id.name or object.company_id.name }}</field>
+            <field name="email_from">"Honna Campus" &lt;campus@honna.in&gt;</field>
+            <field name="reply_to">campus@honna.in</field>
+            <field name="partner_to" eval="False"/>
+            <field name="use_default_to" eval="True"/>
+            <field name="description">Sent to new users registered from the registration page with a Join Network</field>
+            <field name="body_html" type="html">
+<div style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.6; color: #1e293b; max-width: 640px;">
+    <t t-set="network_name" t-value="object.join_network_id.name or object.company_id.name or ''"/>
+    <t t-set="portal_url" t-value="object.get_base_url()"/>
+    <h2 style="font-size: 22px; font-weight: bold; margin: 0 0 20px 0; color: #0f172a;">
+        Welcome to <t t-out="network_name">KUSMA</t>
+    </h2>
+    <p style="margin: 0 0 6px 0;">Hello <b t-out="object.name or ''">Mr. Shiva Kumar</b>,</p>
+    <p style="margin: 0 0 6px 0;">Thank you for showing your interest in joining the <t t-out="network_name">KUSMA</t> network!</p>
+    <p style="margin: 0 0 16px 0;">Please accept your invitation using the link below:</p>
+    <div style="margin: 0 0 24px 0;">
+        <a t-att-href="object.partner_id._get_signup_url()"
+           style="display: inline-block; background-color: #e8663b; color: #ffffff; padding: 10px 24px; border-radius: 24px; text-decoration: none; font-weight: bold; font-size: 14px;">
+            Accept Invitation
+        </a>
+    </div>
+    <p style="margin: 0 0 6px 0;">You can join <t t-out="network_name">KUSMA</t> by providing all your details using the details below:</p>
+    <ul style="margin: 0 0 24px 0; padding-left: 20px;">
+        <li><b>Login Username:</b> <t t-out="object.email or ''">shiva@example.com</t></li>
+        <li><b>Portal Link:</b> <a t-att-href="portal_url" t-out="portal_url or ''" style="color: #2563eb;">https://campus.honna.in</a></li>
+    </ul>
+    <p style="margin: 0;">With Warm Regards,</p>
+    <p style="margin: 0;"><b>Honna Campus Team</b></p>
+</div>
+            </field>
+            <field name="lang">{{ object.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+    </data>
+</odoo>

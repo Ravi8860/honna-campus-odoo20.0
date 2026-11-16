@@ -24,3 +24,7 @@ access_calendar_event_type_portal,calendar.event.type portal,calendar.event.type
 access_ir_actions_act_window_portal,ir.actions.act_window portal,ir.actions.act_window,base.group_portal,r,
 access_ir_ui_menu_portal,ir.ui.menu portal,ir.ui.menu,base.group_portal,r,
 access_ir_ui_view_portal,ir.ui.view portal,ir.ui.view,base.group_portal,r,
+access_stakeholder_join_network_user,stakeholder.join.network user,stakeholder.join.network,base.group_user,r,
+access_stakeholder_join_network_manager,stakeholder.join.network manager,stakeholder.join.network,sales_team.group_sale_manager,crud,
+access_stakeholder_registration_role_user,stakeholder.registration.role user,stakeholder.registration.role,base.group_user,r,
+access_stakeholder_registration_role_manager,stakeholder.registration.role manager,stakeholder.registration.role,sales_team.group_sale_manager,crud,

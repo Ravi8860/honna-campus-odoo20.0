@@ -4,3 +4,5 @@ from . import stakeholder_models
 from . import crm_lead_link
 from . import crm_lead
 from . import portal_entry
+from . import registration_option
+from . import res_users

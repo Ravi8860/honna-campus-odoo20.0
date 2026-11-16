@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Default "Join Network" options -->
+    <record id="join_network_kusma" model="stakeholder.join.network">
+        <field name="name">KUSMA</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="join_network_honna_campus" model="stakeholder.join.network">
+        <field name="name">Honna Campus</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- Default "I am an" options (same as the previous fixed list) -->
+    <record id="registration_role_association" model="stakeholder.registration.role">
+        <field name="name">Organisation</field>
+        <field name="portal_type">association</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="registration_role_school" model="stakeholder.registration.role">
+        <field name="name">School</field>
+        <field name="portal_type">school</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="registration_role_parent" model="stakeholder.registration.role">
+        <field name="name">Parent</field>
+        <field name="portal_type">parent</field>
+        <field name="sequence">30</field>
+    </record>
+    <record id="registration_role_academy" model="stakeholder.registration.role">
+        <field name="name">Academy</field>
+        <field name="portal_type">academy</field>
+        <field name="sequence">40</field>
+    </record>
+    <record id="registration_role_student" model="stakeholder.registration.role">
+        <field name="name">Student</field>
+        <field name="portal_type">student</field>
+        <field name="sequence">50</field>
+    </record>
+    <record id="registration_role_partner" model="stakeholder.registration.role">
+        <field name="name">Vendor</field>
+        <field name="portal_type">partner</field>
+        <field name="sequence">60</field>
+    </record>
+</odoo>

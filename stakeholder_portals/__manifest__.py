@@ -29,9 +29,12 @@ Features:
         'security/ir.access.csv',
         'data/website_menu.xml',
         'data/mock_data.xml',
+        'data/registration_option_data.xml',
+        'data/mail_template_data.xml',
         'views/portal_templates.xml',
         'views/stakeholder_crm_views.xml',
         'views/crm_lead_views.xml',
+        'views/registration_option_views.xml',
     ],
     'assets': {
         'web.assets_frontend': [

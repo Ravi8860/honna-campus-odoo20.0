@@ -35,65 +35,79 @@
                             <form action="/stakeholder-portals/submit" method="post" class="needs-validation" id="honna_registration_form">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                 
-                                <!-- Role Selector Section ("I am an") matching Figma -->
-                                <div class="honna-role-selector-wrapper mb-3">
-                                    <label class="honna-field-label">I am an</label>
-                                    <input type="hidden" name="portal_type" id="hidden_portal_type" t-att-value="values.get('portal_type') or 'association'"/>
-                                    
-                                    <div class="honna-custom-dropdown" id="honna_role_dropdown">
-                                        <button type="button" class="honna-role-select-btn" id="honna_role_btn" aria-haspopup="listbox" aria-expanded="false">
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div class="honna-role-icon-box">
-                                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                        <rect x="3" y="3" width="18" height="18" rx="4"></rect>
-                                                        <circle cx="10" cy="10" r="2.5"></circle>
-                                                        <path d="M6 17c0-1.8 1.8-3 4-3s4 1.2 4 3"></path>
-                                                        <line x1="16" y1="9" x2="18" y2="9"></line>
-                                                        <line x1="16" y1="13" x2="18" y2="13"></line>
+                                <!-- "Join Network" and "I am an" selectors (options configured by admin in CRM > Configuration > Registration Page) -->
+                                <div class="honna-selector-row mb-3">
+                                    <div class="honna-role-selector-wrapper" data-error-for="join_network_id">
+                                        <label class="honna-field-label">Join Network</label>
+                                        <input type="hidden" name="join_network_id" id="hidden_join_network_id" t-att-value="selected_network.id or ''"/>
+                                        <div class="honna-custom-dropdown" data-input="hidden_join_network_id">
+                                            <button type="button" class="honna-role-select-btn" aria-haspopup="listbox" aria-expanded="false">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="honna-role-icon-box">
+                                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+                                                            <circle cx="10" cy="10" r="2.5"></circle>
+                                                            <path d="M6 17c0-1.8 1.8-3 4-3s4 1.2 4 3"></path>
+                                                            <line x1="16" y1="9" x2="18" y2="9"></line>
+                                                            <line x1="16" y1="13" x2="18" y2="13"></line>
+                                                        </svg>
+                                                    </div>
+                                                    <span class="honna-role-label-text"><t t-out="selected_network.name or 'Select Network'"/></span>
+                                                </div>
+                                                <div class="honna-chevron-wrap">
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <polyline points="6 9 12 15 18 9"></polyline>
                                                     </svg>
                                                 </div>
-                                                <span class="honna-role-label-text" id="honna_selected_role_label">
-                                                    <t t-if="values.get('portal_type') == 'association'">Organisation</t>
-                                                    <t t-elif="values.get('portal_type') == 'school'">School</t>
-                                                    <t t-elif="values.get('portal_type') == 'parent'">Parent</t>
-                                                    <t t-elif="values.get('portal_type') == 'academy'">Academy</t>
-                                                    <t t-elif="values.get('portal_type') == 'student'">Student</t>
-                                                    <t t-elif="values.get('portal_type') in ('partner', 'ecosystem_partner')">Vendor</t>
-                                                    <t t-else="">Organisation</t>
-                                                </span>
-                                            </div>
-                                            <div class="honna-chevron-wrap">
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <polyline points="6 9 12 15 18 9"></polyline>
-                                                </svg>
-                                            </div>
-                                        </button>
-
-                                        <!-- Dropdown Menu for Roles (only Organisation, School, Parent, Academy, Student, Vendor) -->
-                                        <ul class="honna-role-options-menu d-none" id="honna_role_menu" role="listbox">
-                                            <li t-attf-class="honna-role-option #{(values.get('portal_type') or 'association') == 'association' and 'active' or ''}" data-value="association" role="option">
-                                                <span>Organisation</span>
-                                            </li>
-                                            <li t-attf-class="honna-role-option #{values.get('portal_type') in ('school', 'school_college', 'organisation') and 'active' or ''}" data-value="school" role="option">
-                                                <span>School</span>
-                                            </li>
-                                            <li t-attf-class="honna-role-option #{values.get('portal_type') == 'parent' and 'active' or ''}" data-value="parent" role="option">
-                                                <span>Parent</span>
-                                            </li>
-                                            <li t-attf-class="honna-role-option #{values.get('portal_type') == 'academy' and 'active' or ''}" data-value="academy" role="option">
-                                                <span>Academy</span>
-                                            </li>
-                                            <li t-attf-class="honna-role-option #{values.get('portal_type') == 'student' and 'active' or ''}" data-value="student" role="option">
-                                                <span>Student</span>
-                                            </li>
-                                            <li t-attf-class="honna-role-option #{values.get('portal_type') in ('partner', 'ecosystem_partner') and 'active' or ''}" data-value="partner" role="option">
-                                                <span>Vendor</span>
-                                            </li>
-                                        </ul>
+                                            </button>
+                                            <ul class="honna-role-options-menu d-none" role="listbox">
+                                                <t t-foreach="networks" t-as="network">
+                                                    <li t-attf-class="honna-role-option #{network == selected_network and 'active' or ''}" t-att-data-value="network.id" role="option">
+                                                        <span t-out="network.name"/>
+                                                    </li>
+                                                </t>
+                                            </ul>
+                                        </div>
+                                        <t t-if="errors and errors.get('join_network_id')">
+                                            <div class="text-danger small mt-1"><t t-out="errors.get('join_network_id')"/></div>
+                                        </t>
                                     </div>
-                                    <t t-if="errors and errors.get('portal_type')">
-                                        <div class="text-danger small mt-1"><t t-out="errors.get('portal_type')"/></div>
-                                    </t>
+
+                                    <div class="honna-role-selector-wrapper" data-error-for="portal_type">
+                                        <label class="honna-field-label">I am an</label>
+                                        <input type="hidden" name="role_id" id="hidden_role_id" t-att-value="selected_role.id or ''"/>
+                                        <div class="honna-custom-dropdown" data-input="hidden_role_id">
+                                            <button type="button" class="honna-role-select-btn" aria-haspopup="listbox" aria-expanded="false">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="honna-role-icon-box">
+                                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+                                                            <circle cx="10" cy="10" r="2.5"></circle>
+                                                            <path d="M6 17c0-1.8 1.8-3 4-3s4 1.2 4 3"></path>
+                                                            <line x1="16" y1="9" x2="18" y2="9"></line>
+                                                            <line x1="16" y1="13" x2="18" y2="13"></line>
+                                                        </svg>
+                                                    </div>
+                                                    <span class="honna-role-label-text"><t t-out="selected_role.name or 'Select Role'"/></span>
+                                                </div>
+                                                <div class="honna-chevron-wrap">
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                                    </svg>
+                                                </div>
+                                            </button>
+                                            <ul class="honna-role-options-menu d-none" role="listbox">
+                                                <t t-foreach="roles" t-as="role">
+                                                    <li t-attf-class="honna-role-option #{role == selected_role and 'active' or ''}" t-att-data-value="role.id" role="option">
+                                                        <span t-out="role.name"/>
+                                                    </li>
+                                                </t>
+                                            </ul>
+                                        </div>
+                                        <t t-if="errors and errors.get('portal_type')">
+                                            <div class="text-danger small mt-1"><t t-out="errors.get('portal_type')"/></div>
+                                        </t>
+                                    </div>
                                 </div>
 
                                 <!-- Main Form Card matching Figma -->

@@ -18,6 +18,8 @@ class CrmLead(models.Model):
     first_name = fields.Char(string='First Name', copy=False)
     last_name = fields.Char(string='Last Name', copy=False)
     registration_id_ref = fields.Char(string='Registration ID', copy=False)
+    join_network_id = fields.Many2one('stakeholder.join.network', string='Join Network', copy=False)
+    registration_role_id = fields.Many2one('stakeholder.registration.role', string='I am an', copy=False)
 
     portal_type = fields.Selection([
         ('association', 'Organisation'),
